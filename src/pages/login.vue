@@ -47,12 +47,20 @@
                 v-model="otp[index]"
                 inputmode="numeric"
                 maxlength="1"
+                :autocomplete="index === 0 ? 'one-time-code' : 'off'"
                 :aria-label="`Digit ${index + 1}`"
                 @input="handleOtpInput(index)"
                 @keydown.backspace="handleOtpBackspace(index)"
+                @paste.prevent="handleOtpPaste"
               >
             </div>
-            <div v-if="localPreview" class="preview-code">
+            <div class="otp-actions">
+              <span>Code expires in 10 minutes.</span>
+              <button type="button" :disabled="loading || resendSeconds > 0" @click="resendOtp">
+                {{ resendSeconds > 0 ? `Resend in ${resendSeconds}s` : 'Resend code' }}
+              </button>
+            </div>
+            <div v-if="useLocalOtp" class="preview-code">
               <Info :size="15" />
               Local preview code: <strong>123456</strong>
             </div>
@@ -66,6 +74,11 @@
         <button v-if="otpStep" class="change-email" type="button" @click="resetOtp">
           Use a different email
         </button>
+
+        <p v-if="!otpStep" class="signup-link">
+          New to Goalmatic?
+          <a :href="goalmaticSignupUrl">Create an account</a>
+        </p>
 
         <div v-if="!otpStep && localPreview" class="demo-area">
           <span>Exploring locally?</span>
@@ -92,7 +105,13 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue'
 import { ArrowLeft, ArrowRight, Github, Info, KeyRound, Mail, Repeat2, ShieldCheck } from 'lucide-vue-next'
-import { hasGoogleSignInConfig, signInWithGoalmaticGoogle } from '@/lib/auth/firebase'
+import {
+  hasFirebaseConfig,
+  hasGoogleSignInConfig,
+  sendGoalmaticEmailOtp,
+  signInWithGoalmaticGoogle,
+  verifyGoalmaticEmailOtp,
+} from '@/lib/auth/firebase'
 
 definePageMeta({ layout: 'auth' })
 
@@ -104,8 +123,12 @@ const email = ref('')
 const otpStep = ref(false)
 const otp = ref(['', '', '', '', '', ''])
 const otpRefs = ref<Array<HTMLInputElement | null>>([])
-const localPreview = computed(() => config.appMode === 'local' || !config.goalmaticOtpUrl)
+const resendSeconds = ref(0)
+const localPreview = computed(() => config.appMode === 'local')
+const useLocalOtp = computed(() => !hasFirebaseConfig(config))
 const googleReady = computed(() => hasGoogleSignInConfig(config))
+const goalmaticSignupUrl = computed(() => `${config.goalmaticAppUrl.replace(/\/$/, '')}/auth/signup`)
+let resendTimer: number | undefined
 
 onMounted(() => {
   workspace.hydrate()
@@ -123,6 +146,25 @@ const handleOtpInput = (index: number) => {
 
 const handleOtpBackspace = (index: number) => {
   if (!otp.value[index] && index > 0) otpRefs.value[index - 1]?.focus()
+}
+
+const handleOtpPaste = (event: ClipboardEvent) => {
+  const digits = event.clipboardData?.getData('text').replace(/\D/g, '').slice(0, 6) || ''
+  if (!digits) return
+  otp.value = Array.from({ length: 6 }, (_, index) => digits[index] || '')
+  otpRefs.value[Math.min(digits.length, 6) - 1]?.focus()
+}
+
+const startResendCooldown = () => {
+  if (resendTimer) window.clearInterval(resendTimer)
+  resendSeconds.value = 60
+  resendTimer = window.setInterval(() => {
+    resendSeconds.value -= 1
+    if (resendSeconds.value <= 0 && resendTimer) {
+      window.clearInterval(resendTimer)
+      resendTimer = undefined
+    }
+  }, 1000)
 }
 
 const handleGoogle = async () => {
@@ -146,14 +188,13 @@ const requestOtp = async () => {
   if (!email.value) return
   loading.value = true
   try {
-    if (config.goalmaticOtpUrl) {
-      const response = await $fetch<{ success: boolean }>(config.goalmaticOtpUrl, {
-        method: 'POST',
-        body: { action: 'send', email: email.value, app: 'career-studio' },
-      })
-      if (!response.success) throw new Error('The sign-in code could not be sent.')
+    if (!useLocalOtp.value) {
+      const message = await sendGoalmaticEmailOtp(config, email.value)
+      toast.show('Check your email', { message, tone: 'success' })
     }
     otpStep.value = true
+    otp.value = ['', '', '', '', '', '']
+    startResendCooldown()
     nextTick(() => otpRefs.value[0]?.focus())
   } catch (error) {
     toast.show('Could not send the code', {
@@ -165,6 +206,11 @@ const requestOtp = async () => {
   }
 }
 
+const resendOtp = async () => {
+  if (loading.value || resendSeconds.value > 0) return
+  await requestOtp()
+}
+
 const verifyOtp = async () => {
   const code = otp.value.join('')
   if (code.length !== 6) {
@@ -173,16 +219,9 @@ const verifyOtp = async () => {
   }
   loading.value = true
   try {
-    if (config.goalmaticOtpUrl) {
-      const response = await $fetch<{ success: boolean; user?: { id: string; name: string; email: string; accountId: string } }>(
-        config.goalmaticOtpUrl,
-        {
-          method: 'POST',
-          body: { action: 'verify', email: email.value, code, app: 'career-studio' },
-        },
-      )
-      if (!response.success || !response.user) throw new Error('The code is invalid or expired.')
-      workspace.login({ ...response.user, authProvider: 'email' })
+    if (!useLocalOtp.value) {
+      const user = await verifyGoalmaticEmailOtp(config, email.value, code)
+      workspace.login(user)
     } else {
       if (code !== '123456') throw new Error('Use the local preview code 123456.')
       workspace.login({
@@ -207,7 +246,16 @@ const verifyOtp = async () => {
 const resetOtp = () => {
   otpStep.value = false
   otp.value = ['', '', '', '', '', '']
+  resendSeconds.value = 0
+  if (resendTimer) {
+    window.clearInterval(resendTimer)
+    resendTimer = undefined
+  }
 }
+
+onBeforeUnmount(() => {
+  if (resendTimer) window.clearInterval(resendTimer)
+})
 
 const enterDemo = async () => {
   workspace.loginDemo()
@@ -450,6 +498,30 @@ const enterDemo = async () => {
   box-shadow: 0 0 0 3px rgba(91, 50, 223, 0.1);
 }
 
+.otp-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.otp-actions button {
+  padding: 0;
+  border: 0;
+  color: var(--purple);
+  font: inherit;
+  font-weight: 700;
+  background: transparent;
+  cursor: pointer;
+}
+
+.otp-actions button:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
 .preview-code {
   display: flex;
   align-items: center;
@@ -470,6 +542,18 @@ const enterDemo = async () => {
   font-weight: 700;
   background: transparent;
   cursor: pointer;
+}
+
+.signup-link {
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.signup-link a {
+  color: var(--purple);
+  font-weight: 700;
 }
 
 .login-benefits {

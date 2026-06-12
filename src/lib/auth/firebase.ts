@@ -33,6 +33,13 @@ interface GoogleIdentityApi {
   }
 }
 
+interface EmailOtpResponse {
+  code: number
+  message?: string
+  msg?: string
+  customToken?: string
+}
+
 declare global {
   interface Window {
     google?: GoogleIdentityApi
@@ -52,6 +59,51 @@ export function hasFirebaseConfig(config: FirebasePublicConfig): boolean {
 
 export function hasGoogleSignInConfig(config: FirebasePublicConfig): boolean {
   return hasFirebaseConfig(config) && Boolean(config.googleClientId)
+}
+
+async function getFirebaseClient(config: FirebasePublicConfig) {
+  if (!hasFirebaseConfig(config)) {
+    throw new Error('Firebase is not configured for this environment.')
+  }
+
+  const [{ initializeApp, getApp, getApps }, authModule] = await Promise.all([
+    import('firebase/app'),
+    import('firebase/auth'),
+  ])
+  const app = getApps().length
+    ? getApp()
+    : initializeApp({
+        apiKey: config.firebaseApiKey,
+        authDomain: config.firebaseAuthDomain,
+        projectId: config.firebaseProjectId,
+        storageBucket: config.firebaseStorageBucket,
+        messagingSenderId: config.firebaseMessagingSenderId,
+        appId: config.firebaseAppId,
+      })
+  const auth = authModule.getAuth(app)
+  await authModule.setPersistence(auth, authModule.browserLocalPersistence)
+
+  return { app, auth, authModule }
+}
+
+async function callGoalmaticAuthFunction(
+  config: FirebasePublicConfig,
+  functionName: string,
+  payload: Record<string, string>,
+): Promise<EmailOtpResponse> {
+  const { app } = await getFirebaseClient(config)
+  const functionsModule = await import('firebase/functions')
+  const functions = functionsModule.getFunctions(app, 'us-central1')
+  const callable = functionsModule.httpsCallable<Record<string, string>, EmailOtpResponse>(
+    functions,
+    functionName,
+  )
+  const response = await callable(payload)
+  return response.data
+}
+
+function emailOtpError(response: EmailOtpResponse, fallback: string): Error {
+  return new Error(response.message || response.msg || fallback)
 }
 
 function loadGoogleIdentityServices(): Promise<void> {
@@ -119,26 +171,7 @@ async function requestGoogleAccessToken(clientId: string): Promise<string> {
 export async function signInWithGoalmaticGoogle(
   config: FirebasePublicConfig,
 ): Promise<UserProfile> {
-  if (!hasFirebaseConfig(config)) {
-    throw new Error('Firebase is not configured for this environment.')
-  }
-
-  const [{ initializeApp, getApp, getApps }, authModule] = await Promise.all([
-    import('firebase/app'),
-    import('firebase/auth'),
-  ])
-  const app = getApps().length
-    ? getApp()
-    : initializeApp({
-        apiKey: config.firebaseApiKey,
-        authDomain: config.firebaseAuthDomain,
-        projectId: config.firebaseProjectId,
-        storageBucket: config.firebaseStorageBucket,
-        messagingSenderId: config.firebaseMessagingSenderId,
-        appId: config.firebaseAppId,
-      })
-  const auth = authModule.getAuth(app)
-  await authModule.setPersistence(auth, authModule.browserLocalPersistence)
+  const { auth, authModule } = await getFirebaseClient(config)
   if (!config.googleClientId) {
     throw new Error('Google Identity Services is not configured for this environment.')
   }
@@ -155,6 +188,50 @@ export async function signInWithGoalmaticGoogle(
     email: user.email || '',
     avatarUrl: user.photoURL || undefined,
     authProvider: 'google',
+  }
+}
+
+export async function sendGoalmaticEmailOtp(
+  config: FirebasePublicConfig,
+  email: string,
+): Promise<string> {
+  const response = await callGoalmaticAuthFunction(
+    config,
+    'sendEmailOTPForLogin',
+    { email: email.trim().toLowerCase() },
+  )
+  if (response.code !== 200) {
+    throw emailOtpError(response, 'The sign-in code could not be sent.')
+  }
+  return response.message || 'A six-digit sign-in code was sent to your email.'
+}
+
+export async function verifyGoalmaticEmailOtp(
+  config: FirebasePublicConfig,
+  email: string,
+  otp: string,
+): Promise<UserProfile> {
+  const normalizedEmail = email.trim().toLowerCase()
+  const response = await callGoalmaticAuthFunction(
+    config,
+    'verifyEmailOTPAndLogin',
+    { email: normalizedEmail, otp },
+  )
+  if (response.code !== 200 || !response.customToken) {
+    throw emailOtpError(response, 'The sign-in code is invalid or expired.')
+  }
+
+  const { auth, authModule } = await getFirebaseClient(config)
+  const credential = await authModule.signInWithCustomToken(auth, response.customToken)
+  const user = credential.user
+
+  return {
+    id: user.uid,
+    accountId: user.uid,
+    name: user.displayName || normalizedEmail.split('@')[0]?.replace(/[._-]/g, ' ') || 'Goalmatic user',
+    email: user.email || normalizedEmail,
+    avatarUrl: user.photoURL || undefined,
+    authProvider: 'email',
   }
 }
 
