@@ -1,24 +1,32 @@
 # Contributing to Career Studio
 
-Thanks for contributing.
+Thanks for contributing. To ensure a high-quality codebase, we follow a set of development rules and standards.
+
+## Code Standards & Rules
+
+- **Package Manager**: Strictly use **Yarn** (`yarn install`, `yarn add`, etc.). Do not use `npm` or `pnpm`.
+- **Framework & Logic**: Use Vue 3 `<script setup>` with TypeScript for all components.
+- **Styling**: Use standard CSS with scoped styles or standard classes. Avoid arbitrary inline styles.
+- **Linting & Formatting**: Ensure there are no ESLint or Prettier warnings before committing. Run `yarn lint`.
+- **Commits**: Follow Conventional Commits format (e.g., `feat:`, `fix:`, `chore:`, `docs:`).
 
 ## Development
 
-Use Node.js 22 or newer and npm. The local preview does not require private
+Use Node.js 22 or newer and Yarn. The local preview does not require private
 Goalmatic repositories or credentials.
 
 ```bash
-npm install
-npm run dev
+yarn install
+yarn dev
 ```
 
 Before opening a pull request, run:
 
 ```bash
-npm test
-npm run typecheck
-npm run build
-npm audit
+yarn test
+yarn typecheck
+yarn build
+yarn lint
 ```
 
 Resume scores must remain deterministic. Add or update repeatability tests for

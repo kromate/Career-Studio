@@ -55,11 +55,11 @@ Tables, storage, and workflow adapters before handling real user data.
 
 ## Development
 
-Requirements: Node.js 22 or newer and npm.
+Requirements: Node.js 22 or newer and Yarn.
 
 ```bash
-npm install
-npm run dev
+yarn install
+yarn dev
 ```
 
 The app runs at [http://localhost:3030](http://localhost:3030). It works without
@@ -67,10 +67,10 @@ credentials in local preview mode. Copy `.env.example` to `.env` only when you
 need shared Goalmatic Firebase identity or the email OTP endpoint.
 
 ```bash
-npm test
-npm run typecheck
-npm run build
-npm audit
+yarn test
+yarn typecheck
+yarn build
+yarn lint
 ```
 
 ## Documentation
