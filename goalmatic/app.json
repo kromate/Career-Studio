@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "career-studio",
+  "name": "Career Studio",
+  "description": "Open-source job search workspace powered by Goalmatic",
+  "goalmatic": {
+    "identity": {
+      "required": true,
+      "scope": "account"
+    },
+    "tables": [
+      "job_search_resumes",
+      "job_search_resume_versions",
+      "job_search_analyses",
+      "job_search_jobs",
+      "job_search_applications",
+      "job_search_rewrite_sessions"
+    ],
+    "agents": [
+      "resume_coach",
+      "job_requirements_extractor"
+    ],
+    "workflows": [
+      "analyze_resume",
+      "rewrite_resume",
+      "target_resume",
+      "job_search_follow_up"
+    ],
+    "integrations": [
+      "goalmatic_auth",
+      "goalmatic_tables"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "@goalmatic/career-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Open-source job search workspace powered by Goalmatic",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev --port 3030",
+    "preview": "nuxt preview --port 3030",
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "docx": "^9.7.1",
+    "firebase": "^12.14.0",
+    "jspdf": "^4.2.1",
+    "lucide-vue-next": "^0.468.0",
+    "mammoth": "^1.12.0",
+    "nuxt": "3.21.8",
+    "pdfjs-dist": "^4.10.38",
+    "vue": "3.5.29",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.8",
+    "vue-tsc": "^2.2.10"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}
