@@ -34,8 +34,12 @@
               <input v-model.trim="form.location" class="input" placeholder="Remote, London, Lagos…">
             </label>
             <label class="field">
-              <span class="field-label">Job URL <small>optional</small></span>
+              <span class="field-label url-label">
+                Job URL <small>optional</small>
+                <ComingSoonBadge>Auto-import coming soon</ComingSoonBadge>
+              </span>
               <input v-model.trim="form.url" class="input" type="url" placeholder="https://company.com/jobs/…">
+              <small class="field-help">The URL is saved with the job. Paste the complete description below for analysis.</small>
             </label>
           </div>
           <label class="field">
@@ -250,6 +254,13 @@ const analyzeAndSave = async () => {
 .field-label small {
   color: var(--muted);
   font-weight: 500;
+}
+
+.url-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
 }
 
 .job-description {

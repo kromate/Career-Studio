@@ -125,6 +125,7 @@ export interface ResumeVersion {
   parsed: ParsedResume
   analysis: ResumeAnalysis
   targetJobId?: string
+  intentionalRuleIds?: string[]
 }
 
 export interface ResumeRecord {
@@ -188,6 +189,7 @@ export interface ApplicationRecord {
   updatedAt: string
   appliedAt?: string
   nextAction?: string
+  nextActionAt?: string
   notes?: string
 }
 

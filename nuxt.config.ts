@@ -7,6 +7,11 @@ export default defineNuxtConfig({
     appManifest: false,
   },
   ssr: true,
+  routeRules: {
+    '/login': { ssr: false },
+    '/app': { ssr: false },
+    '/app/**': { ssr: false },
+  },
   css: ['@/assets/css/main.css'],
   alias: {
     '@': fileURLToPath(new URL('./src', import.meta.url)),

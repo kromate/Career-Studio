@@ -26,7 +26,10 @@
           <div class="settings-heading">
             <span class="settings-icon"><UserRound :size="20" /></span>
             <div>
-              <h2>Profile and identity</h2>
+              <div class="heading-with-badge">
+                <h2>Profile and identity</h2>
+                <span class="badge badge-purple">Managed by Goalmatic</span>
+              </div>
               <p>Your Goalmatic identity is used to scope all resumes, jobs, and applications.</p>
             </div>
           </div>
@@ -74,21 +77,23 @@
               <input v-model="preferences.weeklyReview" type="checkbox" @change="savePreferences">
               <span class="toggle" />
             </label>
-            <label class="setting-row">
-              <div><strong>Email updates</strong><p>Receive application reminders when production Goalmatic email is connected.</p></div>
-              <input v-model="preferences.emailUpdates" type="checkbox" @change="savePreferences">
-              <span class="toggle" />
-            </label>
+            <div class="setting-row unavailable">
+              <div>
+                <div class="setting-title"><strong>Email updates</strong><ComingSoonBadge /></div>
+                <p>Receive application reminders when production Goalmatic email is connected.</p>
+              </div>
+            </div>
             <label class="setting-row">
               <div><strong>Show scoring details</strong><p>Display rule IDs, scoring versions, and content fingerprints.</p></div>
               <input v-model="preferences.scoringDetails" type="checkbox" @change="savePreferences">
               <span class="toggle" />
             </label>
-            <label class="setting-row">
-              <div><strong>Retain original upload</strong><p>Production deployments may keep the source file; local preview stores extracted text only.</p></div>
-              <input v-model="preferences.retainUploads" type="checkbox" @change="savePreferences">
-              <span class="toggle" />
-            </label>
+            <div class="setting-row unavailable">
+              <div>
+                <div class="setting-title"><strong>Retain original upload</strong><ComingSoonBadge /></div>
+                <p>Local preview stores extracted text only. Encrypted source-file retention is not connected yet.</p>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -203,6 +208,10 @@ const sections: Array<{ id: typeof activeSection.value; label: string; icon: Com
 
 const initials = computed(() => workspace.state.value.user?.name.split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'G')
 const versionCount = computed(() => workspace.state.value.resumes.reduce((sum, resume) => sum + resume.versions.length, 0))
+onMounted(() => {
+  workspace.hydrate()
+  Object.assign(preferences, workspace.state.value.settings)
+})
 const savePreferences = () => {
   workspace.updateSettings(preferences)
   toast.show('Preferences saved')
@@ -279,6 +288,19 @@ const deleteAll = () => {
   font-size: 18px;
 }
 
+.heading-with-badge,
+.setting-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.heading-with-badge h2,
+.setting-title strong {
+  margin-bottom: 0;
+}
+
 .settings-heading p {
   margin: 0;
   color: var(--muted);
@@ -345,6 +367,10 @@ const deleteAll = () => {
 
 .setting-row:last-child {
   border-bottom: 0;
+}
+
+.setting-row.unavailable {
+  cursor: default;
 }
 
 .setting-row strong {

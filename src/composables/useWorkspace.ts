@@ -215,6 +215,18 @@ export function useWorkspace() {
     persist()
   }
 
+  const toggleFindingIntentional = (resumeId: string, versionId: string, ruleId: string) => {
+    const resume = state.value.resumes.find(item => item.id === resumeId)
+    const version = resume?.versions.find(item => item.id === versionId)
+    if (!resume || !version) return
+    const intentionalRuleIds = new Set(version.intentionalRuleIds || [])
+    if (intentionalRuleIds.has(ruleId)) intentionalRuleIds.delete(ruleId)
+    else intentionalRuleIds.add(ruleId)
+    version.intentionalRuleIds = [...intentionalRuleIds]
+    resume.updatedAt = now()
+    persist()
+  }
+
   const renameResume = (resumeId: string, name: string) => {
     const resume = state.value.resumes.find(item => item.id === resumeId)
     if (!resume) return
@@ -304,7 +316,7 @@ export function useWorkspace() {
 
   const updateApplication = (
     applicationId: string,
-    updates: Partial<Pick<ApplicationRecord, 'status' | 'notes' | 'nextAction'>>,
+    updates: Partial<Pick<ApplicationRecord, 'status' | 'notes' | 'nextAction' | 'nextActionAt'>>,
   ) => {
     const application = state.value.applications.find(item => item.id === applicationId)
     if (!application) return
@@ -368,6 +380,7 @@ export function useWorkspace() {
     addResume,
     addResumeVersion,
     setActiveVersion,
+    toggleFindingIntentional,
     renameResume,
     deleteResume,
     saveJob,

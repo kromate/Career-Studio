@@ -54,7 +54,7 @@
               <span class="section-kicker">Career Studio Resume Quality Score</span>
               <h2>{{ scoreMessage.title }}</h2>
               <p>{{ scoreMessage.description }}</p>
-              <div class="score-meta">
+              <div v-if="workspace.state.value.settings.scoringDetails" class="score-meta">
                 <span><GitBranch :size="13" /> {{ version.analysis.scoringVersion }}</span>
                 <span><Fingerprint :size="13" /> {{ workspace.scoreFingerprint.value }}</span>
               </div>
@@ -86,7 +86,7 @@
             <div class="findings-header">
               <div>
                 <span class="section-kicker">Prioritized findings</span>
-                <h2>{{ findings.length }} improvements</h2>
+                <h2>{{ actionableFindings.length }} improvements</h2>
               </div>
               <button class="filter-button" type="button" @click="filterOpen = !filterOpen">
                 <ListFilter :size="15" />
@@ -108,7 +108,10 @@
                 v-for="finding in filteredFindings"
                 :key="finding.ruleId"
                 class="finding-item"
-                :class="{ active: selectedFinding?.ruleId === finding.ruleId }"
+                :class="{
+                  active: selectedFinding?.ruleId === finding.ruleId,
+                  intentional: intentionalRuleIds.has(finding.ruleId),
+                }"
                 type="button"
                 @click="selectFinding(finding.ruleId)"
               >
@@ -119,7 +122,10 @@
                 <div>
                   <strong>{{ finding.title }}</strong>
                   <p>{{ finding.recommendation }}</p>
-                  <span>{{ finding.dimension }} · {{ pointsLost(finding) }} points available</span>
+                  <span v-if="intentionalRuleIds.has(finding.ruleId)" class="intentional-label">
+                    Marked intentional
+                  </span>
+                  <span v-else>{{ finding.dimension }} · {{ pointsLost(finding) }} points available</span>
                 </div>
                 <ChevronRight :size="15" />
               </button>
@@ -133,7 +139,7 @@
                   <span class="badge" :class="severityBadge(selectedFinding.severity)">
                     {{ selectedFinding.severity }} priority
                   </span>
-                  <span class="rule-id">{{ selectedFinding.ruleId }}</span>
+                  <span v-if="workspace.state.value.settings.scoringDetails" class="rule-id">{{ selectedFinding.ruleId }}</span>
                 </div>
                 <span class="point-recovery">Up to +{{ pointsLost(selectedFinding) }} pts</span>
               </div>
@@ -157,9 +163,9 @@
                   <Sparkles :size="15" />
                   Improve this
                 </NuxtLink>
-                <button class="btn btn-secondary" type="button" @click="intentionalRules.add(selectedFinding.ruleId)">
+                <button class="btn btn-secondary" type="button" @click="toggleIntentional">
                   <CheckCircle2 :size="15" />
-                  {{ intentionalRules.has(selectedFinding.ruleId) ? 'Marked intentional' : 'Mark intentional' }}
+                  {{ intentionalRuleIds.has(selectedFinding.ruleId) ? 'Restore finding' : 'Mark intentional' }}
                 </button>
               </div>
             </article>
@@ -288,11 +294,13 @@ const activeFilter = ref<'all' | ScoreDimension>('all')
 const filterOpen = ref(false)
 const exportOpen = ref(false)
 const deleteConfirm = ref(false)
-const intentionalRules = reactive(new Set<string>())
-
 const resume = computed(() => workspace.getResume(route.params.id as string))
 const version = computed(() => resume.value ? workspace.getActiveVersion(resume.value) : undefined)
 const findings = computed(() => version.value ? getPrioritizedFindings(version.value.analysis) : [])
+const intentionalRuleIds = computed(() => new Set(version.value?.intentionalRuleIds || []))
+const actionableFindings = computed(() => findings.value.filter(
+  finding => !intentionalRuleIds.value.has(finding.ruleId),
+))
 const filteredFindings = computed(() => activeFilter.value === 'all'
   ? findings.value
   : findings.value.filter(finding => finding.dimension === activeFilter.value))
@@ -338,6 +346,17 @@ onMounted(() => {
 const selectFinding = (ruleId: string) => {
   selectedRuleId.value = ruleId
   navigateTo({ query: { finding: ruleId } }, { replace: true })
+}
+const toggleIntentional = () => {
+  if (!resume.value || !version.value || !selectedFinding.value) return
+  const wasIntentional = intentionalRuleIds.value.has(selectedFinding.value.ruleId)
+  workspace.toggleFindingIntentional(resume.value.id, version.value.id, selectedFinding.value.ruleId)
+  toast.show(wasIntentional ? 'Finding restored' : 'Finding marked intentional', {
+    message: wasIntentional
+      ? 'It will count toward your improvement list again.'
+      : 'It remains in the report for transparency but no longer counts as an open improvement.',
+    tone: 'info',
+  })
 }
 const pointsLost = (finding: ScoreCheck) => Math.round(finding.maxPoints - finding.earnedPoints)
 const severityBadge = (severity: FindingSeverity) => (
@@ -643,6 +662,14 @@ const confirmDelete = async () => {
 
 .finding-item.active {
   box-shadow: inset 3px 0 0 var(--purple);
+}
+
+.finding-item.intentional {
+  opacity: 0.68;
+}
+
+.finding-item .intentional-label {
+  color: var(--green);
 }
 
 .finding-severity {

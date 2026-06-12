@@ -19,10 +19,14 @@
           <p v-else>Enter the six-digit code sent to <strong>{{ email }}</strong>.</p>
         </div>
 
-        <button v-if="!otpStep" class="google-button" type="button" :disabled="loading" @click="handleGoogle">
+        <button v-if="!otpStep" class="google-button" type="button" :disabled="loading || !googleReady" @click="handleGoogle">
           <span class="google-logo">G</span>
           {{ loading ? 'Connecting…' : 'Continue with Google' }}
         </button>
+        <div v-if="!otpStep && !googleReady" class="auth-coming-soon">
+          <ComingSoonBadge />
+          <span>Shared Goalmatic Google sign-in is not connected in this deployment. Email and demo access work now.</span>
+        </div>
 
         <div v-if="!otpStep" class="or-divider"><span>or continue with email</span></div>
 
@@ -101,6 +105,7 @@ const otpStep = ref(false)
 const otp = ref(['', '', '', '', '', ''])
 const otpRefs = ref<Array<HTMLInputElement | null>>([])
 const localPreview = computed(() => config.appMode === 'local' || !config.goalmaticOtpUrl)
+const googleReady = computed(() => hasFirebaseConfig(config))
 
 onMounted(() => {
   workspace.hydrate()
@@ -121,18 +126,11 @@ const handleOtpBackspace = (index: number) => {
 }
 
 const handleGoogle = async () => {
+  if (!googleReady.value) return
   loading.value = true
   try {
-    if (hasFirebaseConfig(config)) {
-      const user = await signInWithGoalmaticGoogle(config)
-      workspace.login(user)
-    } else {
-      workspace.loginDemo()
-      toast.show('Local preview opened', {
-        message: 'Add the shared Goalmatic Firebase configuration to enable real Google sign-in.',
-        tone: 'info',
-      })
-    }
+    const user = await signInWithGoalmaticGoogle(config)
+    workspace.login(user)
     await navigateTo('/app')
   } catch (error) {
     toast.show('Could not sign in with Google', {
@@ -315,6 +313,24 @@ const enterDemo = async () => {
 
 .google-button:hover {
   background: var(--surface-soft);
+}
+
+.google-button:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+  box-shadow: none;
+  background: var(--surface-soft);
+}
+
+.auth-coming-soon {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
 }
 
 .google-logo {

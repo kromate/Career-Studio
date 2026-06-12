@@ -194,7 +194,7 @@
                 <del>Responsible for managing</del>
                 <ins>Managed</ins>
               </div>
-              <button class="btn btn-primary btn-sm" type="button">Apply safe rewrite</button>
+              <NuxtLink to="/login" class="btn btn-primary btn-sm">Apply safe rewrite</NuxtLink>
             </div>
           </div>
         </div>

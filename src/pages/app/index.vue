@@ -61,7 +61,7 @@
               <ShieldCheck :size="15" />
               {{ confidenceLabel }} parse confidence
             </span>
-            <span>
+            <span v-if="workspace.state.value.settings.scoringDetails">
               <GitBranch :size="15" />
               {{ currentVersion.analysis.scoringVersion }}
             </span>
@@ -97,7 +97,7 @@
               <small>Interviews</small>
             </NuxtLink>
           </div>
-          <div class="weekly-review">
+          <div v-if="workspace.state.value.settings.weeklyReview" class="weekly-review">
             <div class="weekly-top">
               <span>This week's focus</span>
               <strong>{{ weeklyCompletion }}%</strong>
@@ -234,7 +234,11 @@ const formattedDate = new Intl.DateTimeFormat('en', {
 }).format(new Date())
 
 const openFindings = computed(() => (
-  currentVersion.value ? getPrioritizedFindings(currentVersion.value.analysis) : []
+  currentVersion.value
+    ? getPrioritizedFindings(currentVersion.value.analysis).filter(
+        finding => !currentVersion.value?.intentionalRuleIds?.includes(finding.ruleId),
+      )
+    : []
 ))
 const confidenceLabel = computed(() => (
   currentVersion.value?.analysis.parseConfidence === 'high'

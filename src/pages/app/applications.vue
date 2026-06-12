@@ -6,6 +6,7 @@
         <p>Track the opportunity, next action, and exact resume version used.</p>
       </div>
       <div class="page-actions">
+        <ComingSoonBadge>Email reminders coming soon</ComingSoonBadge>
         <NuxtLink to="/app/target" class="btn btn-primary">
           <Plus :size="16" />
           Add opportunity
@@ -56,6 +57,14 @@
                 @change="updateNextAction(application.id, $event)"
               >
             </label>
+            <label>
+              <span>Action date</span>
+              <input
+                :value="application.nextActionAt || ''"
+                type="date"
+                @change="updateNextActionDate(application.id, $event)"
+              >
+            </label>
             <select
               :value="application.status"
               class="select status-select"
@@ -67,7 +76,7 @@
             </select>
             <footer>
               <Clock3 :size="12" />
-              Updated {{ relativeDate(application.updatedAt) }}
+              {{ application.nextActionAt ? `Due ${formatActionDate(application.nextActionAt)}` : `Updated ${relativeDate(application.updatedAt)}` }}
             </footer>
           </article>
           <div v-if="!applicationsFor(column.status).length" class="column-empty">
@@ -131,6 +140,11 @@ const updateNextAction = (id: string, event: Event) => {
   workspace.updateApplication(id, { nextAction })
   toast.show('Next action saved')
 }
+const updateNextActionDate = (id: string, event: Event) => {
+  const nextActionAt = (event.target as HTMLInputElement).value
+  workspace.updateApplication(id, { nextActionAt: nextActionAt || undefined })
+  toast.show(nextActionAt ? 'Action date saved' : 'Action date cleared')
+}
 const removeApplication = (id: string) => {
   openMenu.value = ''
   workspace.deleteApplication(id)
@@ -142,6 +156,10 @@ const relativeDate = (date: string) => {
   if (hours < 24) return `${hours}h ago`
   return `${Math.floor(hours / 24)}d ago`
 }
+const formatActionDate = (date: string) => new Intl.DateTimeFormat('en', {
+  month: 'short',
+  day: 'numeric',
+}).format(new Date(`${date}T12:00:00`))
 </script>
 
 <style scoped>
@@ -330,6 +348,10 @@ const relativeDate = (date: string) => {
 .application-card label {
   display: grid;
   gap: 5px;
+}
+
+.application-card label + label {
+  margin-top: 8px;
 }
 
 .application-card label span {
