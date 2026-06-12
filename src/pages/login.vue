@@ -92,7 +92,7 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue'
 import { ArrowLeft, ArrowRight, Github, Info, KeyRound, Mail, Repeat2, ShieldCheck } from 'lucide-vue-next'
-import { hasFirebaseConfig, signInWithGoalmaticGoogle } from '@/lib/auth/firebase'
+import { hasGoogleSignInConfig, signInWithGoalmaticGoogle } from '@/lib/auth/firebase'
 
 definePageMeta({ layout: 'auth' })
 
@@ -105,7 +105,7 @@ const otpStep = ref(false)
 const otp = ref(['', '', '', '', '', ''])
 const otpRefs = ref<Array<HTMLInputElement | null>>([])
 const localPreview = computed(() => config.appMode === 'local' || !config.goalmaticOtpUrl)
-const googleReady = computed(() => hasFirebaseConfig(config))
+const googleReady = computed(() => hasGoogleSignInConfig(config))
 
 onMounted(() => {
   workspace.hydrate()

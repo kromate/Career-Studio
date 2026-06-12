@@ -64,6 +64,7 @@ export default defineNuxtConfig({
       firebaseStorageBucket: process.env.NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '',
       firebaseMessagingSenderId: process.env.NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
       firebaseAppId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID || '',
+      googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || '',
       goalmaticOtpUrl: process.env.NUXT_PUBLIC_GOALMATIC_OTP_URL || '',
       goalmaticAppUrl: process.env.NUXT_PUBLIC_GOALMATIC_APP_URL || 'https://goalmatic.io',
       appMode: process.env.NUXT_PUBLIC_APP_MODE || 'local',
