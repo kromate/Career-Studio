@@ -1,0 +1,364 @@
+.login-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(96, 29, 237, 0.08), transparent 27%),
+    #f9fafb;
+}
+
+.login-header {
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.login-header .container {
+  display: flex;
+  height: 64px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.back-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.back-home:hover {
+  color: var(--purple);
+}
+
+.login-form-area {
+  display: grid;
+  min-height: calc(100vh - 64px);
+  align-content: center;
+  justify-items: center;
+  padding: 48px 20px;
+}
+
+.login-card {
+  width: min(100%, 410px);
+  padding: 30px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(16, 24, 40, 0.08);
+}
+
+.login-card.signup-card {
+  width: min(100%, 440px);
+}
+
+.login-heading {
+  margin-bottom: 26px;
+  text-align: center;
+}
+
+.auth-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  margin: 0 auto 18px;
+  border-radius: 12px;
+  color: var(--purple);
+  background: var(--purple-soft);
+}
+
+.login-heading h1 {
+  margin-bottom: 8px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.login-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.google-button {
+  display: flex;
+  width: 100%;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.google-button:hover:not(:disabled) {
+  background: var(--surface-soft);
+}
+
+.google-button:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+  box-shadow: none;
+  background: var(--surface-soft);
+}
+
+.auth-coming-soon {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.google-logo {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: #4285f4;
+  font-weight: 800;
+}
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.or-divider::before,
+.or-divider::after {
+  height: 1px;
+  flex: 1;
+  content: '';
+  background: var(--line);
+}
+
+.email-form,
+.signup-fields {
+  display: grid;
+  gap: 18px;
+}
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon svg {
+  position: absolute;
+  z-index: 1;
+  top: 11px;
+  left: 12px;
+  color: var(--muted);
+}
+
+.input-with-icon .input {
+  padding-left: 40px;
+}
+
+.field-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.field-heading small,
+.field-help {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.field-error {
+  margin: 0;
+  color: var(--red);
+  font-size: 10px;
+}
+
+.full-button {
+  width: 100%;
+}
+
+.terms {
+  margin: 22px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.terms a {
+  color: var(--purple);
+}
+
+.consent-field {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.consent-field input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--purple);
+}
+
+.consent-field a {
+  color: var(--purple);
+  font-weight: 700;
+}
+
+.demo-area {
+  display: grid;
+  gap: 7px;
+  margin-top: 23px;
+  padding: 15px;
+  border: 1px solid #ded6ff;
+  border-radius: 10px;
+  background: var(--purple-soft);
+}
+
+.demo-area > span {
+  color: var(--purple-dark);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.demo-area button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border: 0;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  background: transparent;
+  cursor: pointer;
+}
+
+.otp-inputs {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.otp-inputs input {
+  width: 100%;
+  height: 50px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.otp-inputs input:focus {
+  border-color: var(--purple);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(91, 50, 223, 0.1);
+}
+
+.otp-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.otp-actions button {
+  padding: 0;
+  border: 0;
+  color: var(--purple);
+  font: inherit;
+  font-weight: 700;
+  background: transparent;
+  cursor: pointer;
+}
+
+.otp-actions button:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.preview-code {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--amber);
+  font-size: 11px;
+  background: var(--amber-soft);
+}
+
+.change-email {
+  display: block;
+  margin: 17px auto 0;
+  border: 0;
+  color: var(--purple);
+  font-size: 11px;
+  font-weight: 700;
+  background: transparent;
+  cursor: pointer;
+}
+
+.signup-link {
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.signup-link a {
+  color: var(--purple);
+  font-weight: 700;
+}
+
+.login-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 22px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.login-benefits span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 520px) {
+  .login-form-area {
+    align-content: start;
+    padding: 30px 14px;
+  }
+
+  .login-card {
+    padding: 24px 20px;
+  }
+}

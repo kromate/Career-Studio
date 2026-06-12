@@ -9,10 +9,11 @@ export default defineNuxtConfig({
   ssr: true,
   routeRules: {
     '/login': { ssr: false },
+    '/signup': { ssr: false },
     '/app': { ssr: false },
     '/app/**': { ssr: false },
   },
-  css: ['@/assets/css/main.css'],
+  css: ['@/assets/css/main.css', '@/assets/css/auth-pages.css'],
   alias: {
     '@': fileURLToPath(new URL('./src', import.meta.url)),
   },

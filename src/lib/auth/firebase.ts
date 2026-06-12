@@ -38,6 +38,7 @@ interface EmailOtpResponse {
   message?: string
   msg?: string
   customToken?: string
+  accountId?: string
 }
 
 declare global {
@@ -229,6 +230,61 @@ export async function verifyGoalmaticEmailOtp(
     id: user.uid,
     accountId: user.uid,
     name: user.displayName || normalizedEmail.split('@')[0]?.replace(/[._-]/g, ' ') || 'Goalmatic user',
+    email: user.email || normalizedEmail,
+    avatarUrl: user.photoURL || undefined,
+    authProvider: 'email',
+  }
+}
+
+export async function sendGoalmaticSignupOtp(
+  config: FirebasePublicConfig,
+  email: string,
+): Promise<string> {
+  const response = await callGoalmaticAuthFunction(
+    config,
+    'sendEmailOTPForSignup',
+    { email: email.trim().toLowerCase() },
+  )
+  if (response.code !== 200) {
+    throw emailOtpError(response, 'The verification code could not be sent.')
+  }
+  return response.message || 'A six-digit verification code was sent to your email.'
+}
+
+export async function verifyGoalmaticSignupOtp(
+  config: FirebasePublicConfig,
+  details: {
+    email: string
+    otp: string
+    fullName: string
+    referralCode?: string
+  },
+): Promise<UserProfile> {
+  const normalizedEmail = details.email.trim().toLowerCase()
+  const payload: Record<string, string> = {
+    email: normalizedEmail,
+    otp: details.otp,
+    fullName: details.fullName.trim(),
+  }
+  if (details.referralCode) payload.referralCode = details.referralCode.toUpperCase()
+
+  const response = await callGoalmaticAuthFunction(
+    config,
+    'verifyEmailOTPAndCreateAccount',
+    payload,
+  )
+  if (response.code !== 200 || !response.customToken) {
+    throw emailOtpError(response, 'The verification code is invalid or expired.')
+  }
+
+  const { auth, authModule } = await getFirebaseClient(config)
+  const credential = await authModule.signInWithCustomToken(auth, response.customToken)
+  const user = credential.user
+
+  return {
+    id: user.uid,
+    accountId: response.accountId || user.uid,
+    name: user.displayName || details.fullName.trim(),
     email: user.email || normalizedEmail,
     avatarUrl: user.photoURL || undefined,
     authProvider: 'email',
