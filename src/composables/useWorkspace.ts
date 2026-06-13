@@ -25,13 +25,59 @@ function defaultSettings(): AppSettings {
 
 function initialState(): WorkspaceState {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
+    ownerId: null,
     user: null,
     resumes: [],
     jobs: [],
     applications: [],
     settings: defaultSettings(),
     hydrated: false,
+  }
+}
+
+function removeLegacyDemoData(workspace: WorkspaceState): WorkspaceState {
+  const demoResumeIds = new Set(
+    workspace.resumes
+      .filter(resume => (
+        resume.originalFileName === 'jordan-lee-resume.txt'
+        || resume.name === 'Jordan Lee - Product Engineer'
+        || resume.versions.some(version => (
+          version.text.includes('JORDAN LEE')
+          && version.text.includes('jordan.lee@example.com')
+          && version.text.includes('Northstar Labs')
+        ))
+      ))
+      .map(resume => resume.id),
+  )
+  const demoJobIds = new Set(
+    workspace.jobs
+      .filter(job => (
+        job.url === 'https://example.com/jobs/senior-frontend-engineer'
+        || (
+          job.company === 'Linear Labs'
+          && job.title === 'Senior Frontend Engineer'
+          && job.description.includes('workflow products')
+        )
+      ))
+      .map(job => job.id),
+  )
+  const resumes = workspace.resumes.filter(resume => !demoResumeIds.has(resume.id))
+  const jobs = workspace.jobs
+    .filter(job => !demoJobIds.has(job.id))
+    .map(job => (
+      job.resumeId && demoResumeIds.has(job.resumeId)
+        ? { ...job, resumeId: undefined, resumeVersionId: undefined, match: undefined }
+        : job
+    ))
+  const jobIds = new Set(jobs.map(job => job.id))
+
+  return {
+    ...workspace,
+    schemaVersion: 2,
+    resumes,
+    jobs,
+    applications: workspace.applications.filter(application => jobIds.has(application.jobId)),
   }
 }
 
@@ -88,14 +134,22 @@ export function useWorkspace() {
       try {
         const parsed = JSON.parse(stored) as WorkspaceState
         const storedProvider = (parsed.user as { authProvider?: string } | null)?.authProvider
-        state.value = {
+        const migrated = removeLegacyDemoData({
           ...initialState(),
           ...parsed,
+          ownerId: parsed.ownerId || parsed.user?.id || null,
           user: storedProvider === 'demo' ? null : parsed.user,
           settings: { ...defaultSettings(), ...parsed.settings },
           hydrated: true,
-        }
-        if (storedProvider === 'demo') persist()
+        })
+        state.value = migrated
+        if (
+          storedProvider === 'demo'
+          || parsed.schemaVersion !== migrated.schemaVersion
+          || parsed.resumes.length !== migrated.resumes.length
+          || parsed.jobs.length !== migrated.jobs.length
+          || parsed.applications.length !== migrated.applications.length
+        ) persist()
         return
       } catch {
         localStorage.removeItem(STORAGE_KEY)
@@ -106,6 +160,26 @@ export function useWorkspace() {
   }
 
   const login = (user: UserProfile) => {
+    const hasWorkspaceData = Boolean(
+      state.value.resumes.length
+      || state.value.jobs.length
+      || state.value.applications.length,
+    )
+    const belongsToAnotherUser = Boolean(
+      (state.value.ownerId && state.value.ownerId !== user.id)
+      || (!state.value.ownerId && hasWorkspaceData),
+    )
+    if (belongsToAnotherUser) {
+      state.value = {
+        ...initialState(),
+        ownerId: user.id,
+        user,
+        hydrated: true,
+      }
+      persist()
+      return
+    }
+    state.value.ownerId = user.id
     state.value.user = user
     persist()
   }
@@ -290,7 +364,7 @@ export function useWorkspace() {
 
   const deleteAllData = () => {
     const user = state.value.user
-    state.value = { ...initialState(), user, hydrated: true }
+    state.value = { ...initialState(), ownerId: user?.id || state.value.ownerId, user, hydrated: true }
     persist()
   }
 

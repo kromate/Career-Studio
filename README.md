@@ -50,7 +50,7 @@ The full local-preview application is implemented in Nuxt 3 and includes:
 
 - responsive public landing, methodology, privacy, and open-source pages;
 - shared-project Firebase Google sign-in when configured;
-- local demo and email-code preview modes for contributors;
+- local email-code preview mode for contributors;
 - PDF, DOCX, TXT, and pasted-text resume ingestion;
 - extraction review before scoring;
 - deterministic, versioned Resume Quality and Job Match scoring;

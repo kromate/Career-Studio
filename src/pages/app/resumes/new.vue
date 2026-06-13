@@ -46,10 +46,6 @@
               placeholder="Paste the complete resume, including headings and bullet points…"
             />
             <div class="paste-actions">
-              <button v-if="localPreview" class="btn btn-ghost btn-sm" type="button" @click="useSample">
-                <Sparkles :size="14" />
-                Use sample resume
-              </button>
               <button class="btn btn-primary" type="button" :disabled="pastedText.trim().length < 40" @click="reviewPastedText">
                 Review extraction
                 <ArrowRight :size="15" />
@@ -171,17 +167,14 @@ import {
   ScanSearch,
   ScanText,
   ShieldCheck,
-  Sparkles,
   TriangleAlert,
 } from 'lucide-vue-next'
-import { DEMO_RESUME_TEXT } from '@/lib/demo'
 import { extractTextFromFile, parseResumeText } from '@/lib/resume/parser'
 
 definePageMeta({ layout: 'app', middleware: 'auth' })
 
 const workspace = useWorkspace()
 const toast = useToast()
-const config = useRuntimeConfig().public
 const fileInput = ref<HTMLInputElement | null>(null)
 const stage = ref<'upload' | 'review'>('upload')
 const dragging = ref(false)
@@ -193,7 +186,6 @@ const sourceText = ref('')
 const fileName = ref('pasted-resume.txt')
 const fileType = ref('text/plain')
 const resumeName = ref('')
-const localPreview = computed(() => config.appMode === 'local')
 const parsed = computed(() => sourceText.value ? parseResumeText(sourceText.value) : null)
 const confidenceCopy = computed(() => {
   if (parsed.value?.confidence === 'high') {
@@ -242,10 +234,6 @@ const handleDrop = (event: DragEvent) => {
 const handleFileInput = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0]
   if (file) processFile(file)
-}
-
-const useSample = () => {
-  pastedText.value = DEMO_RESUME_TEXT
 }
 
 const reviewPastedText = () => {

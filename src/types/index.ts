@@ -216,6 +216,7 @@ export interface AppSettings {
 
 export interface WorkspaceState {
   schemaVersion: number
+  ownerId: string | null
   user: UserProfile | null
   resumes: ResumeRecord[]
   jobs: SavedJob[]

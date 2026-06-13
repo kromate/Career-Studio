@@ -1,5 +1,6 @@
 <template>
-  <div class="page-shell applications-page">
+  <CollectionLoadingState v-if="!workspace.state.value.hydrated" />
+  <div v-else class="page-shell applications-page">
     <header class="page-header">
       <div>
         <h1>Applications</h1>

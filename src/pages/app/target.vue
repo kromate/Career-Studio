@@ -64,12 +64,6 @@
               {{ wordCount >= 50 ? 'Ready to calculate a useful match.' : 'Add at least 50 words for a useful result.' }}
             </small>
           </label>
-          <div v-if="localPreview" class="sample-row">
-            <button class="btn btn-ghost btn-sm" type="button" @click="useSample">
-              <Sparkles :size="14" />
-              Fill sample role
-            </button>
-          </div>
           <button class="btn btn-primary btn-lg submit-button" type="submit" :disabled="!canAnalyze || saving">
             <AppSpinner v-if="saving" :size="17" light />
             <ScanSearch v-else :size="17" />
@@ -141,16 +135,13 @@ import {
   Gauge,
   ScanSearch,
   ShieldCheck,
-  Sparkles,
   Target,
 } from 'lucide-vue-next'
-import { DEMO_JOB_DESCRIPTION } from '@/lib/demo'
 import { matchResumeToJob } from '@/lib/resume/matching'
 
 definePageMeta({ layout: 'app', middleware: 'auth' })
 
 const workspace = useWorkspace()
-const config = useRuntimeConfig().public
 const toast = useToast()
 const saving = ref(false)
 const form = reactive({
@@ -178,21 +169,12 @@ const liveMatch = computed(() => (
 const canAnalyze = computed(() => Boolean(
   form.title && form.company && selectedVersion.value && wordCount.value >= 50,
 ))
-const localPreview = computed(() => config.appMode === 'local')
 const required = computed(() => liveMatch.value?.requirements.filter(item => item.type === 'required') || [])
 const responsibilities = computed(() => liveMatch.value?.requirements.filter(item => item.type === 'responsibility') || [])
 const requiredCount = computed(() => required.value.length)
 const responsibilityCount = computed(() => responsibilities.value.length)
 const matchedRequired = computed(() => required.value.filter(item => item.matched).length)
 const matchedResponsibilities = computed(() => responsibilities.value.filter(item => item.matched).length)
-
-const useSample = () => {
-  form.title = 'Senior Frontend Engineer'
-  form.company = 'Linear Labs'
-  form.location = 'Remote'
-  form.url = 'https://example.com/jobs/senior-frontend-engineer'
-  form.description = DEMO_JOB_DESCRIPTION
-}
 
 const analyzeAndSave = async () => {
   if (!canAnalyze.value) return
@@ -269,12 +251,6 @@ const analyzeAndSave = async () => {
 .field-help {
   color: var(--muted);
   font-size: 11px;
-}
-
-.sample-row {
-  display: flex;
-  justify-content: flex-start;
-  margin-top: -5px;
 }
 
 .submit-button {

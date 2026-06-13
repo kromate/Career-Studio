@@ -1,5 +1,6 @@
 <template>
-  <div class="page-shell">
+  <CollectionLoadingState v-if="!workspace.state.value.hydrated" />
+  <div v-else class="page-shell">
     <header class="page-header">
       <div>
         <h1>Resumes</h1>

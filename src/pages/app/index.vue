@@ -1,5 +1,6 @@
 <template>
-  <div class="page-shell">
+  <OverviewLoadingState v-if="!workspace.state.value.hydrated" />
+  <div v-else class="page-shell">
     <header class="page-header">
       <div>
         <span class="welcome-date">{{ formattedDate }}</span>
