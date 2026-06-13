@@ -17,6 +17,29 @@ interface EmailOtpResponse {
   accountId?: string
 }
 
+function formatAuthFunctionError(error: unknown): Error {
+  if (!(error instanceof Error)) {
+    return new Error('Authentication is temporarily unavailable. Please try again shortly.')
+  }
+
+  const firebaseError = error as Error & { code?: string; details?: unknown }
+  const code = firebaseError.code?.toLowerCase() || ''
+  const message = firebaseError.message.trim()
+  const isInfrastructureFailure = (
+    code === 'functions/internal'
+    || code === 'functions/unavailable'
+    || code === 'internal'
+    || code === 'unavailable'
+    || message.toLowerCase() === 'internal'
+  )
+
+  if (isInfrastructureFailure) {
+    return new Error('Goalmatic email sign-in is temporarily unavailable. Please try again in a moment or use Google.')
+  }
+
+  return error
+}
+
 export function hasFirebaseConfig(config: FirebasePublicConfig): boolean {
   return Boolean(
     config.firebaseApiKey
@@ -67,8 +90,12 @@ async function callGoalmaticAuthFunction(
     functions,
     functionName,
   )
-  const response = await callable(payload)
-  return response.data
+  try {
+    const response = await callable(payload)
+    return response.data
+  } catch (error) {
+    throw formatAuthFunctionError(error)
+  }
 }
 
 function emailOtpError(response: EmailOtpResponse, fallback: string): Error {
