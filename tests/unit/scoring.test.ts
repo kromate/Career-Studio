@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
+import { createResumeDocxBlob, createResumePdfBlob } from '@/lib/export/resume'
 import { matchResumeToJob } from '@/lib/resume/matching'
-import { parseResumeText } from '@/lib/resume/parser'
+import { parseResumeText, reconstructPdfText } from '@/lib/resume/parser'
 import { applySuggestion, generateRewriteSuggestions } from '@/lib/resume/rewrite'
 import { getPrioritizedFindings, scoreResume } from '@/lib/resume/scoring'
 import { sampleJobDescription, sampleResume } from '../fixtures/sample-resume'
@@ -33,6 +34,77 @@ describe('deterministic resume analysis', () => {
     expect(analysis.parseConfidence).toBe('low')
     expect(analysis.score).toBeNull()
     expect(analysis.parseWarnings.length).toBeGreaterThan(0)
+  })
+
+  it('recognizes a header portfolio as a professional profile', () => {
+    const parsed = parseResumeText(sampleResume.replace(
+      'linkedin.com/in/jordanlee',
+      'https://portfolio.example.com',
+    ))
+    const profileCheck = scoreResume(parsed).checks.find(check => check.ruleId === 'search.linkedin')
+
+    expect(parsed.contacts.website).toBe('https://portfolio.example.com')
+    expect(profileCheck?.earnedPoints).toBe(2)
+    expect(profileCheck?.passed).toBe(true)
+  })
+})
+
+describe('PDF text reconstruction', () => {
+  it('preserves headings and bullets while joining wrapped bullet lines', () => {
+    const text = reconstructPdfText([[
+      { str: 'SKILLS & TOOLS', transform: [10, 0, 0, 10, 45, 700] },
+      { str: '', hasEOL: true, transform: [10, 0, 0, 10, 45, 680] },
+      { str: 'EXPERIENCE', transform: [10, 0, 0, 10, 45, 660] },
+      { str: '', hasEOL: true, transform: [10, 0, 0, 10, 45, 640] },
+      { str: '●', width: 5, transform: [10, 0, 0, 10, 45, 620] },
+      { str: ' ', width: 13, transform: [10, 0, 0, 10, 50, 620] },
+      { str: 'Built a reliable product for', hasEOL: true, width: 150, transform: [10, 0, 0, 10, 63, 620] },
+      { str: 'customers across Africa.', transform: [10, 0, 0, 10, 63, 602] },
+    ]])
+
+    expect(text).toBe([
+      'SKILLS & TOOLS',
+      'EXPERIENCE',
+      '• Built a reliable product for customers across Africa.',
+    ].join('\n'))
+  })
+
+  it('joins adjacent ligature fragments and removes isolated page numbers', () => {
+    const text = reconstructPdfText([[
+      { str: 'uni', width: 18, transform: [10, 0, 0, 10, 63, 620] },
+      { str: 'fi', width: 7, transform: [10, 0, 0, 10, 81, 620] },
+      { str: 'cation', hasEOL: true, width: 32, transform: [10, 0, 0, 10, 88, 620] },
+      { str: '1', width: 6, transform: [10, 0, 0, 10, 543, 20] },
+    ]])
+
+    expect(text).toBe('unification')
+  })
+
+  it('preserves PDF page count without exposing page-break markers in normalized text', () => {
+    const text = reconstructPdfText([
+      [{ str: 'Page one', hasEOL: true, transform: [10, 0, 0, 10, 45, 700] }],
+      [{ str: 'Page two', hasEOL: true, transform: [10, 0, 0, 10, 45, 700] }],
+      [{ str: 'Page three', hasEOL: true, transform: [10, 0, 0, 10, 45, 700] }],
+    ])
+    const parsed = parseResumeText(text)
+
+    expect(parsed.stats.pagesEstimated).toBe(3)
+    expect(parsed.normalizedText).not.toContain('\f')
+  })
+
+  it('recognizes Skills & Tools as a standard section', () => {
+    const parsed = parseResumeText([
+      'Taylor Reed',
+      'taylor@example.com',
+      'SKILLS & TOOLS',
+      'Vue, TypeScript, Firebase',
+      'EXPERIENCE',
+      '• Built reliable applications for customers.',
+      'EDUCATION',
+      'University of Lagos',
+    ].join('\n'))
+
+    expect(parsed.sections.some(section => section.type === 'skills')).toBe(true)
   })
 })
 
@@ -99,5 +171,39 @@ describe('evidence-preserving rewrites', () => {
     expect(factPrompt).toBeTruthy()
     expect(applySuggestion(sampleResume, direct!)).not.toBe(sampleResume)
     expect(applySuggestion(sampleResume, factPrompt!)).toBe(sampleResume)
+  })
+
+  it('prioritizes safe leadership rewrites ahead of evidence prompts', () => {
+    const resume = sampleResume.replace(
+      'Led development of a workflow platform',
+      'Was in charge of development of a workflow platform',
+    )
+    const parsed = parseResumeText(resume)
+    const suggestions = generateRewriteSuggestions(parsed, scoreResume(parsed))
+
+    expect(suggestions[0]?.requiresFactConfirmation).toBe(false)
+    expect(suggestions[0]?.proposedText).toContain('Led development of a workflow platform')
+  })
+
+  it('does not request impact metrics for technology-list bullets', () => {
+    const resume = `${sampleResume}\n\nPROJECTS\n- Technologies used: Vue, Firebase, Node.js`
+    const parsed = parseResumeText(resume)
+    const suggestions = generateRewriteSuggestions(parsed, scoreResume(parsed))
+
+    expect(suggestions.some(suggestion => suggestion.sourceText.startsWith('Technologies used:'))).toBe(false)
+  })
+})
+
+describe('resume exports', () => {
+  it('generates non-empty PDF and DOCX files', async () => {
+    const parsed = parseResumeText(sampleResume)
+    const [pdf, docx] = await Promise.all([
+      createResumePdfBlob(parsed),
+      createResumeDocxBlob(parsed),
+    ])
+
+    expect(pdf.type).toBe('application/pdf')
+    expect(pdf.size).toBeGreaterThan(1_000)
+    expect(docx.size).toBeGreaterThan(1_000)
   })
 })

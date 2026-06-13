@@ -12,6 +12,7 @@ import {
   PARSER_VERSION,
   SCORING_VERSION,
   TAXONOMY_VERSION,
+  TECHNOLOGY_LIST_PATTERN,
   WEAK_PHRASES,
 } from './constants'
 import { hashText } from './parser'
@@ -85,12 +86,13 @@ export function scoreResume(
   options: { resumeId?: string; versionId?: string; createdAt?: string } = {},
 ): ResumeAnalysis {
   const bullets = parsed.lines.filter(line => line.kind === 'bullet')
+  const impactBullets = bullets.filter(line => !TECHNOLOGY_LIST_PATTERN.test(line.text))
   const bulletTexts = bullets.map(line => line.text)
-  const actionBullets = bullets.filter((line) => {
+  const actionBullets = impactBullets.filter((line) => {
     const firstWord = line.text.toLowerCase().split(/\s+/)[0]?.replace(/[^a-z]/g, '') || ''
     return ACTION_VERBS.includes(firstWord)
   })
-  const quantifiedBullets = bullets.filter(line => /\b(?:\d+(?:\.\d+)?%?|\$[\d,.]+|£[\d,.]+|€[\d,.]+)\b/.test(line.text))
+  const quantifiedBullets = impactBullets.filter(line => /\b(?:\d+(?:\.\d+)?%?|\$[\d,.]+|£[\d,.]+|€[\d,.]+)\b/.test(line.text))
   const weakEvidence = evidenceFor(parsed, text => WEAK_PHRASES.some(phrase => text.includes(phrase)))
   const weakCount = parsed.lines.filter(line => WEAK_PHRASES.some(phrase => line.text.toLowerCase().includes(phrase))).length
   const conciseBullets = bullets.filter((line) => {
@@ -143,7 +145,9 @@ export function scoreResume(
       explanation: 'Recruiters need a reliable email address and phone number.',
       recommendation: 'Put your email and phone number in normal text near the top of the first page.',
       maxPoints: 4,
-      earnedPoints: (parsed.contacts.email ? 2 : 0) + (parsed.contacts.phone ? 1.5 : 0) + (parsed.contacts.linkedIn ? 0.5 : 0),
+      earnedPoints: (parsed.contacts.email ? 2 : 0)
+        + (parsed.contacts.phone ? 1.5 : 0)
+        + (parsed.contacts.linkedIn || parsed.contacts.website ? 0.5 : 0),
     },
     {
       id: 'parse.dates',
@@ -217,8 +221,8 @@ export function scoreResume(
       explanation: 'Strong opening verbs make ownership and contribution easier to understand.',
       recommendation: 'Start each experience bullet with a precise action verb.',
       maxPoints: 8,
-      earnedPoints: ratioScore(actionBullets.length, bullets.length, 8),
-      evidence: bullets
+      earnedPoints: ratioScore(actionBullets.length, impactBullets.length, 8),
+      evidence: impactBullets
         .filter(line => !actionBullets.includes(line))
         .slice(0, 3)
         .map(line => ({ lineId: line.id, section: line.section, quote: line.text })),
@@ -230,8 +234,8 @@ export function scoreResume(
       explanation: 'Numbers make the size and result of your work concrete.',
       recommendation: 'Where truthful, add verified volume, time, revenue, quality, or percentage outcomes.',
       maxPoints: 10,
-      earnedPoints: ratioScore(quantifiedBullets.length, Math.max(1, Math.min(bullets.length, 6)), 10),
-      evidence: bullets
+      earnedPoints: ratioScore(quantifiedBullets.length, Math.max(1, Math.min(impactBullets.length, 6)), 10),
+      evidence: impactBullets
         .filter(line => !quantifiedBullets.includes(line))
         .slice(0, 3)
         .map(line => ({ lineId: line.id, section: line.section, quote: line.text })),
@@ -350,7 +354,11 @@ export function scoreResume(
       explanation: 'A LinkedIn or portfolio link gives recruiters additional context.',
       recommendation: 'Add a clean LinkedIn or portfolio URL if it strengthens your application.',
       maxPoints: 2,
-      earnedPoints: parsed.contacts.linkedIn ? 2 : /https?:\/\//i.test(parsed.normalizedText) ? 1 : 0,
+      earnedPoints: parsed.contacts.linkedIn || parsed.contacts.website
+        ? 2
+        : /https?:\/\//i.test(parsed.normalizedText)
+          ? 1
+          : 0,
     },
     {
       id: 'mechanics.placeholders',

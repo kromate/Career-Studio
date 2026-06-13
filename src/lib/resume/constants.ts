@@ -1,7 +1,7 @@
 import type { ResumeSectionType, ScoreDimension } from '@/types'
 
-export const PARSER_VERSION = 'resume-parser-v1.0.0'
-export const SCORING_VERSION = 'resume-quality-v1.0.0'
+export const PARSER_VERSION = 'resume-parser-v1.1.0'
+export const SCORING_VERSION = 'resume-quality-v1.2.0'
 export const MATCH_SCORING_VERSION = 'job-match-v1.0.0'
 export const TAXONOMY_VERSION = 'skills-v1.0.0'
 
@@ -21,19 +21,35 @@ export const SECTION_HEADINGS: Array<{
 }> = [
   { type: 'summary', patterns: ['summary', 'profile', 'professional summary', 'career summary', 'about me', 'objective'] },
   { type: 'experience', patterns: ['experience', 'work experience', 'professional experience', 'employment', 'employment history', 'career history'] },
-  { type: 'skills', patterns: ['skills', 'technical skills', 'core competencies', 'competencies', 'expertise', 'technologies'] },
+  {
+    type: 'skills',
+    patterns: [
+      'skills',
+      'skills & tools',
+      'technical skills',
+      'technical skills & tools',
+      'core competencies',
+      'competencies',
+      'expertise',
+      'technologies',
+    ],
+  },
   { type: 'education', patterns: ['education', 'academic background', 'qualifications'] },
   { type: 'certifications', patterns: ['certifications', 'certificates', 'licenses', 'professional development'] },
   { type: 'projects', patterns: ['projects', 'selected projects', 'key projects', 'portfolio'] },
 ]
 
 export const ACTION_VERBS = [
-  'achieved', 'accelerated', 'built', 'created', 'delivered', 'designed', 'developed',
-  'drove', 'established', 'generated', 'grew', 'improved', 'increased', 'launched',
-  'led', 'managed', 'optimized', 'orchestrated', 'produced', 'reduced', 'resolved',
-  'scaled', 'shipped', 'streamlined', 'transformed', 'implemented', 'owned',
-  'coordinated', 'analyzed', 'automated', 'mentored', 'negotiated', 'supported',
+  'achieved', 'accelerated', 'analyzed', 'attracted', 'automated', 'built',
+  'collaborated', 'completed', 'converted', 'coordinated', 'created', 'delivered',
+  'designed', 'developed', 'drove', 'established', 'founded', 'generated', 'grew',
+  'implemented', 'improved', 'increased', 'launched', 'led', 'managed', 'mentored',
+  'negotiated', 'optimized', 'orchestrated', 'oversaw', 'owned', 'produced',
+  'reduced', 'resolved', 'scaled', 'shipped', 'streamlined', 'supported',
+  'transformed', 'worked',
 ]
+
+export const TECHNOLOGY_LIST_PATTERN = /^(?:technologies?|tech stack|tools) used\s*:/i
 
 export const WEAK_PHRASES = [
   'responsible for',

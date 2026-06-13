@@ -96,8 +96,8 @@
               <strong>{{ parsed.contacts.phone || 'Not detected' }}</strong>
             </div>
             <div>
-              <span>LinkedIn</span>
-              <strong>{{ parsed.contacts.linkedIn || 'Not detected' }}</strong>
+              <span>Professional profile</span>
+              <strong>{{ parsed.contacts.linkedIn || parsed.contacts.website || 'Not detected' }}</strong>
             </div>
           </div>
 

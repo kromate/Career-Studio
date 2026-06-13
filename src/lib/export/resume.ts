@@ -20,7 +20,7 @@ function downloadBlob(blob: Blob, filename: string): void {
   URL.revokeObjectURL(url)
 }
 
-export async function exportResumePdf(parsed: ParsedResume, name: string): Promise<void> {
+export async function createResumePdfBlob(parsed: ParsedResume): Promise<Blob> {
   const { jsPDF } = await import('jspdf')
   const pdf = new jsPDF({ unit: 'pt', format: 'a4' })
   const margin = 48
@@ -50,10 +50,14 @@ export async function exportResumePdf(parsed: ParsedResume, name: string): Promi
     }
   }
 
-  pdf.save(`${safeFilename(name)}.pdf`)
+  return pdf.output('blob')
 }
 
-export async function exportResumeDocx(parsed: ParsedResume, name: string): Promise<void> {
+export async function exportResumePdf(parsed: ParsedResume, name: string): Promise<void> {
+  downloadBlob(await createResumePdfBlob(parsed), `${safeFilename(name)}.pdf`)
+}
+
+export async function createResumeDocxBlob(parsed: ParsedResume): Promise<Blob> {
   const {
     Document,
     Packer,
@@ -96,6 +100,9 @@ export async function exportResumeDocx(parsed: ParsedResume, name: string): Prom
       children: paragraphs,
     }],
   })
-  const blob = await Packer.toBlob(document)
-  downloadBlob(blob, `${safeFilename(name)}.docx`)
+  return Packer.toBlob(document)
+}
+
+export async function exportResumeDocx(parsed: ParsedResume, name: string): Promise<void> {
+  downloadBlob(await createResumeDocxBlob(parsed), `${safeFilename(name)}.docx`)
 }

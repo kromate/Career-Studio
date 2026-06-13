@@ -1,8 +1,11 @@
 import type { ParsedResume, ResumeAnalysis, RewriteSuggestion } from '@/types'
-import { WEAK_PHRASES } from './constants'
+import { TECHNOLOGY_LIST_PATTERN, WEAK_PHRASES } from './constants'
 import { hashText } from './parser'
 
 const DIRECT_REWRITES: Array<[RegExp, string, string]> = [
+  [/^as the founder and primary developer,\s*i assumed the responsibility of overseeing\b/i, 'Oversaw', 'State your ownership directly.'],
+  [/^was in charge of\b/i, 'Led', 'State your leadership directly.'],
+  [/^team lead for\b/i, 'Led', 'Use a clear action verb while preserving the original claim.'],
   [/^responsible for managing\b/i, 'Managed', 'State your ownership directly.'],
   [/^responsible for\b/i, 'Owned', 'State your ownership directly.'],
   [/^worked on\b/i, 'Contributed to', 'Replace vague phrasing with a more precise contribution.'],
@@ -60,7 +63,10 @@ export function generateRewriteSuggestions(
         }
       }
 
-      if (!/\b(?:\d+(?:\.\d+)?%?|\$[\d,.]+|£[\d,.]+|€[\d,.]+)\b/.test(line.text)) {
+      if (
+        !TECHNOLOGY_LIST_PATTERN.test(line.text)
+        && !/\b(?:\d+(?:\.\d+)?%?|\$[\d,.]+|£[\d,.]+|€[\d,.]+)\b/.test(line.text)
+      ) {
         suggestions.push({
           id: `rewrite-${hashText(`${line.id}:evidence-prompt`)}`,
           lineId: line.id,
@@ -75,7 +81,9 @@ export function generateRewriteSuggestions(
       }
     })
 
-  return suggestions.slice(0, 12)
+  return suggestions
+    .sort((left, right) => Number(left.requiresFactConfirmation) - Number(right.requiresFactConfirmation))
+    .slice(0, 12)
 }
 
 export function applySuggestion(text: string, suggestion: RewriteSuggestion): string {

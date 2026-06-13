@@ -4,8 +4,22 @@ import { SECTION_HEADINGS } from './constants'
 const EMAIL_PATTERN = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i
 const PHONE_PATTERN = /(?:\+?\d[\d\s().-]{7,}\d)/
 const LINKEDIN_PATTERN = /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w-]+/i
+const URL_PATTERN = /https?:\/\/[^\s|]+/gi
 const DATE_PATTERN = /\b(?:(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+)?(?:19|20)\d{2}\b/i
 const BULLET_PATTERN = /^\s*(?:[-*+]|[•◦▪‣])\s+/
+const PDF_BULLET_PATTERN = /^\s*[•●◦▪‣]\s*/
+
+export interface PdfTextItem {
+  str: string
+  hasEOL?: boolean
+  width?: number
+  transform?: number[]
+}
+
+interface PdfPhysicalLine {
+  text: string
+  x: number
+}
 
 export function normalizeResumeText(input: string): string {
   return input
@@ -27,6 +41,96 @@ export function hashText(input: string): string {
     hash = Math.imul(hash, 0x01000193)
   }
   return `fnv1a:${(hash >>> 0).toString(16).padStart(8, '0')}`
+}
+
+function pdfItemX(item: PdfTextItem): number {
+  return item.transform?.[4] || 0
+}
+
+function appendPdfFragment(
+  line: string,
+  fragment: string,
+  item: PdfTextItem,
+  previousItem?: PdfTextItem,
+): string {
+  if (!fragment) return line
+  if (/^\s+$/.test(fragment)) return line.endsWith(' ') ? line : `${line} `
+
+  const text = fragment.trim()
+  if (!line) return text
+
+  const previousEnd = previousItem
+    ? pdfItemX(previousItem) + (previousItem.width || 0)
+    : pdfItemX(item)
+  const gap = pdfItemX(item) - previousEnd
+  const fontSize = Math.abs(item.transform?.[0] || 10)
+  const needsSpace = !/\s$/.test(line)
+    && !/^[,.;:!?%)\]}]/.test(text)
+    && gap > fontSize * 0.08
+
+  return `${line}${needsSpace ? ' ' : ''}${text}`
+}
+
+function physicalLinesFromPdfItems(items: PdfTextItem[]): PdfPhysicalLine[] {
+  const lines: PdfPhysicalLine[] = []
+  let line = ''
+  let lineX = 0
+  let previousItem: PdfTextItem | undefined
+
+  const flush = () => {
+    const text = line.replace(/\s+/g, ' ').trim()
+    if (text) lines.push({ text, x: lineX })
+    line = ''
+    lineX = 0
+    previousItem = undefined
+  }
+
+  items.forEach((item) => {
+    if (item.str && !line) lineX = pdfItemX(item)
+    line = appendPdfFragment(line, item.str, item, previousItem)
+    if (item.str) previousItem = item
+    if (item.hasEOL) flush()
+  })
+  flush()
+
+  return lines
+}
+
+function isPdfPageNumber(line: PdfPhysicalLine): boolean {
+  return /^\d{1,3}$/.test(line.text) && line.x > 450
+}
+
+function mergePdfBulletLines(lines: PdfPhysicalLine[]): string[] {
+  const merged: string[] = []
+  let activeBulletIndex = -1
+
+  lines.forEach((line) => {
+    if (isPdfPageNumber(line)) return
+
+    if (PDF_BULLET_PATTERN.test(line.text)) {
+      merged.push(line.text.replace(PDF_BULLET_PATTERN, '• '))
+      activeBulletIndex = merged.length - 1
+      return
+    }
+
+    if (activeBulletIndex >= 0 && line.x >= 55) {
+      merged[activeBulletIndex] = `${merged[activeBulletIndex]} ${line.text}`.replace(/\s+/g, ' ')
+      return
+    }
+
+    activeBulletIndex = -1
+    merged.push(line.text)
+  })
+
+  return merged
+}
+
+export function reconstructPdfText(pages: PdfTextItem[][]): string {
+  return pages
+    .map(items => mergePdfBulletLines(physicalLinesFromPdfItems(items)).join('\n'))
+    .filter(Boolean)
+    .join('\n\f\n')
+    .trim()
 }
 
 function normalizeHeading(line: string): string {
@@ -59,7 +163,20 @@ function inferLocation(lines: string[]): string | undefined {
   })
 }
 
+function inferWebsite(lines: string[]): string | undefined {
+  for (const line of lines.slice(0, 6)) {
+    const candidate = line
+      .match(URL_PATTERN)
+      ?.map(url => url.replace(/[),.;]+$/, ''))
+      .find(url => !LINKEDIN_PATTERN.test(url))
+    if (candidate) return candidate
+  }
+}
+
 export function parseResumeText(input: string): ParsedResume {
+  const explicitPageCount = input.includes('\f')
+    ? input.split('\f').filter(page => page.trim()).length
+    : null
   const normalizedText = normalizeResumeText(input)
   const rawLines = normalizedText ? normalizedText.split('\n').filter(Boolean) : []
   const lines: ResumeLine[] = []
@@ -145,11 +262,12 @@ export function parseResumeText(input: string): ParsedResume {
       email: normalizedText.match(EMAIL_PATTERN)?.[0],
       phone: normalizedText.match(PHONE_PATTERN)?.[0],
       linkedIn: normalizedText.match(LINKEDIN_PATTERN)?.[0],
+      website: inferWebsite(rawLines),
       location: inferLocation(rawLines),
     },
     stats: {
       words,
-      pagesEstimated: Math.max(1, Math.ceil(words / 550)),
+      pagesEstimated: explicitPageCount || Math.max(1, Math.ceil(words / 450)),
       bullets,
       datedLines,
     },
@@ -177,20 +295,27 @@ export async function extractTextFromFile(file: File): Promise<string> {
       isEvalSupported: false,
       useSystemFonts: true,
     }).promise
-    const pages: string[] = []
+    const pages: PdfTextItem[][] = []
 
     for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
       const page = await document.getPage(pageNumber)
       const content = await page.getTextContent()
-      pages.push(
-        content.items
-          .map(item => ('str' in item ? item.str : ''))
-          .filter(Boolean)
-          .join(' '),
-      )
+      const items: PdfTextItem[] = []
+
+      content.items.forEach((item) => {
+        if ('str' in item) {
+          items.push({
+            str: item.str,
+            hasEOL: item.hasEOL,
+            width: item.width,
+            transform: item.transform,
+          })
+        }
+      })
+      pages.push(items)
     }
 
-    return pages.join('\n\n')
+    return reconstructPdfText(pages)
   }
 
   throw new Error('Unsupported file type. Upload a PDF, DOCX, or TXT file.')

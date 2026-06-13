@@ -52,6 +52,7 @@ export interface ParsedResume {
     email?: string
     phone?: string
     linkedIn?: string
+    website?: string
     location?: string
   }
   stats: {
