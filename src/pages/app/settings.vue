@@ -154,21 +154,15 @@
       </main>
     </div>
 
-    <div v-if="deleteConfirm" class="modal-backdrop" @click.self="deleteConfirm = false">
-      <div class="confirm-modal card">
-        <span><TriangleAlert :size="23" /></span>
-        <h2>Delete all local career data?</h2>
-        <p>This cannot be undone. Your resumes, versions, analyses, saved jobs, and applications will be removed from this browser.</p>
-        <label class="field">
-          <span class="field-label">Type DELETE to confirm</span>
-          <input v-model="deleteText" class="input" autocomplete="off">
-        </label>
-        <div>
-          <button class="btn btn-secondary" type="button" @click="deleteConfirm = false">Cancel</button>
-          <button class="btn btn-danger" type="button" :disabled="deleteText !== 'DELETE'" @click="deleteAll">Delete everything</button>
-        </div>
-      </div>
-    </div>
+    <ConfirmDialog
+      :open="deleteConfirm"
+      title="Delete all local career data?"
+      description="This cannot be undone. Your resumes, versions, analyses, saved jobs, and applications will be removed from this browser."
+      confirm-label="Delete everything"
+      confirmation-text="DELETE"
+      @close="deleteConfirm = false"
+      @confirm="deleteAll"
+    />
   </div>
 </template>
 
@@ -181,7 +175,6 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Trash2,
-  TriangleAlert,
   UserRound,
 } from 'lucide-vue-next'
 import {
@@ -197,7 +190,6 @@ const workspace = useWorkspace()
 const toast = useToast()
 const activeSection = ref<'profile' | 'preferences' | 'data' | 'about'>('profile')
 const deleteConfirm = ref(false)
-const deleteText = ref('')
 const preferences = reactive({ ...workspace.state.value.settings })
 const sections: Array<{ id: typeof activeSection.value; label: string; icon: Component }> = [
   { id: 'profile', label: 'Profile', icon: UserRound },
@@ -219,7 +211,6 @@ const savePreferences = () => {
 const deleteAll = () => {
   workspace.deleteAllData()
   deleteConfirm.value = false
-  deleteText.value = ''
   toast.show('All local career data deleted', { tone: 'info' })
 }
 </script>
@@ -528,55 +519,6 @@ const deleteAll = () => {
 
 .about-actions {
   display: flex;
-  gap: 8px;
-}
-
-.modal-backdrop {
-  display: grid;
-  place-items: center;
-  position: fixed;
-  z-index: 100;
-  inset: 0;
-  padding: 20px;
-  background: rgba(23, 20, 38, 0.45);
-}
-
-.confirm-modal {
-  width: min(100%, 440px);
-  padding: 28px;
-  text-align: center;
-}
-
-.confirm-modal > span {
-  display: grid;
-  width: 52px;
-  height: 52px;
-  place-items: center;
-  margin: 0 auto 18px;
-  border-radius: 15px;
-  color: var(--red);
-  background: var(--red-soft);
-}
-
-.confirm-modal h2 {
-  margin-bottom: 8px;
-  font-size: 20px;
-}
-
-.confirm-modal > p {
-  color: var(--muted);
-  font-size: 10px;
-  line-height: 1.55;
-}
-
-.confirm-modal .field {
-  margin: 20px 0;
-  text-align: left;
-}
-
-.confirm-modal > div:last-child {
-  display: flex;
-  justify-content: center;
   gap: 8px;
 }
 

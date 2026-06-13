@@ -20,7 +20,8 @@
         </div>
 
         <button v-if="!otpStep" class="google-button" type="button" :disabled="loading || !googleReady" @click="handleGoogle">
-          <span class="google-logo">G</span>
+          <AppSpinner v-if="loading" :size="18" />
+          <span v-else class="google-logo">G</span>
           {{ loading ? 'Connecting…' : 'Continue with Google' }}
         </button>
         <div v-if="!otpStep && !googleReady" class="auth-coming-soon">
@@ -66,8 +67,9 @@
             </div>
           </template>
           <button class="btn btn-primary btn-lg full-button" type="submit" :disabled="loading">
+            <AppSpinner v-if="loading" :size="16" light />
             {{ otpStep ? 'Verify and continue' : 'Email me a code' }}
-            <ArrowRight :size="16" />
+            <ArrowRight v-if="!loading" :size="16" />
           </button>
         </form>
 

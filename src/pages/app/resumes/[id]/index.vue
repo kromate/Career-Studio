@@ -232,23 +232,19 @@
         </aside>
       </section>
 
-      <div v-if="deleteConfirm" class="modal-backdrop" @click.self="deleteConfirm = false">
-        <div class="confirm-modal card">
-          <span class="danger-icon"><Trash2 :size="22" /></span>
-          <h2>Delete this resume?</h2>
-          <p>This removes every local version and analysis. Saved jobs will remain, but their match results will be cleared.</p>
-          <div>
-            <button class="btn btn-secondary" type="button" @click="deleteConfirm = false">Cancel</button>
-            <button class="btn btn-danger" type="button" @click="confirmDelete">Delete resume</button>
-          </div>
-        </div>
-      </div>
+      <ConfirmDialog
+        :open="deleteConfirm"
+        title="Delete this resume?"
+        description="This removes every local version and analysis. Saved jobs will remain, but their match results will be cleared."
+        confirm-label="Delete resume"
+        loading-label="Deleting…"
+        :loading="deleteLoading"
+        @close="deleteConfirm = false"
+        @confirm="confirmDelete"
+      />
     </template>
 
-    <div v-else class="card loading-state">
-      <LoaderCircle class="spin" :size="25" />
-      Loading resume…
-    </div>
+    <DetailPageSkeleton v-else />
   </div>
 </template>
 
@@ -271,7 +267,6 @@ import {
   History,
   Lightbulb,
   ListFilter,
-  LoaderCircle,
   Plus,
   ScanSearch,
   ShieldCheck,
@@ -294,6 +289,7 @@ const activeFilter = ref<'all' | ScoreDimension>('all')
 const filterOpen = ref(false)
 const exportOpen = ref(false)
 const deleteConfirm = ref(false)
+const deleteLoading = ref(false)
 const resume = computed(() => workspace.getResume(route.params.id as string))
 const version = computed(() => resume.value ? workspace.getActiveVersion(resume.value) : undefined)
 const findings = computed(() => version.value ? getPrioritizedFindings(version.value.analysis) : [])
@@ -389,6 +385,7 @@ const exportDocx = async () => {
 }
 const confirmDelete = async () => {
   if (!resume.value) return
+  deleteLoading.value = true
   workspace.deleteResume(resume.value.id)
   toast.show('Resume deleted', { tone: 'info' })
   await navigateTo('/app/resumes')
@@ -947,69 +944,6 @@ const confirmDelete = async () => {
   gap: 8px;
   margin-top: 22px;
 }
-
-.modal-backdrop {
-  display: grid;
-  place-items: center;
-  position: fixed;
-  z-index: 100;
-  inset: 0;
-  padding: 20px;
-  background: rgba(23, 20, 38, 0.45);
-  backdrop-filter: blur(4px);
-}
-
-.confirm-modal {
-  width: min(100%, 430px);
-  padding: 28px;
-  text-align: center;
-  box-shadow: var(--shadow-md);
-}
-
-.danger-icon {
-  display: grid;
-  width: 52px;
-  height: 52px;
-  place-items: center;
-  margin: 0 auto 18px;
-  border-radius: 15px;
-  color: var(--red);
-  background: var(--red-soft);
-}
-
-.confirm-modal h2 {
-  margin-bottom: 8px;
-  font-size: 21px;
-}
-
-.confirm-modal p {
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.6;
-}
-
-.confirm-modal > div:last-child {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 22px;
-}
-
-.loading-state {
-  display: flex;
-  min-height: 300px;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.spin {
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 1100px) {
   .score-hero {

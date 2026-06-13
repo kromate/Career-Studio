@@ -21,9 +21,9 @@
         <div class="rewrite-actions">
           <button class="btn btn-secondary" type="button" @click="resetDraft">Reset</button>
           <button class="btn btn-primary" type="button" :disabled="!hasChanges || saving" @click="saveVersion">
-            <LoaderCircle v-if="saving" class="spin" :size="16" />
+            <AppSpinner v-if="saving" :size="16" light />
             <Save v-else :size="16" />
-            Save new version
+            {{ saving ? 'Saving…' : 'Save new version' }}
           </button>
         </div>
       </header>
@@ -175,14 +175,29 @@
         </aside>
       </div>
 
-      <div v-if="previewExpanded" class="preview-modal" @click.self="previewExpanded = false">
-        <button class="icon-btn close-preview" type="button" aria-label="Close preview" @click="previewExpanded = false">
-          <X :size="18" />
-        </button>
-        <ResumePreview :parsed="draftParsed" />
-      </div>
+      <BaseModal
+        :open="previewExpanded"
+        title="Resume preview"
+        description="Review the current ATS-readable document layout."
+        size="full"
+        @close="previewExpanded = false"
+      >
+        <div class="preview-document">
+          <ResumePreview :parsed="draftParsed" />
+        </div>
+      </BaseModal>
     </template>
-    <div v-else class="rewrite-loading"><LoaderCircle class="spin" /> Loading editor…</div>
+    <div v-else class="rewrite-loading" aria-label="Loading editor" role="status">
+      <div class="rewrite-loading-header">
+        <AppSkeleton width="220px" height="24px" radius="8px" />
+        <AppSkeleton width="145px" height="40px" radius="9px" />
+      </div>
+      <div class="rewrite-loading-grid">
+        <AppSkeleton height="610px" radius="12px" />
+        <AppSkeleton height="610px" radius="12px" />
+        <AppSkeleton height="610px" radius="12px" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -193,7 +208,6 @@ import {
   ArrowRight,
   Check,
   CircleHelp,
-  LoaderCircle,
   Maximize2,
   Save,
   WandSparkles,
@@ -722,40 +736,32 @@ const saveVersion = async () => {
   background: #fff;
 }
 
-.preview-modal {
+.preview-document {
   display: grid;
-  overflow: auto;
   place-items: start center;
-  position: fixed;
-  z-index: 100;
-  inset: 0;
-  padding: 45px;
-  background: rgba(23, 20, 38, 0.78);
-  backdrop-filter: blur(5px);
-}
-
-.close-preview {
-  position: fixed;
-  z-index: 2;
-  top: 18px;
-  right: 18px;
+  min-height: 640px;
+  padding: 12px;
+  background: #eef0f3;
 }
 
 .rewrite-loading {
-  display: flex;
+  display: grid;
   min-height: calc(100vh - 64px);
+  gap: 16px;
+  padding: 18px;
+}
+
+.rewrite-loading-header {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: var(--muted);
-  font-size: 12px;
+  justify-content: space-between;
 }
 
-.spin {
-  animation: spin 0.8s linear infinite;
+.rewrite-loading-grid {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr) 350px;
+  gap: 12px;
 }
-
-@keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 1180px) {
   .rewrite-workspace {
@@ -763,6 +769,14 @@ const saveVersion = async () => {
   }
 
   .live-preview-panel {
+    display: none;
+  }
+
+  .rewrite-loading-grid {
+    grid-template-columns: 280px 1fr;
+  }
+
+  .rewrite-loading-grid :deep(.app-skeleton:last-child) {
     display: none;
   }
 }
@@ -775,6 +789,14 @@ const saveVersion = async () => {
   }
 
   .rewrite-score {
+    display: none;
+  }
+
+  .rewrite-loading-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rewrite-loading-grid :deep(.app-skeleton:first-child) {
     display: none;
   }
 

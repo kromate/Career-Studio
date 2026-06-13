@@ -121,19 +121,18 @@
         <pre>{{ job.description }}</pre>
       </section>
 
-      <div v-if="deleteConfirm" class="modal-backdrop" @click.self="deleteConfirm = false">
-        <div class="confirm-modal card">
-          <span><Trash2 :size="22" /></span>
-          <h2>Remove this saved job?</h2>
-          <p>The associated application pipeline record will also be removed.</p>
-          <div>
-            <button class="btn btn-secondary" type="button" @click="deleteConfirm = false">Cancel</button>
-            <button class="btn btn-danger" type="button" @click="deleteJob">Remove job</button>
-          </div>
-        </div>
-      </div>
+      <ConfirmDialog
+        :open="deleteConfirm"
+        title="Remove this saved job?"
+        description="The associated application pipeline record will also be removed."
+        confirm-label="Remove job"
+        loading-label="Removing…"
+        :loading="deleteLoading"
+        @close="deleteConfirm = false"
+        @confirm="deleteJob"
+      />
     </template>
-    <div v-else class="card loading-state">Loading job…</div>
+    <DetailPageSkeleton v-else />
   </div>
 </template>
 
@@ -156,6 +155,7 @@ const workspace = useWorkspace()
 const toast = useToast()
 const selectedResumeId = ref('')
 const deleteConfirm = ref(false)
+const deleteLoading = ref(false)
 const statuses: ApplicationStatus[] = ['saved', 'applied', 'interview', 'offer', 'rejected']
 const statusLabels: Record<ApplicationStatus, string> = {
   saved: 'Saved',
@@ -230,6 +230,7 @@ const updateStatus = () => {
 
 const deleteJob = async () => {
   if (!job.value) return
+  deleteLoading.value = true
   workspace.deleteJob(job.value.id)
   toast.show('Saved job removed', { tone: 'info' })
   await navigateTo('/app/jobs')
@@ -503,57 +504,6 @@ const deleteJob = async () => {
 .section-card-header > span {
   color: var(--muted);
   font-size: 11px;
-}
-
-.modal-backdrop {
-  display: grid;
-  place-items: center;
-  position: fixed;
-  z-index: 100;
-  inset: 0;
-  padding: 20px;
-  background: rgba(23, 20, 38, 0.45);
-}
-
-.confirm-modal {
-  width: min(100%, 420px);
-  padding: 27px;
-  text-align: center;
-}
-
-.confirm-modal > span {
-  display: grid;
-  width: 50px;
-  height: 50px;
-  place-items: center;
-  margin: 0 auto 18px;
-  border-radius: 14px;
-  color: var(--red);
-  background: var(--red-soft);
-}
-
-.confirm-modal h2 {
-  margin-bottom: 8px;
-  font-size: 20px;
-}
-
-.confirm-modal p {
-  color: var(--muted);
-  font-size: 10px;
-}
-
-.confirm-modal > div:last-child {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 20px;
-}
-
-.loading-state {
-  display: grid;
-  min-height: 300px;
-  place-items: center;
-  color: var(--muted);
 }
 
 @media (max-width: 980px) {

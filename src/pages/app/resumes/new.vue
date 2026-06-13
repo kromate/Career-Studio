@@ -26,7 +26,7 @@
               @change="handleFileInput"
             >
             <span class="drop-icon">
-              <LoaderCircle v-if="busy" class="spin" :size="29" />
+              <AppSpinner v-if="busy" :size="29" />
               <FileUp v-else :size="29" />
             </span>
             <h2>{{ busy ? 'Reading your resume…' : 'Drop your resume here' }}</h2>
@@ -130,7 +130,7 @@
               <input v-model.trim="resumeName" class="input" placeholder="e.g. Product engineer resume">
             </label>
             <button class="btn btn-primary btn-lg" type="button" :disabled="saving || !resumeName" @click="confirmAndAnalyze">
-              <LoaderCircle v-if="saving" class="spin" :size="17" />
+              <AppSpinner v-if="saving" :size="17" light />
               <ScanSearch v-else :size="17" />
               {{ saving ? 'Analyzing…' : 'Confirm and analyze' }}
             </button>
@@ -166,7 +166,6 @@ import {
   CheckCircle2,
   FileText,
   FileUp,
-  LoaderCircle,
   LockKeyhole,
   PencilLine,
   ScanSearch,
@@ -641,14 +640,6 @@ const confirmAndAnalyze = async () => {
   margin-top: 25px;
   padding-top: 22px;
   border-top: 1px solid var(--line);
-}
-
-.spin {
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 @media (max-width: 950px) {

@@ -1,20 +1,33 @@
 <template>
-  <div class="toast-stack" aria-live="polite" aria-atomic="true">
-    <div v-for="message in toastMessages" :key="message.id" class="toast" :class="`toast-${message.tone}`">
-      <span class="toast-icon">
-        <CircleCheck v-if="message.tone === 'success'" :size="18" />
-        <TriangleAlert v-else-if="message.tone === 'warning'" :size="18" />
-        <CircleX v-else-if="message.tone === 'error'" :size="18" />
-        <Info v-else :size="18" />
-      </span>
-      <div>
-        <strong>{{ message.title }}</strong>
-        <p v-if="message.message">{{ message.message }}</p>
+  <div class="toast-stack" aria-live="polite" aria-relevant="additions removals">
+    <TransitionGroup name="toast-list">
+      <div
+        v-for="message in toastMessages"
+        :key="message.id"
+        class="toast"
+        :class="`toast-${message.tone}`"
+        role="status"
+      >
+        <span class="toast-icon">
+          <CircleCheck v-if="message.tone === 'success'" :size="18" />
+          <TriangleAlert v-else-if="message.tone === 'warning'" :size="18" />
+          <CircleX v-else-if="message.tone === 'error'" :size="18" />
+          <Info v-else :size="18" />
+        </span>
+        <div>
+          <strong>{{ message.title }}</strong>
+          <p v-if="message.message">{{ message.message }}</p>
+        </div>
+        <button type="button" aria-label="Dismiss notification" @click="dismiss(message.id)">
+          <X :size="15" />
+        </button>
+        <span
+          v-if="message.duration > 0"
+          class="toast-progress"
+          :style="{ animationDuration: `${message.duration}ms` }"
+        />
       </div>
-      <button type="button" aria-label="Dismiss notification" @click="dismiss(message.id)">
-        <X :size="15" />
-      </button>
-    </div>
+    </TransitionGroup>
   </div>
 </template>
 
@@ -33,16 +46,18 @@ const dismiss = toast.dismiss
   width: min(390px, calc(100vw - 30px));
   gap: 10px;
   position: fixed;
-  z-index: 100;
+  z-index: 300;
   right: 18px;
-  bottom: 18px;
+  top: 82px;
 }
 
 .toast {
+  overflow: hidden;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: start;
   gap: 11px;
+  position: relative;
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -98,6 +113,61 @@ const dismiss = toast.dismiss
   color: var(--muted);
   background: transparent;
   cursor: pointer;
+}
+
+.toast-progress {
+  height: 3px;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: currentColor;
+  opacity: 0.35;
+  transform-origin: left;
+  animation: toast-progress linear forwards;
+}
+
+.toast-success { color: var(--green); }
+.toast-info { color: var(--purple); }
+.toast-warning { color: var(--amber); }
+.toast-error { color: var(--red); }
+
+.toast > div,
+.toast button {
+  color: var(--ink);
+}
+
+.toast-list-enter-active,
+.toast-list-leave-active,
+.toast-list-move {
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.toast-list-enter-from,
+.toast-list-leave-to {
+  opacity: 0;
+  transform: translateX(18px);
+}
+
+@keyframes toast-progress {
+  to { transform: scaleX(0); }
+}
+
+@media (max-width: 620px) {
+  .toast-stack {
+    right: 15px;
+    top: 74px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-progress,
+  .toast-list-enter-active,
+  .toast-list-leave-active,
+  .toast-list-move {
+    animation: none;
+    transition: none;
+  }
 }
 
 </style>

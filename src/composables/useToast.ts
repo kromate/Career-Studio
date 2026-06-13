@@ -2,20 +2,23 @@ import type { ToastMessage } from '@/types'
 
 export function useToast() {
   const messages = useState<ToastMessage[]>('career-studio-toasts', () => [])
+  const nextId = useState('career-studio-toast-id', () => 0)
 
   const show = (
     title: string,
     options: { message?: string; tone?: ToastMessage['tone']; duration?: number } = {},
   ) => {
-    const id = Date.now() + Math.floor(Math.random() * 1000)
+    const id = Date.now() + nextId.value++
+    const duration = options.duration ?? 5000
     messages.value.push({
       id,
       title,
       message: options.message,
       tone: options.tone || 'success',
+      duration,
     })
-    if (import.meta.client) {
-      window.setTimeout(() => dismiss(id), options.duration || 3200)
+    if (import.meta.client && duration > 0) {
+      window.setTimeout(() => dismiss(id), duration)
     }
   }
 

@@ -7,6 +7,7 @@ export interface ToastMessage {
   title: string
   message?: string
   tone: 'success' | 'info' | 'warning' | 'error'
+  duration: number
 }
 
 export interface UserProfile {

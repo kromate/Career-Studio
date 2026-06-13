@@ -26,7 +26,8 @@
           :disabled="loading || !googleReady || !acceptedTerms"
           @click="handleGoogle"
         >
-          <span class="google-logo">G</span>
+          <AppSpinner v-if="loading" :size="18" />
+          <span v-else class="google-logo">G</span>
           {{ loading ? 'Connecting…' : 'Sign up with Google' }}
         </button>
         <div v-if="!otpStep && !googleReady" class="auth-coming-soon">
@@ -137,8 +138,9 @@
             type="submit"
             :disabled="loading || !acceptedTerms || (!otpStep && (!fullName || !email || !referralCodeValid))"
           >
+            <AppSpinner v-if="loading" :size="16" light />
             {{ otpStep ? 'Verify and create account' : 'Email me a code' }}
-            <ArrowRight :size="16" />
+            <ArrowRight v-if="!loading" :size="16" />
           </button>
         </form>
 

@@ -71,7 +71,7 @@
             </button>
           </div>
           <button class="btn btn-primary btn-lg submit-button" type="submit" :disabled="!canAnalyze || saving">
-            <LoaderCircle v-if="saving" class="spin" :size="17" />
+            <AppSpinner v-if="saving" :size="17" light />
             <ScanSearch v-else :size="17" />
             {{ saving ? 'Calculating match…' : 'Calculate and save match' }}
           </button>
@@ -139,7 +139,6 @@
 import {
   Check,
   Gauge,
-  LoaderCircle,
   ScanSearch,
   ShieldCheck,
   Sparkles,
@@ -419,12 +418,6 @@ const analyzeAndSave = async () => {
   font-size: 11px;
   line-height: 1.5;
 }
-
-.spin {
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 1050px) {
   .target-layout {
