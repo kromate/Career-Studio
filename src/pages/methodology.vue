@@ -5,7 +5,7 @@
         <span class="eyebrow">Scoring methodology</span>
         <h1 class="display-lg">A transparent score with versioned rules.</h1>
         <p class="body-lg">
-          Career Studio does not claim to show the score assigned by every
+          Resume review is Career Studio's first major tool. It does not claim to show the score assigned by every
           applicant tracking system. It measures document parseability, resume
           quality, and role alignment using published, deterministic checks.
         </p>

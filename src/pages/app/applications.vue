@@ -3,7 +3,7 @@
     <header class="page-header">
       <div>
         <h1>Applications</h1>
-        <p>Track the opportunity, next action, and exact resume version used.</p>
+        <p>Track each opportunity from preparation to outcome, including the resume and next action that moved it forward.</p>
       </div>
       <div class="page-actions">
         <ComingSoonBadge>Email reminders coming soon</ComingSoonBadge>

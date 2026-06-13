@@ -5,8 +5,9 @@
         <span class="eyebrow">Privacy approach</span>
         <h1 class="display-lg">Career data deserves deliberate protection.</h1>
         <p class="body-lg">
-          This page describes the product's implemented local-preview behavior
-          and the requirements that must be satisfied before hosted production use.
+          Career Studio may eventually hold resumes, interview notes, mentorship
+          conversations, compensation context, and company experiences. This page
+          describes today's behavior and the standard every future tool must meet.
         </p>
       </div>
     </section>
@@ -47,6 +48,15 @@
             The product does not score protected characteristics, personality,
             disability, age, ethnicity, gender, or other sensitive traits. It is
             a job-seeker tool and must not be repurposed for employer-side ranking.
+          </p>
+        </article>
+        <article>
+          <h2>Community privacy principles</h2>
+          <p>
+            Future peer reviews, company reviews, interview experiences, and
+            compensation submissions must minimize identifying information,
+            explain anonymity limits, prevent retaliation and abuse, and give
+            contributors meaningful control over editing and deletion.
           </p>
         </article>
         <article>

@@ -1,9 +1,14 @@
 # Career Studio by Goalmatic
 
-An open-source job search workspace powered by Goalmatic.
+An open-source career growth workspace powered by Goalmatic.
 
-Career Studio helps people understand and improve their resumes, tailor a
-resume to a specific role, and manage the work of a serious job search.
+Career Studio is intended to become a shared home for resume improvement,
+peer review, practice interviews, mentorship, company and compensation
+insight, job discovery, and career transitions.
+
+The product is beginning with resume review: helping people understand and
+improve their resumes, tailor a resume to a specific role, and create a clean
+new version without inventing evidence.
 
 ## Product Direction
 

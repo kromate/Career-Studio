@@ -15,7 +15,7 @@
         <div class="login-heading">
           <span class="auth-icon"><KeyRound :size="22" /></span>
           <h1>{{ otpStep ? 'Check your email' : 'Sign in to Career Studio' }}</h1>
-          <p v-if="!otpStep">Continue with the same identity you use across Goalmatic.</p>
+          <p v-if="!otpStep">Continue to your open-source career growth workspace.</p>
           <p v-else>Enter the six-digit code sent to <strong>{{ email }}</strong>.</p>
         </div>
 

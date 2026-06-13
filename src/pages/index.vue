@@ -5,36 +5,31 @@
       <div class="container hero-grid">
         <div class="hero-copy">
           <span class="hero-pill">
-            <ShieldCheck :size="14" />
-            Deterministic scoring, not AI guesswork
+            <HeartHandshake :size="14" />
+            Open-source career growth, built around people
           </span>
           <h1 class="display-xl">
-            A resume workspace
-            <span>built on objective proof.</span>
+            Build the career you want.
+            <span>Start with a stronger resume.</span>
           </h1>
           <p class="body-lg">
-            Analyze your resume with a repeatable scoring engine, see exactly what needs
-            improvement, and build tailored versions you can actually defend.
+            Career Studio is becoming one place to improve your resume, prepare for
+            interviews, find mentors and peers, understand companies, discover jobs,
+            and make your next career move with confidence.
           </p>
           <div class="hero-actions">
             <NuxtLink to="/login" class="btn btn-primary btn-lg">
-              Check my resume
+              Review my resume
               <ArrowRight :size="17" />
             </NuxtLink>
-            <NuxtLink to="/methodology" class="btn btn-secondary btn-lg">
-              See how scoring works
+            <NuxtLink to="/#vision" class="btn btn-secondary btn-lg">
+              Explore the vision
             </NuxtLink>
           </div>
           <div class="hero-trust">
-            <span>
-              <Check :size="14" /> PDF, DOCX, or TXT
-            </span>
-            <span>
-              <Check :size="14" /> Private by default
-            </span>
-            <span>
-              <Check :size="14" /> Open source
-            </span>
+            <span><Check :size="14" /> Resume review available now</span>
+            <span><Check :size="14" /> Community roadmap</span>
+            <span><Check :size="14" /> Open source</span>
           </div>
         </div>
 
@@ -91,12 +86,12 @@
 
     <section class="proof-strip">
       <div class="container proof-inner">
-        <p>Built around how modern hiring systems actually read resumes</p>
+        <p>One career studio, beginning with trustworthy resume improvement</p>
         <div>
-          <span>Parseability</span>
-          <span>Evidence</span>
-          <span>Job alignment</span>
-          <span>Version control</span>
+          <span>Resume growth</span>
+          <span>Interview practice</span>
+          <span>Mentorship</span>
+          <span>Company insight</span>
         </div>
       </div>
     </section>
@@ -104,11 +99,11 @@
     <section id="how-it-works" class="section process-section">
       <div class="container">
         <div class="section-heading">
-          <span class="eyebrow">How it works</span>
-          <h2 class="display-lg">A structured path to a stronger application.</h2>
+          <span class="eyebrow">Available now: resume review</span>
+          <h2 class="display-lg">The first step toward a stronger career.</h2>
           <p class="body-lg">
-            No mystery score. Every point matches a clear rule, highlights evidence in
-            your original document, and provides a direct, verifiable path to improve.
+            We are starting with the foundation of most job searches: a resume you
+            understand, can improve, and can confidently adapt for the roles you want.
           </p>
         </div>
         <div class="process-grid">
@@ -223,18 +218,19 @@
       </div>
     </section>
 
-    <section class="section workspace-section">
+    <section id="vision" class="section workspace-section">
       <div class="container">
         <div class="section-heading centered">
-          <span class="eyebrow">More than one score</span>
-          <h2 class="display-lg">Keep the whole search connected.</h2>
+          <span class="eyebrow">The Career Studio vision</span>
+          <h2 class="display-lg">A home for every meaningful career move.</h2>
           <p class="body-lg">
-            One source resume, intentional versions for each job, and a clear
-            record of what you submitted.
+            Anything that helps you grow in your career should eventually have a
+            place here, shaped in the open by the people who use it.
           </p>
         </div>
         <div class="workspace-grid">
           <article v-for="feature in workspaceFeatures" :key="feature.title" class="workspace-card">
+            <small :class="{ live: feature.live }">{{ feature.live ? 'Available now' : 'On the roadmap' }}</small>
             <span>
               <component :is="feature.icon" :size="22" />
             </span>
@@ -251,8 +247,9 @@
           <span class="eyebrow">Built for trust</span>
           <h2 class="display-lg">Your career data belongs to you.</h2>
           <p class="body-lg">
-            A resume contains contact info and employment history. Career Studio enforces
-            local-first preview storage, zero telemetry logs, and explicit deletion.
+            Career growth can involve sensitive documents, private conversations,
+            compensation, and personal experiences. We want privacy and user control
+            designed into every part of Career Studio.
           </p>
           <div class="privacy-actions">
             <NuxtLink to="/privacy" class="btn btn-secondary">Read the privacy approach</NuxtLink>
@@ -270,7 +267,7 @@
             <BadgeCheck /><strong>Zero AI hallucinations</strong><span>We never fabricate accomplishments. Unconfirmed facts are highlighted for review.</span>
           </div>
           <div>
-            <Code2 /><strong>Open methodology</strong><span>All parser rules and scoring calculations are fully open source on GitHub.</span>
+            <Code2 /><strong>Built in public</strong><span>Inspect the code, challenge decisions, propose features, and contribute on GitHub.</span>
           </div>
         </div>
       </div>
@@ -278,13 +275,14 @@
 
     <section class="cta-section">
       <div class="container cta-card">
-        <span class="eyebrow">Your next version starts here</span>
-        <h2 class="display-lg">Stop wondering what the score means.</h2>
+        <span class="eyebrow">Start where we are strongest today</span>
+        <h2 class="display-lg">Make your resume the first career asset you improve.</h2>
         <p class="body-lg">
-          Upload your resume, review the evidence, and make changes you can defend.
+          Get a repeatable review, understand every finding, and create a better
+          version without invented claims.
         </p>
         <NuxtLink to="/login" class="btn btn-primary btn-lg">
-          Check my resume
+          Review my resume
           <ArrowRight :size="17" />
         </NuxtLink>
       </div>
@@ -303,7 +301,12 @@ import {
   FileSearch,
   FileUp,
   GitCompare,
-  History,
+  GraduationCap,
+  HeartHandshake,
+  MessagesSquare,
+  Mic2,
+  Building2,
+  Compass,
   LockKeyhole,
   PencilLine,
   Repeat2,
@@ -336,24 +339,40 @@ const steps = [
 
 const workspaceFeatures = [
   {
-    icon: History,
-    title: 'Immutable version control',
-    description: 'Track original, revised, and targeted versions side-by-side. Roll back changes or compare formatting differences at any time.',
-  },
-  {
-    icon: Target,
-    title: 'Precise role alignment',
-    description: 'Compare your resume structure against any job description. Uncover skill gaps and seniority mismatches without keyword stuffing.',
-  },
-  {
-    icon: GitCompare,
-    title: 'Measurable score changes',
-    description: 'Instantly see how edits affect your quality score. Distinguish updates to your content from scoring engine upgrades.',
-  },
-  {
     icon: FileCheck2,
-    title: 'Application tracking',
-    description: 'Keep a clear record of the exact resume version, target job requirements, and match score for every opportunity.',
+    title: 'Resume improvement',
+    description: 'Review, rewrite, tailor, version, and export a resume you can defend with real evidence.',
+    live: true,
+  },
+  {
+    icon: Mic2,
+    title: 'Practice interviews',
+    description: 'Find peers for realistic mock interviews, schedule sessions, and exchange useful feedback.',
+    live: false,
+  },
+  {
+    icon: GraduationCap,
+    title: 'Mentorship and career guidance',
+    description: 'Connect with people who have made the move you are planning and book focused conversations.',
+    live: false,
+  },
+  {
+    icon: Building2,
+    title: 'Company intelligence',
+    description: 'Share anonymous interview experiences, compensation context, and what companies are really like.',
+    live: false,
+  },
+  {
+    icon: Compass,
+    title: 'Job and career discovery',
+    description: 'Find relevant roles, explore new career paths, and understand what a successful transition requires.',
+    live: false,
+  },
+  {
+    icon: MessagesSquare,
+    title: 'Peer career community',
+    description: 'Get thoughtful reviews, share practical experience, and grow alongside people pursuing similar goals.',
+    live: false,
   },
 ]
 </script>
@@ -990,7 +1009,7 @@ const workspaceFeatures = [
 
 .workspace-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 15px;
 }
 
@@ -999,6 +1018,23 @@ const workspaceFeatures = [
   border: 1px solid var(--line);
   border-radius: 12px;
   background: #fff;
+}
+
+.workspace-card small {
+  display: inline-flex;
+  margin-bottom: 18px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 750;
+  text-transform: uppercase;
+  background: var(--surface-soft);
+}
+
+.workspace-card small.live {
+  color: var(--green);
+  background: var(--green-soft);
 }
 
 .workspace-card>span {

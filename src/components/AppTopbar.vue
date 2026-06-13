@@ -9,7 +9,7 @@
     <div class="topbar-actions">
       <NuxtLink to="/methodology" class="method-link">
         <ShieldCheck :size="16" />
-        How scoring works
+        Resume scoring
       </NuxtLink>
       <button class="profile-button" type="button" @click="profileOpen = !profileOpen">
         <span class="avatar">

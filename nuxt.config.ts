@@ -38,11 +38,11 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      title: 'Career Studio by Goalmatic - Build a stronger job search',
+      title: 'Career Studio by Goalmatic - Grow your career',
       meta: [
         {
           name: 'description',
-          content: 'Get a stable resume score, understand every finding, and build a stronger job-specific resume.',
+          content: 'An open-source career growth workspace for resume improvement, interview practice, mentorship, company insight, and job discovery.',
         },
         { name: 'theme-color', content: '#601ded' },
       ],

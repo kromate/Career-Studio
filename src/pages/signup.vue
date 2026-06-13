@@ -15,7 +15,7 @@
         <div class="login-heading">
           <span class="auth-icon"><UserPlus :size="22" /></span>
           <h1>{{ otpStep ? 'Verify your email' : 'Create your Career Studio account' }}</h1>
-          <p v-if="!otpStep">Create one Goalmatic identity for Career Studio and every Goalmatic app.</p>
+          <p v-if="!otpStep">Create your account and start building a stronger career profile.</p>
           <p v-else>Enter the six-digit code sent to <strong>{{ email }}</strong>.</p>
         </div>
 

@@ -4,16 +4,16 @@
       <div class="container oss-grid">
         <div>
           <span class="eyebrow">Open source</span>
-          <h1 class="display-lg">A job search app people can inspect and improve.</h1>
+          <h1 class="display-lg">Help build an open home for career growth.</h1>
           <p class="body-lg">
-            Career Studio is independently versioned, MIT licensed, and designed
-            for community contributions across scoring, parsing, accessibility,
-            internationalization, and product experience.
+            Career Studio is an MIT-licensed community project. Resume review is
+            the first working foundation; the long-term roadmap spans peer review,
+            interview practice, mentorship, company insight, and career discovery.
           </p>
           <div class="oss-actions">
-            <a href="https://github.com/kromate" class="btn btn-primary btn-lg" target="_blank" rel="noreferrer">
+            <a href="https://github.com/kromate/Career-Studio" class="btn btn-primary btn-lg" target="_blank" rel="noreferrer">
               <Github :size="18" />
-              View Kromate on GitHub
+              View Career Studio on GitHub
             </a>
             <NuxtLink to="/methodology" class="btn btn-secondary btn-lg">Read the methodology</NuxtLink>
           </div>
@@ -21,7 +21,7 @@
         <div class="repo-card">
           <div class="repo-top">
             <Github :size="21" />
-            <div><strong>career-studio</strong><span>Public application repository</span></div>
+            <div><strong>kromate/Career-Studio</strong><span>Public application repository</span></div>
             <span class="badge">MIT</span>
           </div>
           <pre><code>apps/projects/career-studio
@@ -45,7 +45,7 @@
       <div class="container">
         <div class="section-heading">
           <span class="eyebrow">Where contributors can help</span>
-          <h2 class="display-lg">Make career software more trustworthy.</h2>
+          <h2 class="display-lg">Build the parts of career growth you care about.</h2>
         </div>
         <div class="contribution-grid">
           <article v-for="area in areas" :key="area.title">
@@ -73,11 +73,12 @@
 <script setup lang="ts">
 import {
   Accessibility,
+  Building2,
   CheckCircle2,
-  FileCode2,
   GitPullRequest,
   Github,
-  Languages,
+  GraduationCap,
+  Mic2,
   ScanText,
   ShieldCheck,
   TestTube2,
@@ -87,10 +88,10 @@ import {
 const areas = [
   { icon: ScanText, title: 'Resume parsing', description: 'Improve extraction fixtures, section detection, layout warnings, and international formats.' },
   { icon: Waypoints, title: 'Scoring methodology', description: 'Review rule quality, explainability, fairness, and recruiter evidence.' },
-  { icon: Accessibility, title: 'Accessibility', description: 'Strengthen keyboard editing, announcements, focus behavior, and document previews.' },
-  { icon: Languages, title: 'Internationalization', description: 'Add languages, regional date formats, and culturally appropriate resume guidance.' },
-  { icon: FileCode2, title: 'Export quality', description: 'Build clean, ATS-readable templates and robust PDF and DOCX generation.' },
-  { icon: TestTube2, title: 'Testing', description: 'Expand golden fixtures, browser journeys, reproducibility checks, and edge cases.' },
+  { icon: Mic2, title: 'Interview practice', description: 'Design peer matching, scheduling, interview formats, structured feedback, and trust controls.' },
+  { icon: GraduationCap, title: 'Mentorship', description: 'Explore useful discovery, availability, booking, boundaries, and community reputation.' },
+  { icon: Building2, title: 'Company intelligence', description: 'Build anonymous, abuse-resistant interview reviews and compensation context.' },
+  { icon: Accessibility, title: 'Accessible community', description: 'Make every workflow usable across devices, abilities, regions, and career stages.' },
 ]
 </script>
 

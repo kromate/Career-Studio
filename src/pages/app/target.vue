@@ -3,7 +3,7 @@
     <header class="page-header">
       <div>
         <h1>Target a job</h1>
-        <p>Compare one resume with one role. This score stays separate from resume quality.</p>
+        <p>Understand how your current evidence aligns with a role before deciding what to strengthen or learn next.</p>
       </div>
     </header>
 

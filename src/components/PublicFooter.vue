@@ -4,12 +4,14 @@
       <div>
         <BrandMark />
         <p>
-          A focused, open-source workspace for a stronger job search.
+          An open-source home for improving your resume, preparing for interviews,
+          finding guidance, and moving your career forward.
         </p>
         <span class="company-note">Powered by Goalmatic.</span>
       </div>
       <div class="footer-links">
         <strong>Product</strong>
+        <NuxtLink to="/#vision">Product vision</NuxtLink>
         <NuxtLink to="/methodology">Scoring methodology</NuxtLink>
         <NuxtLink to="/privacy">Privacy</NuxtLink>
         <NuxtLink to="/login">Sign in</NuxtLink>
@@ -17,13 +19,13 @@
       <div class="footer-links">
         <strong>Community</strong>
         <NuxtLink to="/open-source">Open source</NuxtLink>
-        <a href="https://github.com/kromate" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="https://github.com/kromate/Career-Studio" target="_blank" rel="noreferrer">GitHub repository</a>
         <a href="https://goalmatic.io" target="_blank" rel="noreferrer">Goalmatic</a>
       </div>
     </div>
     <div class="container footer-bottom">
       <span>© {{ new Date().getFullYear() }} Kromate. MIT licensed.</span>
-      <span>Built for job seekers, not employer screening.</span>
+      <span>Built to help people grow, not to rank them for employers.</span>
     </div>
   </footer>
 </template>

@@ -3,7 +3,7 @@
     <header class="page-header">
       <div>
         <h1>Resumes</h1>
-        <p>Keep one source of truth and intentional versions for each opportunity.</p>
+        <p>Build the career story you want to tell, then keep a truthful version for every opportunity.</p>
       </div>
       <div class="page-actions">
         <NuxtLink to="/app/resumes/new" class="btn btn-primary">

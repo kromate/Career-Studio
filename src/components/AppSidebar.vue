@@ -24,11 +24,11 @@
           <span>Identity, data, and automation</span>
         </div>
       </div>
-      <NuxtLink to="/open-source" class="settings-link" @click="$emit('close')">
+      <a href="https://github.com/kromate/Career-Studio" class="settings-link" target="_blank" rel="noreferrer" @click="$emit('close')">
         <Github :size="18" />
-        Open source
+        Contribute on GitHub
         <ArrowUpRight class="link-tail" :size="14" />
-      </NuxtLink>
+      </a>
       <NuxtLink to="/app/settings" class="settings-link" @click="$emit('close')">
         <Settings :size="18" />
         Settings

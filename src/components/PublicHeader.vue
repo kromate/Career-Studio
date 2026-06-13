@@ -3,8 +3,8 @@
     <div class="container header-inner">
       <BrandMark />
       <nav class="desktop-nav" aria-label="Primary navigation">
-        <NuxtLink to="/#how-it-works">How it works</NuxtLink>
-        <NuxtLink to="/methodology">Methodology</NuxtLink>
+        <NuxtLink to="/#vision">Our vision</NuxtLink>
+        <NuxtLink to="/#how-it-works">Resume review</NuxtLink>
         <NuxtLink to="/open-source">Open source</NuxtLink>
       </nav>
       <div class="header-actions">
@@ -22,8 +22,8 @@
       </div>
     </div>
     <nav v-if="menuOpen" class="mobile-nav" aria-label="Mobile navigation">
-      <NuxtLink to="/#how-it-works" @click="menuOpen = false">How it works</NuxtLink>
-      <NuxtLink to="/methodology" @click="menuOpen = false">Methodology</NuxtLink>
+      <NuxtLink to="/#vision" @click="menuOpen = false">Our vision</NuxtLink>
+      <NuxtLink to="/#how-it-works" @click="menuOpen = false">Resume review</NuxtLink>
       <NuxtLink to="/open-source" @click="menuOpen = false">Open source</NuxtLink>
       <NuxtLink to="/login" @click="menuOpen = false">Sign in</NuxtLink>
     </nav>

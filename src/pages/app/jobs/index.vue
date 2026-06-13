@@ -3,7 +3,7 @@
     <header class="page-header">
       <div>
         <h1>Saved jobs</h1>
-        <p>Compare opportunities without mixing job fit into your base resume score.</p>
+        <p>Research opportunities, compare role alignment, and keep promising next moves in one place.</p>
       </div>
       <div class="page-actions">
         <NuxtLink to="/app/target" class="btn btn-primary">

@@ -4,8 +4,8 @@
       <div>
         <span class="welcome-date">{{ formattedDate }}</span>
         <h1>Good {{ timeOfDay }}, {{ firstName }}</h1>
-        <p v-if="currentVersion">Your resume has {{ openFindings.length }} focused improvements waiting.</p>
-        <p v-else>Start with a resume to build your job search workspace.</p>
+        <p v-if="currentVersion">Your resume has {{ openFindings.length }} focused improvements waiting. This is the first step in your career workspace.</p>
+        <p v-else>Welcome to your career growth workspace. Start by building a resume that represents you clearly.</p>
       </div>
       <div class="page-actions">
         <NuxtLink to="/app/target" class="btn btn-secondary">
@@ -71,8 +71,8 @@
         <article class="search-summary card card-pad">
           <div class="card-heading">
             <div>
-              <span class="section-kicker">Search progress</span>
-              <h2>Your workspace</h2>
+              <span class="section-kicker">Career progress</span>
+              <h2>Your active search</h2>
             </div>
           </div>
           <div class="summary-stats">
@@ -176,11 +176,12 @@
     <section v-else class="empty-dashboard card">
       <div class="empty-dashboard-copy">
         <span class="empty-illustration"><FileSearch :size="34" /></span>
-        <span class="eyebrow">Start with evidence</span>
+        <span class="eyebrow">Your first Career Studio tool</span>
         <h2 class="heading-lg">Upload your first resume.</h2>
         <p class="body-md">
-          We will show you exactly what was extracted before calculating a stable,
-          explainable quality score.
+          Start with a private, explainable resume review. As Career Studio grows,
+          this workspace will connect your interviews, mentors, company research,
+          applications, and career plans.
         </p>
         <NuxtLink to="/app/resumes/new" class="btn btn-primary btn-lg">
           <FileUp :size="17" />
@@ -191,6 +192,28 @@
         <div><span>1</span><strong>Upload</strong><p>PDF, DOCX, or TXT</p></div>
         <div><span>2</span><strong>Verify</strong><p>Review extracted structure</p></div>
         <div><span>3</span><strong>Improve</strong><p>Act on evidence-based findings</p></div>
+      </div>
+    </section>
+
+    <section class="career-roadmap card">
+      <div class="section-card-header">
+        <div>
+          <span class="section-kicker">The studio is growing</span>
+          <h2>More ways to move your career forward</h2>
+        </div>
+        <a href="https://github.com/kromate/Career-Studio" target="_blank" rel="noreferrer">
+          Shape the roadmap <ArrowUpRight :size="14" />
+        </a>
+      </div>
+      <div class="roadmap-grid">
+        <article v-for="item in careerRoadmap" :key="item.title" :class="{ live: item.live }">
+          <span class="roadmap-icon"><component :is="item.icon" :size="18" /></span>
+          <div>
+            <small>{{ item.live ? 'Available now' : 'Planned' }}</small>
+            <strong>{{ item.title }}</strong>
+            <p>{{ item.description }}</p>
+          </div>
+        </article>
       </div>
     </section>
   </div>
@@ -205,8 +228,12 @@ import {
   FileSearch,
   FileUp,
   Files,
+  Building2,
+  Compass,
   GitBranch,
+  GraduationCap,
   MessagesSquare,
+  Mic2,
   Send,
   ShieldCheck,
   Sparkles,
@@ -275,6 +302,39 @@ const nextAction = computed(() => {
     to: '/app/target',
   }
 })
+
+const careerRoadmap = [
+  {
+    icon: FileSearch,
+    title: 'Resume review and rewriting',
+    description: 'Build a stronger, role-ready resume from evidence you can verify.',
+    live: true,
+  },
+  {
+    icon: Mic2,
+    title: 'Practice interviews',
+    description: 'Schedule mock interviews with peers and exchange structured feedback.',
+    live: false,
+  },
+  {
+    icon: GraduationCap,
+    title: 'Mentorship',
+    description: 'Find people who can guide your next role, skill, or career transition.',
+    live: false,
+  },
+  {
+    icon: Building2,
+    title: 'Company reviews',
+    description: 'Learn from anonymous interview, culture, and compensation experiences.',
+    live: false,
+  },
+  {
+    icon: Compass,
+    title: 'Career discovery',
+    description: 'Explore jobs and realistic paths into the work you want to do next.',
+    live: false,
+  },
+]
 </script>
 
 <style scoped>
@@ -329,6 +389,88 @@ const nextAction = computed(() => {
 
 .lower-grid {
   margin-top: 17px;
+}
+
+.career-roadmap {
+  margin-top: 17px;
+  padding-bottom: 4px;
+}
+
+.career-roadmap .section-card-header {
+  padding: 20px 20px 0;
+}
+
+.career-roadmap .section-card-header > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--purple);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  padding: 17px;
+}
+
+.roadmap-grid article {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-content: start;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f9fafb;
+}
+
+.roadmap-grid article.live {
+  border-color: #c7eadf;
+  background: #f1fbf7;
+}
+
+.roadmap-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 9px;
+  color: var(--purple);
+  background: var(--purple-soft);
+}
+
+.roadmap-grid article.live .roadmap-icon {
+  color: var(--green);
+  background: #ddf5ec;
+}
+
+.roadmap-grid small,
+.roadmap-grid strong {
+  display: block;
+}
+
+.roadmap-grid small {
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.roadmap-grid strong {
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.roadmap-grid p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.45;
 }
 
 .dashboard-grid > *,
@@ -655,6 +797,10 @@ const nextAction = computed(() => {
   .lower-grid {
     grid-template-columns: 1fr;
   }
+
+  .roadmap-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 680px) {
@@ -681,6 +827,15 @@ const nextAction = computed(() => {
 
   .empty-dashboard-copy {
     padding: 36px 24px;
+  }
+
+  .career-roadmap .section-card-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .roadmap-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
