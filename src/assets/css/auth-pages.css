@@ -226,36 +226,6 @@
   font-weight: 700;
 }
 
-.demo-area {
-  display: grid;
-  gap: 7px;
-  margin-top: 23px;
-  padding: 15px;
-  border: 1px solid #ded6ff;
-  border-radius: 10px;
-  background: var(--purple-soft);
-}
-
-.demo-area > span {
-  color: var(--purple-dark);
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.demo-area button {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0;
-  border: 0;
-  color: var(--ink);
-  font-size: 12px;
-  font-weight: 700;
-  text-align: left;
-  background: transparent;
-  cursor: pointer;
-}
-
 .otp-inputs {
   display: grid;
   grid-template-columns: repeat(6, 1fr);

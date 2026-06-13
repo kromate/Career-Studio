@@ -25,7 +25,7 @@
         </button>
         <div v-if="!otpStep && !googleReady" class="auth-coming-soon">
           <ComingSoonBadge />
-          <span>Shared Goalmatic Google sign-in is not connected in this deployment. Email and demo access work now.</span>
+          <span>Shared Goalmatic Google sign-in is not connected in this deployment. Use email sign-in instead.</span>
         </div>
 
         <div v-if="!otpStep" class="or-divider"><span>or continue with email</span></div>
@@ -80,14 +80,6 @@
           <NuxtLink to="/signup">Create an account</NuxtLink>
         </p>
 
-        <div v-if="!otpStep && localPreview" class="demo-area">
-          <span>Exploring locally?</span>
-          <button type="button" @click="enterDemo">
-            Open the complete demo workspace
-            <ArrowRight :size="15" />
-          </button>
-        </div>
-
         <p class="terms">
           By continuing, you agree to use the product responsibly and accept our
           <NuxtLink to="/privacy">privacy approach</NuxtLink>.
@@ -124,7 +116,6 @@ const otpStep = ref(false)
 const otp = ref(['', '', '', '', '', ''])
 const otpRefs = ref<Array<HTMLInputElement | null>>([])
 const resendSeconds = ref(0)
-const localPreview = computed(() => config.appMode === 'local')
 const useLocalOtp = computed(() => !hasFirebaseConfig(config))
 const googleReady = computed(() => hasGoogleSignInConfig(config))
 let resendTimer: number | undefined
@@ -256,8 +247,4 @@ onBeforeUnmount(() => {
   if (resendTimer) window.clearInterval(resendTimer)
 })
 
-const enterDemo = async () => {
-  workspace.loginDemo()
-  await navigateTo('/app')
-}
 </script>

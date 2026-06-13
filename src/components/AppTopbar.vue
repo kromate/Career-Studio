@@ -5,7 +5,6 @@
     </button>
     <div class="topbar-title">
       <span>{{ label }}</span>
-      <small v-if="workspace.state.value.user?.authProvider === 'demo'">Local preview</small>
     </div>
     <div class="topbar-actions">
       <NuxtLink to="/methodology" class="method-link">

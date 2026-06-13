@@ -38,7 +38,7 @@
             <div>
               <strong>{{ workspace.state.value.user?.name }}</strong>
               <p>{{ workspace.state.value.user?.email }}</p>
-              <span class="badge" :class="workspace.state.value.user?.authProvider === 'demo' ? 'badge-amber' : 'badge-green'">
+              <span class="badge badge-green">
                 {{ workspace.state.value.user?.authProvider }} authentication
               </span>
             </div>

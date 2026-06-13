@@ -15,7 +15,7 @@ export interface UserProfile {
   name: string
   email: string
   avatarUrl?: string
-  authProvider: 'demo' | 'google' | 'email'
+  authProvider: 'google' | 'email'
 }
 
 export interface ResumeLine {

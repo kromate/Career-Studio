@@ -8,7 +8,6 @@ import type {
   UserProfile,
   WorkspaceState,
 } from '@/types'
-import { DEMO_JOB_DESCRIPTION, DEMO_RESUME_TEXT } from '@/lib/demo'
 import { matchResumeToJob } from '@/lib/resume/matching'
 import { hashText, parseResumeText } from '@/lib/resume/parser'
 import { scoreResume } from '@/lib/resume/scoring'
@@ -88,12 +87,15 @@ export function useWorkspace() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as WorkspaceState
+        const storedProvider = (parsed.user as { authProvider?: string } | null)?.authProvider
         state.value = {
           ...initialState(),
           ...parsed,
+          user: storedProvider === 'demo' ? null : parsed.user,
           settings: { ...defaultSettings(), ...parsed.settings },
           hydrated: true,
         }
+        if (storedProvider === 'demo') persist()
         return
       } catch {
         localStorage.removeItem(STORAGE_KEY)
@@ -103,62 +105,9 @@ export function useWorkspace() {
     persist()
   }
 
-  const seedDemoWorkspace = () => {
-    if (state.value.resumes.length) return
-    const resumeId = createId('resume')
-    const version = createVersion(resumeId, DEMO_RESUME_TEXT, 'Original resume', 'upload')
-    const createdAt = now()
-    const resume: ResumeRecord = {
-      id: resumeId,
-      name: 'Jordan Lee - Product Engineer',
-      originalFileName: 'jordan-lee-resume.txt',
-      fileType: 'text/plain',
-      createdAt,
-      updatedAt: createdAt,
-      activeVersionId: version.id,
-      versions: [version],
-    }
-    const jobId = createId('job')
-    const job: SavedJob = {
-      id: jobId,
-      title: 'Senior Frontend Engineer',
-      company: 'Linear Labs',
-      location: 'Remote',
-      url: 'https://example.com/jobs/senior-frontend-engineer',
-      description: DEMO_JOB_DESCRIPTION,
-      createdAt,
-      updatedAt: createdAt,
-      resumeId,
-      resumeVersionId: version.id,
-      match: matchResumeToJob(version.parsed, DEMO_JOB_DESCRIPTION, createdAt),
-    }
-    state.value.resumes = [resume]
-    state.value.jobs = [job]
-    state.value.applications = [{
-      id: createId('application'),
-      jobId,
-      status: 'saved',
-      createdAt,
-      updatedAt: createdAt,
-      nextAction: 'Tailor resume before applying',
-      notes: '',
-    }]
-  }
-
-  const login = (user: UserProfile, options: { seedDemo?: boolean } = {}) => {
+  const login = (user: UserProfile) => {
     state.value.user = user
-    if (options.seedDemo) seedDemoWorkspace()
     persist()
-  }
-
-  const loginDemo = () => {
-    login({
-      id: 'demo-user-local',
-      accountId: 'demo-account-local',
-      name: 'Jordan Lee',
-      email: 'jordan.lee@example.com',
-      authProvider: 'demo',
-    }, { seedDemo: true })
   }
 
   const logout = () => {
@@ -375,7 +324,6 @@ export function useWorkspace() {
     hydrate,
     persist,
     login,
-    loginDemo,
     logout,
     addResume,
     addResumeVersion,
