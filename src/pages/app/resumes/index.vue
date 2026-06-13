@@ -3,7 +3,7 @@
     <header class="page-header">
       <div>
         <h1>Resumes</h1>
-        <p>Build the career story you want to tell, then keep a truthful version for every opportunity.</p>
+        <p>Keep your experience clear, truthful, and ready for each opportunity.</p>
       </div>
       <div class="page-actions">
         <NuxtLink to="/app/resumes/new" class="btn btn-primary">
@@ -63,7 +63,7 @@
       <EmptyState
         :icon="Files"
         title="Your resume library is empty"
-        description="Upload a resume to create its first immutable analysis and start a version history."
+        description="Upload a resume to confirm how it is read, get specific feedback, and start a version history."
       >
         <NuxtLink to="/app/resumes/new" class="btn btn-primary">
           <FileUp :size="16" />

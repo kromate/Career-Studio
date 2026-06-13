@@ -2,8 +2,8 @@
   <div class="page-shell">
     <header class="page-header">
       <div>
-        <h1>Target a job</h1>
-        <p>Understand how your current evidence aligns with a role before deciding what to strengthen or learn next.</p>
+        <h1>Compare your resume with a job</h1>
+        <p>See which requirements your resume supports, where the evidence is thin, and what to strengthen next.</p>
       </div>
     </header>
 
@@ -12,8 +12,8 @@
         <div class="form-heading">
           <span class="form-icon"><Target :size="21" /></span>
           <div>
-            <h2>Opportunity details</h2>
-            <p>Add the job description exactly as published for the clearest comparison.</p>
+            <h2>Add the opportunity</h2>
+            <p>Use the job description as published so the comparison reflects the employer's stated requirements.</p>
           </div>
         </div>
 

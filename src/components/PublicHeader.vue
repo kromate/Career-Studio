@@ -3,7 +3,7 @@
     <div class="container header-inner">
       <BrandMark />
       <nav class="desktop-nav" aria-label="Primary navigation">
-        <NuxtLink to="/#vision">Our vision</NuxtLink>
+        <NuxtLink to="/#vision">Vision</NuxtLink>
         <NuxtLink to="/#how-it-works">Resume review</NuxtLink>
         <NuxtLink to="/open-source">Open source</NuxtLink>
       </nav>
@@ -12,7 +12,7 @@
           Sign in
         </NuxtLink>
         <NuxtLink to="/login" class="btn btn-primary">
-          Check my resume
+          Review my resume
           <ArrowUpRight :size="16" />
         </NuxtLink>
         <button class="mobile-menu-button" type="button" aria-label="Toggle navigation" @click="menuOpen = !menuOpen">
@@ -22,7 +22,7 @@
       </div>
     </div>
     <nav v-if="menuOpen" class="mobile-nav" aria-label="Mobile navigation">
-      <NuxtLink to="/#vision" @click="menuOpen = false">Our vision</NuxtLink>
+      <NuxtLink to="/#vision" @click="menuOpen = false">Vision</NuxtLink>
       <NuxtLink to="/#how-it-works" @click="menuOpen = false">Resume review</NuxtLink>
       <NuxtLink to="/open-source" @click="menuOpen = false">Open source</NuxtLink>
       <NuxtLink to="/login" @click="menuOpen = false">Sign in</NuxtLink>

@@ -3,11 +3,11 @@
     <section class="info-hero">
       <div class="container narrow">
         <span class="eyebrow">Scoring methodology</span>
-        <h1 class="display-lg">A transparent score with versioned rules.</h1>
+        <h1 class="display-lg">A score you can inspect, repeat, and challenge.</h1>
         <p class="body-lg">
-          Resume review is Career Studio's first major tool. It does not claim to show the score assigned by every
-          applicant tracking system. It measures document parseability, resume
-          quality, and role alignment using published, deterministic checks.
+          Career Studio does not pretend there is one universal ATS score. It uses
+          published, deterministic checks to measure document readability, resume
+          quality, and alignment with one supplied job description.
         </p>
         <div class="method-meta">
           <span><GitBranch :size="15" /> Resume scorer v1.0.0</span>
@@ -90,7 +90,7 @@
         <div class="info-cta">
           <h2>See the methodology applied to your resume.</h2>
           <p>Every result includes its parser, scorer, and taxonomy versions.</p>
-          <NuxtLink to="/login" class="btn btn-primary btn-lg">Check my resume</NuxtLink>
+          <NuxtLink to="/login" class="btn btn-primary btn-lg">Review my resume</NuxtLink>
         </div>
       </div>
     </section>

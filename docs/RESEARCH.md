@@ -1,15 +1,18 @@
 # Product Research
 
-Research date: June 11, 2026.
+Research updated: June 13, 2026.
 
 ## Executive Summary
 
-The market has four overlapping product categories:
+The market has seven overlapping product categories:
 
 1. General resume quality scoring
 2. Job-description matching and resume tailoring
 3. Resume building and AI rewriting
 4. Job discovery, tracking, autofill, and auto-apply
+5. Peer and expert interview practice
+6. Mentorship and career exploration
+7. Company, interview, and compensation transparency
 
 The strongest initial product is not a broad auto-apply platform. It is a
 trusted resume workspace that produces stable scores, shows its evidence,
@@ -20,6 +23,14 @@ The closest product pattern is Huntr's separation of a base resume score from a
 job-specific match score. Resume Worded is strongest at granular feedback.
 Jobscan is strongest at job-description comparison. Rezi is unusually clear
 that no universal ATS score exists. Teal connects resume work to a job tracker.
+
+The broader Career Studio vision also reflects patterns proven by adjacent
+career products: Exponent Practice makes live peer practice concrete, ADPList
+organizes mentorship around goals and bookable conversations, Glassdoor uses
+anonymous workplace and interview experiences to create context, Levels.fyi
+structures compensation around company, role, level, and location, and the
+U.S. Department of Labor frames career exploration around skills, interests,
+work preferences, preparation, and transitions.
 
 ## Competitor Findings
 
@@ -39,6 +50,13 @@ that no universal ATS score exists. Teal connects resume work to a job tracker.
 | [Sorce](https://www.sorce.jobs/) | Mobile swipe-based discovery plus AI-assisted applications | Discovery can be delightfully simple, but automated submission creates trust and quality risks |
 | [LoopCV](https://www.loopcv.pro/) | Automated searches, applications, statistics, and job aggregation | Search automation is compelling after profile quality and targeting are reliable |
 | [Sonara](https://www.sonara.ai/) | Learns preferences, finds jobs, and applies continuously | Continuous automation requires strong controls, exclusions, and audit history |
+| [Exponent Practice](https://www.tryexponent.com/practice) | Live mock interviews with peers, collaborative practice, and structured feedback | Practice is more useful when it is realistic, repeatable, and followed by actionable feedback |
+| [Interviewing.io](https://interviewing.io/) | Technical mock interviews with detailed feedback and anonymous practice options | Psychological safety and useful feedback matter as much as question coverage |
+| [ADPList](https://adplist.org/) | Goal-led mentor discovery and bookable one-to-one conversations | Mentorship should begin with a specific goal and relevant experience, not a generic directory |
+| [Glassdoor](https://www.glassdoor.com/) | Jobs, anonymous company reviews, interview experiences, salaries, and workplace conversation | Company context must balance anonymity, moderation, recency, and protection against retaliation |
+| [Levels.fyi](https://www.levels.fyi/) | Compensation and leveling data structured by company, role, level, and location | Pay information is most useful when the context and limitations travel with the number |
+| [O*NET Career Exploration Tools](https://www.dol.gov/agencies/eta/onet/tools) | Self-directed tools for planning career options, preparation, and transitions | Career discovery should connect skills, interests, and work preferences to clear next steps |
+| [Harvard Resume Guide](https://careerservices.fas.harvard.edu/resources/create-a-strong-resume/) | Positions a resume as a brief summary that highlights a person's strongest assets | Resume guidance should help people communicate evidence clearly, not optimize only for a score |
 
 ## What ATS Products Actually Do
 
@@ -61,8 +79,13 @@ alignment to a supplied job description.
 
 ## Recommended Positioning
 
-> Know exactly what is weakening your resume, fix it with evidence-preserving
-> AI, and create a tailored version for every job.
+> Move your career forward with tools you can understand and people you can
+> learn from. Start with a resume review that shows what to fix and why.
+
+The public message should lead with the user's outcome, then clearly separate
+what is available now from what is on the roadmap. Use familiar terms such as
+"practice interviews," "mentorship," "company and pay insights," "job search,"
+and "career exploration" instead of abstract platform language.
 
 Avoid:
 
@@ -77,7 +100,11 @@ Prefer:
 - parse previews showing what software extracted;
 - general quality separated from role match;
 - user-approved edits with before/after evidence;
-- a clear record of which resume version was used for each application.
+- a clear record of which resume version was used for each application;
+- plain-language outcomes before implementation details;
+- specific feedback instead of generic "AI-powered" claims;
+- transparent limits, costs, and availability;
+- community participation without implying that planned features already exist.
 
 ## Proposed Product Surface
 
@@ -96,7 +123,7 @@ Prefer:
 - Resume library and upload
 - Resume analysis report
 - Rewrite studio
-- Job targeting
+- Job comparison
 - Resume version history
 - Saved jobs
 - Application tracker
@@ -106,7 +133,10 @@ Prefer:
 
 - Browser extension for saving jobs
 - Cover letters
-- Interview preparation
+- Live peer interview practice and structured feedback
+- Goal-based mentor discovery and scheduling
+- Moderated company, interview, and compensation insights
+- Career exploration based on skills, interests, and work preferences
 - Follow-up reminders
 - Job discovery
 - Application autofill

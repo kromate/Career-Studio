@@ -4,11 +4,11 @@
       <div class="container oss-grid">
         <div>
           <span class="eyebrow">Open source</span>
-          <h1 class="display-lg">Help build an open home for career growth.</h1>
+          <h1 class="display-lg">Career tools should be shaped by the people who use them.</h1>
           <p class="body-lg">
-            Career Studio is an MIT-licensed community project. Resume review is
-            the first working foundation; the long-term roadmap spans peer review,
-            interview practice, mentorship, company insight, and career discovery.
+            Career Studio is MIT licensed and built in public. We are starting with
+            trustworthy resume improvement, then growing toward peer practice,
+            mentorship, company and pay insights, job search, and career exploration.
           </p>
           <div class="oss-actions">
             <a href="https://github.com/kromate/Career-Studio" class="btn btn-primary btn-lg" target="_blank" rel="noreferrer">
@@ -43,9 +43,30 @@
 
     <section class="contribute-section">
       <div class="container">
+        <div class="principles-intro">
+          <div class="section-heading">
+            <span class="eyebrow">How we want to build</span>
+            <h2 class="display-lg">Useful, accountable, and sustainable without putting profit ahead of people.</h2>
+          </div>
+          <div class="principle-grid">
+            <article>
+              <strong>User agency</strong>
+              <p>Career Studio can explain, organize, and suggest. The person using it makes the final decision.</p>
+            </article>
+            <article>
+              <strong>Transparent costs</strong>
+              <p>If a feature depends on paid infrastructure or someone's time, the cost should be clear and tied to delivering that value.</p>
+            </article>
+            <article>
+              <strong>Public accountability</strong>
+              <p>Methods, limitations, tradeoffs, and core product decisions should be open to inspection and challenge.</p>
+            </article>
+          </div>
+        </div>
+
         <div class="section-heading">
           <span class="eyebrow">Where contributors can help</span>
-          <h2 class="display-lg">Build the parts of career growth you care about.</h2>
+          <h2 class="display-lg">Help build the career support you wish existed.</h2>
         </div>
         <div class="contribution-grid">
           <article v-for="area in areas" :key="area.title">
@@ -87,10 +108,10 @@ import {
 
 const areas = [
   { icon: ScanText, title: 'Resume parsing', description: 'Improve extraction fixtures, section detection, layout warnings, and international formats.' },
-  { icon: Waypoints, title: 'Scoring methodology', description: 'Review rule quality, explainability, fairness, and recruiter evidence.' },
-  { icon: Mic2, title: 'Interview practice', description: 'Design peer matching, scheduling, interview formats, structured feedback, and trust controls.' },
-  { icon: GraduationCap, title: 'Mentorship', description: 'Explore useful discovery, availability, booking, boundaries, and community reputation.' },
-  { icon: Building2, title: 'Company intelligence', description: 'Build anonymous, abuse-resistant interview reviews and compensation context.' },
+  { icon: Waypoints, title: 'Scoring methodology', description: 'Improve rule quality, explainability, fairness, and the evidence behind every recommendation.' },
+  { icon: Mic2, title: 'Interview practice', description: 'Design peer matching, scheduling, realistic formats, structured feedback, and trust controls.' },
+  { icon: GraduationCap, title: 'Mentorship', description: 'Explore goal-based discovery, availability, booking, boundaries, and community reputation.' },
+  { icon: Building2, title: 'Company and pay insights', description: 'Build anonymous, moderated interview reviews and useful compensation context.' },
   { icon: Accessibility, title: 'Accessible community', description: 'Make every workflow usable across devices, abilities, regions, and career stages.' },
 ]
 </script>
@@ -181,6 +202,36 @@ const areas = [
   padding: 88px 0;
 }
 
+.principles-intro {
+  margin-bottom: 90px;
+}
+
+.principle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.principle-grid article {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f9fafb;
+}
+
+.principle-grid strong {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 15px;
+}
+
+.principle-grid p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
 .contribution-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -255,6 +306,7 @@ const areas = [
 
 @media (max-width: 900px) {
   .oss-grid,
+  .principle-grid,
   .contribution-rules {
     grid-template-columns: 1fr;
   }

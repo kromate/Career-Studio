@@ -4,8 +4,8 @@
       <div>
         <BrandMark />
         <p>
-          An open-source home for improving your resume, preparing for interviews,
-          finding guidance, and moving your career forward.
+          Open-source tools for the decisions, documents, practice, and people
+          that move a career forward.
         </p>
         <span class="company-note">Powered by Goalmatic.</span>
       </div>
@@ -25,7 +25,7 @@
     </div>
     <div class="container footer-bottom">
       <span>© {{ new Date().getFullYear() }} Kromate. MIT licensed.</span>
-      <span>Built to help people grow, not to rank them for employers.</span>
+      <span>Built for people navigating work, never for ranking them.</span>
     </div>
   </footer>
 </template>

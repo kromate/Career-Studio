@@ -3,11 +3,11 @@
     <section class="legal-hero">
       <div class="container legal-container">
         <span class="eyebrow">Privacy approach</span>
-        <h1 class="display-lg">Career data deserves deliberate protection.</h1>
+        <h1 class="display-lg">Career data deserves more than a privacy checkbox.</h1>
         <p class="body-lg">
-          Career Studio may eventually hold resumes, interview notes, mentorship
-          conversations, compensation context, and company experiences. This page
-          describes today's behavior and the standard every future tool must meet.
+          Resumes, interview notes, mentorship conversations, pay information, and
+          workplace experiences can be deeply personal. This page explains today's
+          local-preview behavior and the standard every future feature must meet.
         </p>
       </div>
     </section>
@@ -51,7 +51,7 @@
           </p>
         </article>
         <article>
-          <h2>Community privacy principles</h2>
+          <h2>Privacy for community features</h2>
           <p>
             Future peer reviews, company reviews, interview experiences, and
             compensation submissions must minimize identifying information,

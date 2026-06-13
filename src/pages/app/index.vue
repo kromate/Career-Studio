@@ -4,13 +4,13 @@
       <div>
         <span class="welcome-date">{{ formattedDate }}</span>
         <h1>Good {{ timeOfDay }}, {{ firstName }}</h1>
-        <p v-if="currentVersion">Your resume has {{ openFindings.length }} focused improvements waiting. This is the first step in your career workspace.</p>
-        <p v-else>Welcome to your career growth workspace. Start by building a resume that represents you clearly.</p>
+        <p v-if="currentVersion">You have {{ openFindings.length }} resume improvement{{ openFindings.length === 1 ? '' : 's' }} worth reviewing. Start with the highest-impact change.</p>
+        <p v-else>Start with the document that introduces you: a clear, truthful resume built around your strongest evidence.</p>
       </div>
       <div class="page-actions">
         <NuxtLink to="/app/target" class="btn btn-secondary">
           <Target :size="16" />
-          Target a job
+          Compare with a job
         </NuxtLink>
         <NuxtLink to="/app/resumes/new" class="btn btn-primary">
           <FileUp :size="16" />
@@ -71,8 +71,8 @@
         <article class="search-summary card card-pad">
           <div class="card-heading">
             <div>
-              <span class="section-kicker">Career progress</span>
-              <h2>Your active search</h2>
+              <span class="section-kicker">Job search</span>
+              <h2>Your opportunities</h2>
             </div>
           </div>
           <div class="summary-stats">
@@ -103,7 +103,7 @@
               <strong>{{ weeklyCompletion }}%</strong>
             </div>
             <div class="weekly-track"><span :style="{ width: `${weeklyCompletion}%` }" /></div>
-            <p>Resolve two high-impact findings and prepare one job-specific version.</p>
+            <p>Review two high-impact findings and prepare one role-specific version.</p>
           </div>
         </article>
       </section>
@@ -164,10 +164,10 @@
           <EmptyState
             v-else
             :icon="Target"
-            title="No targeted jobs yet"
-            description="Add a job description to see role-specific coverage and save the opportunity."
+            title="No compared jobs yet"
+            description="Add a job description to see which requirements your resume supports and save the opportunity."
           >
-            <NuxtLink to="/app/target" class="btn btn-primary btn-sm">Target a job</NuxtLink>
+            <NuxtLink to="/app/target" class="btn btn-primary btn-sm">Compare with a job</NuxtLink>
           </EmptyState>
         </article>
       </section>
@@ -176,12 +176,11 @@
     <section v-else class="empty-dashboard card">
       <div class="empty-dashboard-copy">
         <span class="empty-illustration"><FileSearch :size="34" /></span>
-        <span class="eyebrow">Your first Career Studio tool</span>
-        <h2 class="heading-lg">Upload your first resume.</h2>
+        <span class="eyebrow">Start with your resume</span>
+        <h2 class="heading-lg">See what your resume communicates.</h2>
         <p class="body-md">
-          Start with a private, explainable resume review. As Career Studio grows,
-          this workspace will connect your interviews, mentors, company research,
-          applications, and career plans.
+          First, confirm what Career Studio extracted. Then get specific feedback
+          on clarity, evidence, structure, and how well your resume supports a role.
         </p>
         <NuxtLink to="/app/resumes/new" class="btn btn-primary btn-lg">
           <FileUp :size="17" />
@@ -190,19 +189,19 @@
       </div>
       <div class="empty-dashboard-steps">
         <div><span>1</span><strong>Upload</strong><p>PDF, DOCX, or TXT</p></div>
-        <div><span>2</span><strong>Verify</strong><p>Review extracted structure</p></div>
-        <div><span>3</span><strong>Improve</strong><p>Act on evidence-based findings</p></div>
+        <div><span>2</span><strong>Check</strong><p>Confirm the extraction</p></div>
+        <div><span>3</span><strong>Review</strong><p>Prioritize clear improvements</p></div>
       </div>
     </section>
 
     <section class="career-roadmap card">
       <div class="section-card-header">
         <div>
-          <span class="section-kicker">The studio is growing</span>
-          <h2>More ways to move your career forward</h2>
+          <span class="section-kicker">Beyond the resume</span>
+          <h2>Career support that grows with you</h2>
         </div>
         <a href="https://github.com/kromate/Career-Studio" target="_blank" rel="noreferrer">
-          Shape the roadmap <ArrowUpRight :size="14" />
+          Join the roadmap <ArrowUpRight :size="14" />
         </a>
       </div>
       <div class="roadmap-grid">
@@ -298,7 +297,7 @@ const nextAction = computed(() => {
   return {
     title: 'Create a job-specific resume',
     description: 'Add a job description to measure requirement coverage separately from resume quality.',
-    label: 'Target a job',
+    label: 'Compare with a job',
     to: '/app/target',
   }
 })
@@ -307,31 +306,31 @@ const careerRoadmap = [
   {
     icon: FileSearch,
     title: 'Resume review and rewriting',
-    description: 'Build a stronger, role-ready resume from evidence you can verify.',
+    description: 'Clarify your strongest evidence, tailor it to roles, and track every version.',
     live: true,
   },
   {
     icon: Mic2,
     title: 'Practice interviews',
-    description: 'Schedule mock interviews with peers and exchange structured feedback.',
+    description: 'Practice live with peers and exchange structured, useful feedback.',
     live: false,
   },
   {
     icon: GraduationCap,
     title: 'Mentorship',
-    description: 'Find people who can guide your next role, skill, or career transition.',
+    description: 'Book focused conversations with people who have relevant experience.',
     live: false,
   },
   {
     icon: Building2,
-    title: 'Company reviews',
-    description: 'Learn from anonymous interview, culture, and compensation experiences.',
+    title: 'Company and pay insights',
+    description: 'Learn from anonymous interview, workplace, and compensation experiences.',
     live: false,
   },
   {
     icon: Compass,
     title: 'Career discovery',
-    description: 'Explore jobs and realistic paths into the work you want to do next.',
+    description: 'Connect your skills and interests to roles and realistic transition paths.',
     live: false,
   },
 ]

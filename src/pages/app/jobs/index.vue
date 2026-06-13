@@ -3,12 +3,12 @@
     <header class="page-header">
       <div>
         <h1>Saved jobs</h1>
-        <p>Research opportunities, compare role alignment, and keep promising next moves in one place.</p>
+        <p>Save roles worth considering, compare their requirements, and keep your research together.</p>
       </div>
       <div class="page-actions">
         <NuxtLink to="/app/target" class="btn btn-primary">
           <Plus :size="16" />
-          Target a job
+          Compare with a job
         </NuxtLink>
       </div>
     </header>
@@ -77,9 +77,9 @@
       <EmptyState
         :icon="Bookmark"
         title="No saved opportunities"
-        description="Paste a job description, compare it with a resume, and save the role with its match evidence."
+        description="Paste a job description to see which requirements your resume supports, then save the role with that evidence."
       >
-        <NuxtLink to="/app/target" class="btn btn-primary">Target a job</NuxtLink>
+        <NuxtLink to="/app/target" class="btn btn-primary">Compare with a job</NuxtLink>
       </EmptyState>
     </section>
   </div>

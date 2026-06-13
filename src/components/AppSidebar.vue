@@ -59,7 +59,7 @@ const workspace = useWorkspace()
 const navigation = computed(() => [
   { label: 'Overview', to: '/app', icon: LayoutDashboard },
   { label: 'Resumes', to: '/app/resumes', icon: Files, badge: workspace.state.value.resumes.length || undefined },
-  { label: 'Target a job', to: '/app/target', icon: Target },
+  { label: 'Compare with a job', to: '/app/target', icon: Target },
   { label: 'Saved jobs', to: '/app/jobs', icon: FileSearch, badge: workspace.state.value.jobs.length || undefined },
   { label: 'Applications', to: '/app/applications', icon: BriefcaseBusiness, badge: workspace.state.value.applications.length || undefined },
 ])

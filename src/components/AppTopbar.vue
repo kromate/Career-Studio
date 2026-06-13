@@ -49,7 +49,7 @@ const profileOpen = ref(false)
 const routeLabels: Record<string, string> = {
   '/app': 'Overview',
   '/app/resumes': 'Resumes',
-  '/app/target': 'Target a job',
+  '/app/target': 'Compare with a job',
   '/app/jobs': 'Saved jobs',
   '/app/applications': 'Applications',
   '/app/settings': 'Settings',

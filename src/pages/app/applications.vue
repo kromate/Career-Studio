@@ -3,7 +3,7 @@
     <header class="page-header">
       <div>
         <h1>Applications</h1>
-        <p>Track each opportunity from preparation to outcome, including the resume and next action that moved it forward.</p>
+        <p>Keep every opportunity, next step, and submitted resume version connected from preparation to outcome.</p>
       </div>
       <div class="page-actions">
         <ComingSoonBadge>Email reminders coming soon</ComingSoonBadge>
@@ -91,9 +91,9 @@
       <EmptyState
         :icon="BriefcaseBusiness"
         title="Your application pipeline is empty"
-        description="Save a job match first, then track it from preparation through offer or close."
+        description="Compare your resume with a role, save the opportunity, and track it from preparation through offer or close."
       >
-        <NuxtLink to="/app/target" class="btn btn-primary">Target a job</NuxtLink>
+        <NuxtLink to="/app/target" class="btn btn-primary">Compare with a job</NuxtLink>
       </EmptyState>
     </section>
   </div>

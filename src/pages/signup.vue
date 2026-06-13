@@ -15,7 +15,7 @@
         <div class="login-heading">
           <span class="auth-icon"><UserPlus :size="22" /></span>
           <h1>{{ otpStep ? 'Verify your email' : 'Create your Career Studio account' }}</h1>
-          <p v-if="!otpStep">Create your account and start building a stronger career profile.</p>
+          <p v-if="!otpStep">Create your workspace and take the next clear step in your career.</p>
           <p v-else>Enter the six-digit code sent to <strong>{{ email }}</strong>.</p>
         </div>
 
@@ -157,9 +157,9 @@
       </div>
 
       <div class="login-benefits">
-        <span><Repeat2 :size="14" /> Deterministic scores</span>
-        <span><ShieldCheck :size="14" /> Private workspace</span>
-        <span><Github :size="14" /> Open source</span>
+        <span><Repeat2 :size="14" /> Repeatable scoring</span>
+        <span><ShieldCheck :size="14" /> You stay in control</span>
+        <span><Github :size="14" /> Built in public</span>
       </div>
     </section>
   </div>
