@@ -74,10 +74,14 @@ const progressColor = computed(() => {
 }
 
 .score-copy {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
   position: absolute;
   inset: 0;
+  text-align: center;
 }
 
 .score-copy strong {
@@ -87,9 +91,9 @@ const progressColor = computed(() => {
 }
 
 .score-copy span {
-  margin-top: 4px;
   color: var(--muted);
   font-size: calc(var(--size) * 0.083);
   font-weight: 600;
+  line-height: 1.1;
 }
 </style>
