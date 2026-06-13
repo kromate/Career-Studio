@@ -6,7 +6,7 @@
   "description": "Open-source job search workspace powered by Goalmatic",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev --port 3030",
+    "dev": "nuxt dev --dotenv .env.dev --port 3030",
     "preview": "nuxt preview --port 3030",
     "postinstall": "nuxt prepare",
     "typecheck": "nuxt typecheck",

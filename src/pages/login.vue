@@ -20,9 +20,9 @@
         </div>
 
         <button v-if="!otpStep" class="google-button" type="button" :disabled="loading || !googleReady" @click="handleGoogle">
-          <AppSpinner v-if="loading" :size="18" />
+          <AppSpinner v-if="activeAction === 'google'" :size="18" />
           <span v-else class="google-logo">G</span>
-          {{ loading ? 'Connecting…' : 'Continue with Google' }}
+          {{ activeAction === 'google' ? 'Connecting…' : 'Continue with Google' }}
         </button>
         <div v-if="!otpStep && !googleReady" class="auth-coming-soon">
           <ComingSoonBadge />
@@ -67,9 +67,9 @@
             </div>
           </template>
           <button class="btn btn-primary btn-lg full-button" type="submit" :disabled="loading">
-            <AppSpinner v-if="loading" :size="16" light />
-            {{ otpStep ? 'Verify and continue' : 'Email me a code' }}
-            <ArrowRight v-if="!loading" :size="16" />
+            <AppSpinner v-if="activeAction === 'email'" :size="16" light />
+            {{ activeAction === 'email' ? (otpStep ? 'Verifying…' : 'Sending code…') : (otpStep ? 'Verify and continue' : 'Email me a code') }}
+            <ArrowRight v-if="activeAction !== 'email'" :size="16" />
           </button>
         </form>
 
@@ -112,7 +112,8 @@ definePageMeta({ layout: 'auth' })
 const workspace = useWorkspace()
 const config = useRuntimeConfig().public
 const toast = useToast()
-const loading = ref(false)
+const activeAction = ref<'google' | 'email' | null>(null)
+const loading = computed(() => activeAction.value !== null)
 const email = ref('')
 const otpStep = ref(false)
 const otp = ref(['', '', '', '', '', ''])
@@ -161,7 +162,7 @@ const startResendCooldown = () => {
 
 const handleGoogle = async () => {
   if (!googleReady.value) return
-  loading.value = true
+  activeAction.value = 'google'
   try {
     const user = await signInWithGoalmaticGoogle(config)
     workspace.login(user)
@@ -172,13 +173,13 @@ const handleGoogle = async () => {
       tone: 'error',
     })
   } finally {
-    loading.value = false
+    activeAction.value = null
   }
 }
 
 const requestOtp = async () => {
   if (!email.value) return
-  loading.value = true
+  activeAction.value = 'email'
   try {
     if (!useLocalOtp.value) {
       const message = await sendGoalmaticEmailOtp(config, email.value)
@@ -194,7 +195,7 @@ const requestOtp = async () => {
       tone: 'error',
     })
   } finally {
-    loading.value = false
+    activeAction.value = null
   }
 }
 
@@ -209,7 +210,7 @@ const verifyOtp = async () => {
     toast.show('Enter all six digits', { tone: 'warning' })
     return
   }
-  loading.value = true
+  activeAction.value = 'email'
   try {
     if (!useLocalOtp.value) {
       const user = await verifyGoalmaticEmailOtp(config, email.value, code)
@@ -231,7 +232,7 @@ const verifyOtp = async () => {
       tone: 'error',
     })
   } finally {
-    loading.value = false
+    activeAction.value = null
   }
 }
 

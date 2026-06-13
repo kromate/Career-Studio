@@ -73,8 +73,10 @@ yarn dev
 ```
 
 The app runs at [http://localhost:3030](http://localhost:3030). It works without
-credentials in local preview mode. Copy `.env.example` to `.env` only when you
-need shared Goalmatic Firebase identity or the email OTP endpoint.
+credentials in local preview mode. Copy `.env.example` to `.env.dev` when you
+need shared Goalmatic Firebase identity or the email OTP endpoint. Goalmatic
+contributors should map the public Firebase web values from
+`gm/frontend/.env.dev`; never copy server credentials into this app.
 
 ```bash
 yarn test
