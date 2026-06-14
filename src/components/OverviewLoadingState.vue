@@ -12,7 +12,20 @@
       </div>
     </header>
 
-    <AppSkeleton height="112px" radius="16px" />
+    <section class="card focus-loading">
+      <div class="focus-loading-main">
+        <AppSkeleton width="50px" height="50px" radius="14px" />
+        <div class="loading-lines">
+          <AppSkeleton width="150px" height="10px" radius="5px" />
+          <AppSkeleton width="340px" height="24px" radius="8px" />
+          <AppSkeleton width="480px" height="13px" radius="6px" />
+        </div>
+        <AppSkeleton width="150px" height="38px" radius="8px" />
+      </div>
+      <div class="focus-loading-meta">
+        <AppSkeleton v-for="index in 4" :key="index" height="42px" radius="8px" />
+      </div>
+    </section>
 
     <div class="loading-grid">
       <section class="card loading-card">
@@ -44,8 +57,11 @@
 
 <style scoped>
 .overview-loading {
+  width: 100%;
+  max-width: 1540px;
+  margin-inline: auto;
   display: grid;
-  gap: 17px;
+  gap: 18px;
 }
 
 .loading-header {
@@ -67,10 +83,31 @@
   gap: 10px;
 }
 
+.focus-loading {
+  overflow: hidden;
+}
+
+.focus-loading-main {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 24px;
+}
+
+.focus-loading-meta {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(110px, 0.65fr));
+  gap: 1px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--line);
+  background: #faf8ff;
+}
+
 .loading-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 17px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+  gap: 18px;
 }
 
 .loading-card {
@@ -96,6 +133,18 @@
   .loading-grid {
     grid-template-columns: 1fr;
   }
+
+  .focus-loading-main {
+    grid-template-columns: auto 1fr;
+  }
+
+  .focus-loading-main > :last-child {
+    grid-column: 1 / -1;
+  }
+
+  .focus-loading-meta {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 680px) {
@@ -114,6 +163,11 @@
   }
 
   .score-row {
+    grid-template-columns: 1fr;
+  }
+
+  .focus-loading-main,
+  .focus-loading-meta {
     grid-template-columns: 1fr;
   }
 }

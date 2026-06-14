@@ -1,14 +1,14 @@
 <template>
   <OverviewLoadingState v-if="!workspace.state.value.hydrated" />
-  <div v-else class="page-shell">
+  <div v-else class="page-shell overview-page">
     <header class="page-header">
-      <div>
+      <div class="welcome-copy">
         <span class="welcome-date">{{ formattedDate }}</span>
         <h1>Good {{ timeOfDay }}, {{ firstName }}</h1>
         <p v-if="currentVersion">You have {{ openFindings.length }} resume improvement{{ openFindings.length === 1 ? '' : 's' }} worth reviewing. Start with the highest-impact change.</p>
-        <p v-else>Start with the document that introduces you: a clear, truthful resume built around your strongest evidence.</p>
+        <p v-else>Build a stronger resume, understand what to improve, and prepare for the roles you want next.</p>
       </div>
-      <div class="page-actions">
+      <div v-if="currentVersion" class="page-actions">
         <NuxtLink to="/app/target" class="btn btn-secondary">
           <Target :size="16" />
           Compare with a job
@@ -21,17 +21,37 @@
     </header>
 
     <template v-if="currentResume && currentVersion">
-      <section class="next-action card">
-        <span class="next-icon"><Sparkles :size="21" /></span>
-        <div>
-          <span class="badge badge-purple">Recommended next action</span>
-          <h2>{{ nextAction.title }}</h2>
-          <p>{{ nextAction.description }}</p>
+      <section class="focus-panel card">
+        <div class="focus-main">
+          <span class="next-icon"><Sparkles :size="22" /></span>
+          <div class="focus-copy">
+            <span class="focus-label">Recommended next step</span>
+            <h2>{{ nextAction.title }}</h2>
+            <p>{{ nextAction.description }}</p>
+          </div>
+          <NuxtLink :to="nextAction.to" class="btn btn-primary">
+            {{ nextAction.label }}
+            <ArrowRight :size="15" />
+          </NuxtLink>
         </div>
-        <NuxtLink :to="nextAction.to" class="btn btn-primary">
-          {{ nextAction.label }}
-          <ArrowRight :size="15" />
-        </NuxtLink>
+        <div class="focus-context">
+          <div>
+            <span>Active resume</span>
+            <strong>{{ currentResume.name }}</strong>
+          </div>
+          <div>
+            <span>Resume score</span>
+            <strong>{{ currentVersion.analysis.score ?? '—' }}<small v-if="currentVersion.analysis.score !== null">/100</small></strong>
+          </div>
+          <div>
+            <span>Open findings</span>
+            <strong>{{ openFindings.length }}</strong>
+          </div>
+          <div>
+            <span>Last reviewed</span>
+            <strong class="date-value">{{ currentResumeUpdated }}</strong>
+          </div>
+        </div>
       </section>
 
       <section class="dashboard-grid">
@@ -40,13 +60,17 @@
             <div>
               <span class="section-kicker">Active resume</span>
               <h2>{{ currentResume.name }}</h2>
+              <p>{{ currentVersion.label }} · {{ currentVersion.parsed.stats.words }} words</p>
             </div>
             <NuxtLink :to="`/app/resumes/${currentResume.id}`" class="icon-btn" aria-label="Open resume analysis">
               <ArrowUpRight :size="17" />
             </NuxtLink>
           </div>
           <div class="score-overview-body">
-            <ScoreRing :score="currentVersion.analysis.score" :size="142" />
+            <div class="score-summary">
+              <ScoreRing :score="currentVersion.analysis.score" :size="148" />
+              <span :class="['score-status', scoreStatus.tone]">{{ scoreStatus.label }}</span>
+            </div>
             <div class="dimension-list">
               <DimensionBar
                 v-for="dimension in currentVersion.analysis.dimensions.slice(0, 4)"
@@ -73,7 +97,8 @@
           <div class="card-heading">
             <div>
               <span class="section-kicker">Job search</span>
-              <h2>Your opportunities</h2>
+              <h2>Career activity</h2>
+              <p>Keep the work around your search connected.</p>
             </div>
           </div>
           <div class="summary-stats">
@@ -100,7 +125,7 @@
           </div>
           <div v-if="workspace.state.value.settings.weeklyReview" class="weekly-review">
             <div class="weekly-top">
-              <span>This week's focus</span>
+              <span>Weekly momentum</span>
               <strong>{{ weeklyCompletion }}%</strong>
             </div>
             <div class="weekly-track"><span :style="{ width: `${weeklyCompletion}%` }" /></div>
@@ -118,7 +143,7 @@
             </div>
             <NuxtLink :to="`/app/resumes/${currentResume.id}`">View full report <ArrowRight :size="14" /></NuxtLink>
           </div>
-          <div class="finding-list">
+          <div v-if="openFindings.length" class="finding-list">
             <NuxtLink
               v-for="finding in openFindings.slice(0, 4)"
               :key="finding.ruleId"
@@ -134,6 +159,15 @@
               <ChevronRight :size="16" />
             </NuxtLink>
           </div>
+          <EmptyState
+            v-else
+            class="compact-empty"
+            :icon="CheckCircle2"
+            title="Your review is clear"
+            description="There are no open findings in this version. Compare it with a role or create a tailored version next."
+          >
+            <NuxtLink to="/app/target" class="btn btn-secondary btn-sm">Compare with a job</NuxtLink>
+          </EmptyState>
         </article>
 
         <article class="card">
@@ -164,6 +198,7 @@
           </div>
           <EmptyState
             v-else
+            class="compact-empty"
             :icon="Target"
             title="No compared jobs yet"
             description="Add a job description to see which requirements your resume supports and save the opportunity."
@@ -174,26 +209,103 @@
       </section>
     </template>
 
-    <section v-else class="empty-dashboard card">
-      <div class="empty-dashboard-copy">
-        <span class="empty-illustration"><FileSearch :size="34" /></span>
-        <span class="eyebrow">Start with your resume</span>
-        <h2 class="heading-lg">See what your resume communicates.</h2>
-        <p class="body-md">
-          First, confirm what Career Studio extracted. Then get specific feedback
-          on clarity, evidence, structure, and how well your resume supports a role.
-        </p>
-        <NuxtLink to="/app/resumes/new" class="btn btn-primary btn-lg">
-          <FileUp :size="17" />
-          Upload a resume
-        </NuxtLink>
-      </div>
-      <div class="empty-dashboard-steps">
-        <div><span>1</span><strong>Upload</strong><p>PDF, DOCX, or TXT</p></div>
-        <div><span>2</span><strong>Check</strong><p>Confirm the extraction</p></div>
-        <div><span>3</span><strong>Review</strong><p>Prioritize clear improvements</p></div>
-      </div>
-    </section>
+    <template v-else>
+      <section class="onboarding-hero card">
+        <div class="onboarding-copy">
+          <span class="onboarding-label">
+            <Sparkles :size="14" />
+            Your career workspace starts here
+          </span>
+          <h2>Turn your resume into a clear plan.</h2>
+          <p class="body-md">
+            Upload your resume to get a consistent score, specific improvements,
+            and a workspace for preparing role by role.
+          </p>
+          <div class="onboarding-actions">
+            <NuxtLink to="/app/resumes/new" class="btn btn-primary btn-lg">
+              <FileUp :size="17" />
+              Upload your resume
+            </NuxtLink>
+            <NuxtLink to="/methodology" class="btn btn-ghost btn-lg">
+              How scoring works
+              <ArrowRight :size="15" />
+            </NuxtLink>
+          </div>
+          <div class="onboarding-trust">
+            <span><LockKeyhole :size="15" /> Private workspace</span>
+            <span><RefreshCw :size="15" /> Repeatable scoring</span>
+            <span><Clock3 :size="15" /> Review in minutes</span>
+          </div>
+        </div>
+
+        <div class="review-preview">
+          <div class="preview-heading">
+            <span class="preview-icon"><FileSearch :size="22" /></span>
+            <div>
+              <span>Your first review</span>
+              <strong>What you will get</strong>
+            </div>
+          </div>
+          <div class="outcome-list">
+            <div>
+              <span class="outcome-icon"><Gauge :size="18" /></span>
+              <div>
+                <strong>A dependable resume score</strong>
+                <p>See how clarity, evidence, structure, and completeness contribute.</p>
+              </div>
+            </div>
+            <div>
+              <span class="outcome-icon"><ListChecks :size="18" /></span>
+              <div>
+                <strong>Prioritized improvements</strong>
+                <p>Work from the highest-impact change instead of guessing.</p>
+              </div>
+            </div>
+            <div>
+              <span class="outcome-icon"><Target :size="18" /></span>
+              <div>
+                <strong>Role-specific matching</strong>
+                <p>Compare the reviewed resume with jobs when you are ready.</p>
+              </div>
+            </div>
+          </div>
+          <div class="privacy-note">
+            <ShieldCheck :size="17" />
+            <p><strong>You stay in control.</strong> Review the extracted text before Career Studio scores it.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="getting-started">
+        <div class="getting-started-heading">
+          <span class="section-kicker">Three simple steps</span>
+          <h2>From document to direction</h2>
+        </div>
+        <div class="step-grid">
+          <article>
+            <span>01</span>
+            <div>
+              <strong>Upload</strong>
+              <p>Add a PDF, DOCX, TXT file, or paste your resume text.</p>
+            </div>
+          </article>
+          <article>
+            <span>02</span>
+            <div>
+              <strong>Confirm</strong>
+              <p>Check the extracted sections before any scoring begins.</p>
+            </div>
+          </article>
+          <article>
+            <span>03</span>
+            <div>
+              <strong>Improve</strong>
+              <p>Review clear findings and save each stronger version.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+    </template>
 
     <section class="career-roadmap card">
       <div class="section-card-header">
@@ -224,7 +336,9 @@ import {
   ArrowRight,
   ArrowUpRight,
   Bookmark,
+  CheckCircle2,
   ChevronRight,
+  Clock3,
   FileSearch,
   FileUp,
   Files,
@@ -232,8 +346,12 @@ import {
   Compass,
   GitBranch,
   GraduationCap,
+  Gauge,
+  ListChecks,
+  LockKeyhole,
   MessagesSquare,
   Mic2,
+  RefreshCw,
   Send,
   ShieldCheck,
   Sparkles,
@@ -280,6 +398,18 @@ const appliedCount = computed(() => workspace.state.value.applications.filter(it
 const interviewCount = computed(() => workspace.state.value.applications.filter(item => (
   ['interview', 'offer'].includes(item.status)
 )).length)
+const currentResumeUpdated = computed(() => (
+  currentResume.value
+    ? new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(currentResume.value.updatedAt))
+    : ''
+))
+const scoreStatus = computed(() => {
+  const score = currentVersion.value?.analysis.score
+  if (score === null || score === undefined) return { label: 'Needs review', tone: 'warning' }
+  if (score >= 80) return { label: 'Strong foundation', tone: 'strong' }
+  if (score >= 60) return { label: 'Good progress', tone: 'progress' }
+  return { label: 'Room to improve', tone: 'warning' }
+})
 const weeklyCompletion = computed(() => {
   const resolved = Math.max(0, 4 - Math.min(4, openFindings.value.length))
   const targeted = workspace.state.value.jobs.length ? 1 : 0
@@ -338,66 +468,147 @@ const careerRoadmap = [
 </script>
 
 <style scoped>
+.overview-page {
+  width: 100%;
+  max-width: 1540px;
+  margin-inline: auto;
+}
+
+.welcome-copy {
+  max-width: 760px;
+}
+
 .welcome-date {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 7px;
   color: var(--muted);
   font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.focus-panel {
+  overflow: hidden;
+  margin-bottom: 18px;
+  border-color: #d8cdf6;
+  background:
+    radial-gradient(circle at 0 0, rgba(96, 29, 237, 0.1), transparent 32%),
+    var(--surface);
+}
+
+.focus-main {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 24px;
+}
+
+.next-icon {
+  display: grid;
+  width: 50px;
+  height: 50px;
+  place-items: center;
+  border: 1px solid #dfd3ff;
+  border-radius: 14px;
+  color: var(--purple);
+  background: var(--purple-soft);
+}
+
+.focus-copy {
+  min-width: 0;
+}
+
+.focus-label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--purple-dark);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.focus-main h2 {
+  margin: 0 0 5px;
+  font-size: 19px;
+  line-height: 1.25;
+}
+
+.focus-main p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.focus-context {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(110px, 0.65fr));
+  border-top: 1px solid #e5def7;
+  background: rgba(250, 248, 255, 0.78);
+}
+
+.focus-context > div {
+  min-width: 0;
+  padding: 13px 18px;
+  border-left: 1px solid #e5def7;
+}
+
+.focus-context > div:first-child {
+  border-left: 0;
+}
+
+.focus-context span,
+.focus-context strong {
+  display: block;
+}
+
+.focus-context span {
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-.next-action {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 17px;
-  margin-bottom: 17px;
-  padding: 20px;
-  border-color: #ded3fa;
-  background: var(--purple-soft);
+.focus-context strong {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.next-icon {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
-  border-radius: 10px;
-  color: var(--purple);
-  background: #fff;
-}
-
-.next-action h2 {
-  margin: 7px 0 4px;
-  font-size: 17px;
-}
-
-.next-action p {
-  margin: 0;
+.focus-context strong small {
+  margin-left: 2px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 9px;
+}
+
+.focus-context .date-value {
+  font-size: 12px;
 }
 
 .dashboard-grid,
 .lower-grid {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 17px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+  gap: 18px;
 }
 
 .lower-grid {
-  margin-top: 17px;
+  margin-top: 18px;
 }
 
 .career-roadmap {
-  margin-top: 17px;
-  padding-bottom: 4px;
+  margin-top: 18px;
+  padding-bottom: 3px;
 }
 
 .career-roadmap .section-card-header {
-  padding: 20px 20px 0;
+  padding: 20px 22px;
 }
 
 .career-roadmap .section-card-header > a {
@@ -411,20 +622,27 @@ const careerRoadmap = [
 
 .roadmap-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 10px;
-  padding: 17px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  padding: 18px;
+  border-top: 1px solid var(--line);
 }
 
 .roadmap-grid article {
   display: grid;
   grid-template-columns: auto 1fr;
   align-content: start;
-  gap: 10px;
-  padding: 14px;
+  gap: 12px;
+  min-height: 118px;
+  padding: 16px;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  background: #f9fafb;
+  border-radius: 12px;
+  background: #fafafa;
+  grid-column: span 2;
+}
+
+.roadmap-grid article:nth-last-child(-n + 2) {
+  grid-column: span 3;
 }
 
 .roadmap-grid article.live {
@@ -434,10 +652,10 @@ const careerRoadmap = [
 
 .roadmap-icon {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   place-items: center;
-  border-radius: 9px;
+  border-radius: 10px;
   color: var(--purple);
   background: var(--purple-soft);
 }
@@ -455,22 +673,22 @@ const careerRoadmap = [
 .roadmap-grid small {
   margin-bottom: 5px;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 750;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
 .roadmap-grid strong {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.3;
 }
 
 .roadmap-grid p {
   margin: 6px 0 0;
   color: var(--muted);
-  font-size: 9px;
-  line-height: 1.45;
+  font-size: 10px;
+  line-height: 1.5;
 }
 
 .dashboard-grid > *,
@@ -490,7 +708,7 @@ const careerRoadmap = [
   display: block;
   margin-bottom: 6px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -499,15 +717,49 @@ const careerRoadmap = [
 .card-heading h2,
 .section-card-header h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: 17px;
+}
+
+.card-heading p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 10px;
 }
 
 .score-overview-body {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 170px 1fr;
   align-items: center;
-  gap: 35px;
-  padding: 27px 0 24px;
+  gap: 32px;
+  padding: 24px 0 22px;
+}
+
+.score-summary {
+  display: grid;
+  justify-items: center;
+  gap: 11px;
+}
+
+.score-status {
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.score-status.strong {
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+.score-status.progress {
+  color: var(--purple-dark);
+  background: var(--purple-soft);
+}
+
+.score-status.warning {
+  color: var(--amber);
+  background: var(--amber-soft);
 }
 
 .dimension-list {
@@ -519,10 +771,10 @@ const careerRoadmap = [
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  padding-top: 15px;
+  padding-top: 14px;
   border-top: 1px solid var(--line);
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .score-footer span {
@@ -535,7 +787,7 @@ const careerRoadmap = [
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-top: 24px;
+  margin-top: 20px;
 }
 
 .summary-stats a {
@@ -543,13 +795,17 @@ const careerRoadmap = [
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: 0 10px;
-  padding: 14px;
+  padding: 13px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 11px;
+  background: #fcfcfd;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
 }
 
 .summary-stats a:hover {
   border-color: #d2c8f1;
+  background: var(--purple-soft);
+  transform: translateY(-1px);
 }
 
 .stat-icon {
@@ -577,11 +833,11 @@ const careerRoadmap = [
 }
 
 .weekly-review {
-  margin-top: 18px;
-  padding: 15px;
+  margin-top: 14px;
+  padding: 14px;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  background: #f9fafb;
+  border-radius: 11px;
+  background: #fafafa;
 }
 
 .weekly-top {
@@ -613,7 +869,7 @@ const careerRoadmap = [
 }
 
 .section-card-header {
-  padding: 20px;
+  padding: 19px 20px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -637,7 +893,7 @@ const careerRoadmap = [
   grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 11px;
-  min-height: 72px;
+  min-height: 76px;
   padding: 13px 18px;
   border-top: 1px solid var(--line);
 }
@@ -649,7 +905,7 @@ const careerRoadmap = [
 
 .finding-row:hover,
 .job-row:hover {
-  background: var(--surface-soft);
+  background: #faf8ff;
 }
 
 .severity-mark {
@@ -721,75 +977,255 @@ const careerRoadmap = [
   color: var(--green);
 }
 
-.empty-dashboard {
+.compact-empty {
+  min-height: 290px;
+}
+
+:deep(.compact-empty .empty-icon) {
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+}
+
+:deep(.compact-empty h3) {
+  font-size: 16px;
+}
+
+.onboarding-hero {
   display: grid;
-  grid-template-columns: 1fr 0.75fr;
+  grid-template-columns: minmax(0, 1.12fr) minmax(420px, 0.88fr);
   overflow: hidden;
+  min-height: 470px;
+  border-color: #d9dfe7;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(96, 29, 237, 0.12), transparent 30%),
+    linear-gradient(135deg, #fff 0%, #fdfcff 56%, #f8f5ff 100%);
 }
 
-.empty-dashboard-copy {
-  padding: 65px;
+.onboarding-copy {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  padding: clamp(42px, 5vw, 74px);
 }
 
-.empty-illustration {
+.onboarding-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 22px;
+  padding: 7px 10px;
+  border: 1px solid #dfd5f8;
+  border-radius: 999px;
+  color: var(--purple-dark);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  background: var(--purple-soft);
+  text-transform: uppercase;
+}
+
+.onboarding-copy h2 {
+  max-width: 650px;
+  margin: 0 0 16px;
+  font-size: clamp(34px, 4.1vw, 54px);
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+}
+
+.onboarding-copy > p {
+  max-width: 590px;
+  margin-bottom: 25px;
+  color: var(--ink-soft);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.onboarding-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.onboarding-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 28px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.onboarding-trust span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.review-preview {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding: 40px;
+  border-left: 1px solid var(--line);
+  background: rgba(249, 248, 252, 0.82);
+}
+
+.preview-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding-bottom: 21px;
+  border-bottom: 1px solid var(--line);
+}
+
+.preview-icon {
   display: grid;
-  width: 68px;
-  height: 68px;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
   place-items: center;
-  margin-bottom: 35px;
-  border-radius: 20px;
+  border-radius: 13px;
   color: var(--purple);
   background: var(--purple-soft);
 }
 
-.empty-dashboard-copy p {
-  max-width: 500px;
-  margin-bottom: 25px;
+.preview-heading span:not(.preview-icon),
+.preview-heading strong {
+  display: block;
 }
 
-.empty-dashboard-steps {
+.preview-heading span:not(.preview-icon) {
+  margin-bottom: 3px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.preview-heading strong {
+  font-size: 17px;
+}
+
+.outcome-list {
   display: grid;
-  align-content: center;
-  gap: 1px;
-  padding: 35px;
-  border-left: 1px solid var(--line);
-  background: #f9fafb;
 }
 
-.empty-dashboard-steps > div {
+.outcome-list > div {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0 13px;
-  padding: 20px;
+  gap: 13px;
+  padding: 19px 0;
   border-bottom: 1px solid var(--line);
-  color: var(--ink);
 }
 
-.empty-dashboard-steps > div:last-child {
+.outcome-list > div:last-child {
   border-bottom: 0;
 }
 
-.empty-dashboard-steps span {
+.outcome-icon {
   display: grid;
-  width: 28px;
-  height: 28px;
-  grid-row: 1 / 3;
+  width: 36px;
+  height: 36px;
   place-items: center;
-  border-radius: 8px;
+  border: 1px solid #e2dafa;
+  border-radius: 10px;
   color: var(--purple);
-  font-size: 10px;
-  font-weight: 800;
-  background: var(--purple-soft);
+  background: #fff;
 }
 
-.empty-dashboard-steps strong {
+.outcome-list strong {
+  display: block;
+  margin-bottom: 4px;
   font-size: 12px;
 }
 
-.empty-dashboard-steps p {
-  margin: 4px 0 0;
+.outcome-list p {
+  margin: 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.privacy-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 5px;
+  padding: 13px 14px;
+  border: 1px solid #caeadc;
+  border-radius: 11px;
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+.privacy-note svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.privacy-note p {
+  margin: 0;
+  color: #285c46;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.getting-started {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.55fr) 1.45fr;
+  align-items: center;
+  gap: 30px;
+  margin-top: 18px;
+  padding: 23px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: #fcfcfd;
+}
+
+.getting-started-heading h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.step-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.step-grid article {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: #fff;
+}
+
+.step-grid article > span {
+  color: var(--purple);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.step-grid strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.step-grid p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
 }
 
 @media (max-width: 1100px) {
@@ -798,20 +1234,66 @@ const careerRoadmap = [
     grid-template-columns: 1fr;
   }
 
+  .onboarding-hero {
+    grid-template-columns: 1fr 0.9fr;
+  }
+
+  .getting-started {
+    grid-template-columns: 1fr;
+  }
+
   .roadmap-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .roadmap-grid article,
+  .roadmap-grid article:nth-last-child(-n + 2) {
+    grid-column: auto;
+  }
+
+  .roadmap-grid article:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 820px) {
+  .focus-main {
+    grid-template-columns: auto 1fr;
+  }
+
+  .focus-main .btn {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-left: 68px;
+  }
+
+  .focus-context {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .focus-context > div:nth-child(3) {
+    border-left: 0;
+  }
+
+  .focus-context > div:nth-child(n + 3) {
+    border-top: 1px solid #e5def7;
+  }
+
+  .onboarding-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .review-preview {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .step-grid {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 680px) {
-  .next-action {
-    grid-template-columns: auto 1fr;
-  }
-
-  .next-action .btn {
-    grid-column: 1 / -1;
-  }
-
   .score-overview-body {
     grid-template-columns: 1fr;
     justify-items: center;
@@ -821,12 +1303,62 @@ const careerRoadmap = [
     width: 100%;
   }
 
-  .empty-dashboard {
+  .focus-main {
     grid-template-columns: 1fr;
   }
 
-  .empty-dashboard-copy {
-    padding: 36px 24px;
+  .next-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .focus-main .btn {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .focus-context {
+    grid-template-columns: 1fr;
+  }
+
+  .focus-context > div {
+    border-top: 1px solid #e5def7;
+    border-left: 0;
+  }
+
+  .focus-context > div:first-child {
+    border-top: 0;
+  }
+
+  .summary-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .onboarding-copy {
+    padding: 38px 24px;
+  }
+
+  .onboarding-copy h2 {
+    font-size: 37px;
+  }
+
+  .onboarding-actions {
+    display: grid;
+    width: 100%;
+  }
+
+  .onboarding-trust {
+    display: grid;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .review-preview {
+    padding: 28px 24px;
+  }
+
+  .getting-started {
+    padding: 19px;
   }
 
   .career-roadmap .section-card-header {
@@ -836,6 +1368,10 @@ const careerRoadmap = [
 
   .roadmap-grid {
     grid-template-columns: 1fr;
+  }
+
+  .roadmap-grid article:last-child {
+    grid-column: auto;
   }
 }
 </style>
