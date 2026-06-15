@@ -289,6 +289,16 @@ export async function extractTextFromFile(file: File): Promise<string> {
 
   if (extension === 'pdf') {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs')
+    if (import.meta.env.SSR) {
+      const workerModule = await import('pdfjs-dist/legacy/build/pdf.worker.min.mjs')
+      const workerScope = globalThis as typeof globalThis & {
+        pdfjsWorker?: typeof workerModule
+      }
+      workerScope.pdfjsWorker = workerModule
+    } else {
+      const workerModule = await import('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url')
+      pdfjs.GlobalWorkerOptions.workerSrc = workerModule.default
+    }
     const document = await pdfjs.getDocument({
       data: new Uint8Array(await file.arrayBuffer()),
       useWorkerFetch: false,
