@@ -17,6 +17,14 @@ interface EmailOtpResponse {
   accountId?: string
 }
 
+interface FirebaseUserLike {
+  uid: string
+  displayName: string | null
+  email: string | null
+  photoURL: string | null
+  providerData?: Array<{ providerId?: string }>
+}
+
 function formatAuthFunctionError(error: unknown): Error {
   if (!(error instanceof Error)) {
     return new Error('Authentication is temporarily unavailable. Please try again shortly.')
@@ -65,13 +73,13 @@ async function getFirebaseClient(config: FirebasePublicConfig) {
   const app = getApps().length
     ? getApp()
     : initializeApp({
-        apiKey: config.firebaseApiKey,
-        authDomain: config.firebaseAuthDomain,
-        projectId: config.firebaseProjectId,
-        storageBucket: config.firebaseStorageBucket,
-        messagingSenderId: config.firebaseMessagingSenderId,
-        appId: config.firebaseAppId,
-      })
+      apiKey: config.firebaseApiKey,
+      authDomain: config.firebaseAuthDomain,
+      projectId: config.firebaseProjectId,
+      storageBucket: config.firebaseStorageBucket,
+      messagingSenderId: config.firebaseMessagingSenderId,
+      appId: config.firebaseAppId,
+    })
   const auth = authModule.getAuth(app)
   await authModule.setPersistence(auth, authModule.browserLocalPersistence)
 
@@ -102,15 +110,7 @@ function emailOtpError(response: EmailOtpResponse, fallback: string): Error {
   return new Error(response.message || response.msg || fallback)
 }
 
-export async function signInWithGoalmaticGoogle(
-  config: FirebasePublicConfig,
-): Promise<UserProfile> {
-  const { auth, authModule } = await getFirebaseClient(config)
-  const provider = new authModule.GoogleAuthProvider()
-  provider.setCustomParameters({ prompt: 'select_account' })
-  const credential = await authModule.signInWithPopup(auth, provider)
-  const user = credential.user
-
+function googleUserProfile(user: FirebaseUserLike): UserProfile {
   return {
     id: user.uid,
     accountId: user.uid,
@@ -119,6 +119,28 @@ export async function signInWithGoalmaticGoogle(
     avatarUrl: user.photoURL || undefined,
     authProvider: 'google',
   }
+}
+
+function isGoogleUser(user: FirebaseUserLike | null | undefined): user is FirebaseUserLike {
+  return Boolean(user?.providerData?.some(provider => provider.providerId === 'google.com'))
+}
+
+export async function startGoalmaticGoogleRedirect(
+  config: FirebasePublicConfig,
+): Promise<void> {
+  const { auth, authModule } = await getFirebaseClient(config)
+  const provider = new authModule.GoogleAuthProvider()
+  provider.setCustomParameters({ prompt: 'select_account' })
+  await authModule.signInWithRedirect(auth, provider)
+}
+
+export async function getGoalmaticGoogleRedirectResult(
+  config: FirebasePublicConfig,
+): Promise<UserProfile | null> {
+  const { auth, authModule } = await getFirebaseClient(config)
+  const credential = await authModule.getRedirectResult(auth)
+  if (credential?.user) return googleUserProfile(credential.user)
+  return isGoogleUser(auth.currentUser) ? googleUserProfile(auth.currentUser) : null
 }
 
 export async function sendGoalmaticEmailOtp(

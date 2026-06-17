@@ -19,7 +19,7 @@
       </div>
       <div class="footer-links">
         <strong>Community</strong>
-        <a href="https://github.com/kromate/Career-Studio" target="_blank" rel="noreferrer">Open source</a>
+        <a href="https://github.com/kromate/Career-Studio" target="_blank" rel="noreferrer">GitHub</a>
         <a href="https://goalmatic.io" target="_blank" rel="noreferrer">Goalmatic</a>
       </div>
     </div>

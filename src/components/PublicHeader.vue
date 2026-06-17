@@ -29,7 +29,7 @@
         </details>
         <NuxtLink to="/#vision">Vision</NuxtLink>
         <NuxtLink to="/methodology">How scoring works</NuxtLink>
-        <a href="https://github.com/kromate/Career-Studio" target="_blank" rel="noreferrer">Open source</a>
+        <a href="https://github.com/kromate/Career-Studio" target="_blank" rel="noreferrer">GitHub</a>
       </nav>
       <div class="header-actions">
         <NuxtLink to="/login" class="btn btn-ghost desktop-login">
@@ -50,7 +50,7 @@
       <NuxtLink to="/#products" @click="menuOpen = false">Resume tools</NuxtLink>
       <NuxtLink to="/#vision" @click="menuOpen = false">Career roadmap</NuxtLink>
       <NuxtLink to="/methodology" @click="menuOpen = false">How scoring works</NuxtLink>
-      <a href="https://github.com/kromate/Career-Studio" target="_blank" rel="noreferrer" @click="menuOpen = false">Open source</a>
+      <a href="https://github.com/kromate/Career-Studio" target="_blank" rel="noreferrer" @click="menuOpen = false">GitHub</a>
       <NuxtLink to="/login" @click="menuOpen = false">Sign in</NuxtLink>
     </nav>
   </header>

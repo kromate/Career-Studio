@@ -4,6 +4,13 @@ const firebaseAuthPopupHeaders = {
   'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
 }
 
+const siteUrl = 'https://careerstudio.goalmatic.io'
+const siteName = 'Career Studio by Goalmatic'
+const siteTitle = 'Career Studio — Your complete career workspace'
+const siteDescription = 'Find jobs, tailor resumes, draft cover letters, prepare for interviews, and track applications in one open-source career workspace.'
+const ogImageUrl = `${siteUrl}/og-image.png`
+const ogImageAlt = 'Career Studio preview showing a connected workspace for jobs, resumes, cover letters, interviews, and applications.'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: false },
@@ -43,15 +50,39 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      title: 'Career Studio by Goalmatic - Move your career forward',
+      htmlAttrs: {
+        lang: 'en',
+      },
+      title: siteTitle,
       meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         {
           name: 'description',
-          content: 'Open-source career tools for resume improvement, interview practice, mentorship, company and pay insights, job search, and career exploration.',
+          content: siteDescription,
         },
+        { name: 'robots', content: 'index, follow' },
+        { name: 'application-name', content: siteName },
         { name: 'theme-color', content: '#601ded' },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:site_name', content: siteName },
+        { property: 'og:url', content: siteUrl },
+        { property: 'og:title', content: siteTitle },
+        { property: 'og:description', content: siteDescription },
+        { property: 'og:image', content: ogImageUrl },
+        { property: 'og:image:secure_url', content: ogImageUrl },
+        { property: 'og:image:type', content: 'image/png' },
+        { property: 'og:image:width', content: '1200' },
+        { property: 'og:image:height', content: '630' },
+        { property: 'og:image:alt', content: ogImageAlt },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:title', content: siteTitle },
+        { name: 'twitter:description', content: siteDescription },
+        { name: 'twitter:image', content: ogImageUrl },
+        { name: 'twitter:image:alt', content: ogImageAlt },
       ],
       link: [
+        { rel: 'canonical', href: siteUrl },
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },

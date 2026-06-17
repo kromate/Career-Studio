@@ -9,17 +9,17 @@
             Your open-source career workspace
           </span>
           <h1 class="display-xl">
-            Make your next career move with evidence, not guesswork.
-            <span>Start with a resume that proves your value.</span>
+            Build the work behind your next career move.
+            <span>Keep the full journey connected.</span>
           </h1>
           <p class="body-lg">
-            Review your resume, improve it without inventing experience, compare it
-            with real roles, and keep every application connected. Career Studio is
-            growing into one trusted place for the work behind your career.
+            Career Studio helps you review resumes, compare jobs, track applications,
+            draft cover letters, prepare for interviews, and keep every career move
+            connected.
           </p>
           <div class="hero-actions">
             <NuxtLink to="/login" class="btn btn-primary btn-lg">
-              Check my resume
+              Start with resume review
               <ArrowRight :size="17" />
             </NuxtLink>
             <NuxtLink to="/#vision" class="btn btn-secondary btn-lg">
