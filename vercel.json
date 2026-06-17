@@ -1,4 +1,10 @@
 {
+    "rewrites": [
+        {
+            "source": "/__/auth/:path*",
+            "destination": "https://goalmatics.firebaseapp.com/__/auth/:path*"
+        }
+    ],
     "headers": [
         {
             "source": "/login",
