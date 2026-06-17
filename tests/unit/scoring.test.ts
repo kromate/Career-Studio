@@ -47,6 +47,62 @@ describe('deterministic resume analysis', () => {
     expect(profileCheck?.earnedPoints).toBe(2)
     expect(profileCheck?.passed).toBe(true)
   })
+
+  it('penalizes sparse three-page resumes, repeated verbs, and filler language', () => {
+    const resume = [
+      'TAYLOR REED',
+      'taylor@example.com | +1 416 555 0100',
+      'EXPERIENCE',
+      'Developer',
+      'Jan 2023 - Present',
+      '- Technologies used: Vue and Firebase.',
+      '- Technologies used: TypeScript and Node.',
+      '- Technologies used: Docker and SQL.',
+      '- Responsible for various product improvements.',
+      '\f',
+      'Developer',
+      '2020 - 2022',
+      '- Worked on internal tools.',
+      '- Built a service used by 500 customers.',
+      '\f',
+      'SKILLS',
+      'Vue, TypeScript, Node, Firebase, Docker, SQL',
+      'EDUCATION',
+      'BSc Computer Science',
+      '09/2016 - 2020',
+    ].join('\n')
+    const analysis = scoreResume(parseResumeText(resume))
+    const check = (ruleId: string) => analysis.checks.find(item => item.ruleId === ruleId)
+
+    expect(check('clarity.resume-length')?.earnedPoints).toBe(0)
+    expect(check('clarity.repetition')?.passed).toBe(false)
+    expect(check('clarity.filler-words')?.earnedPoints).toBeLessThan(2)
+    expect(check('consistency.dates')?.earnedPoints).toBeLessThan(4)
+  })
+
+  it('requires quantified evidence across the resume instead of only six bullets', () => {
+    const unquantifiedBullets = Array.from(
+      { length: 12 },
+      (_, index) => `- Built feature ${String.fromCharCode(65 + index)} for customer workflows.`,
+    ).join('\n')
+    const resume = `${sampleResume}\n${unquantifiedBullets}`
+    const impact = scoreResume(parseResumeText(resume)).checks
+      .find(check => check.ruleId === 'impact.quantified-outcomes')
+
+    expect(impact?.earnedPoints).toBeLessThan(10)
+  })
+
+  it('detects broken ligature text as a language-quality issue', () => {
+    const resume = sampleResume.replace(
+      'Product-minded software engineer',
+      'Product-minded software engineer focused on uni fi cation',
+    )
+    const mechanics = scoreResume(parseResumeText(resume)).checks
+      .find(check => check.ruleId === 'mechanics.language-quality')
+
+    expect(mechanics?.passed).toBe(false)
+    expect(mechanics?.evidence[0]?.quote).toContain('uni fi cation')
+  })
 })
 
 describe('PDF text reconstruction', () => {

@@ -6,24 +6,24 @@
         <div class="hero-copy">
           <span class="hero-pill">
             <HeartHandshake :size="14" />
-            Open-source tools for every career move
+            Your open-source career workspace
           </span>
           <h1 class="display-xl">
-            Move your career forward.
-            <span>Start with a resume that shows your value.</span>
+            Make your next career move with evidence, not guesswork.
+            <span>Start with a resume that proves your value.</span>
           </h1>
           <p class="body-lg">
-            Career Studio is building one place for the work behind a better career.
-            Today, get an explainable resume review. Next, prepare with peers, find
-            mentors, understand companies and pay, and manage every move in one place.
+            Review your resume, improve it without inventing experience, compare it
+            with real roles, and keep every application connected. Career Studio is
+            growing into one trusted place for the work behind your career.
           </p>
           <div class="hero-actions">
             <NuxtLink to="/login" class="btn btn-primary btn-lg">
-              Review my resume
+              Check my resume
               <ArrowRight :size="17" />
             </NuxtLink>
             <NuxtLink to="/#vision" class="btn btn-secondary btn-lg">
-              See what is coming
+              Explore the roadmap
             </NuxtLink>
           </div>
           <div class="hero-trust">
@@ -86,12 +86,62 @@
 
     <section class="proof-strip">
       <div class="container proof-inner">
-        <p>The work behind a better career, brought into one place</p>
+        <p>One profile. Every intentional career move.</p>
         <div>
-          <span>Present your experience</span>
-          <span>Practice with purpose</span>
-          <span>Learn from people</span>
-          <span>Choose with context</span>
+          <span>Review</span>
+          <span>Improve</span>
+          <span>Target</span>
+          <span>Track</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="products" class="section product-suite-section">
+      <div class="container">
+        <div class="suite-heading">
+          <div>
+            <span class="eyebrow">A connected career toolkit</span>
+            <h2 class="display-lg">Start with the tools that make every application stronger.</h2>
+          </div>
+          <p class="body-lg">
+            Career Studio keeps your source resume, verified evidence, role targets,
+            and application history connected. Build once, then create deliberate
+            versions for each opportunity.
+          </p>
+        </div>
+        <div class="suite-grid">
+          <article
+            v-for="product in products"
+            :key="product.title"
+            class="suite-card"
+            :class="{ featured: product.featured }"
+          >
+            <div class="suite-card-top">
+              <span class="suite-icon">
+                <component :is="product.icon" :size="21" />
+              </span>
+              <small :class="{ live: product.live }">
+                {{ product.live ? 'Available now' : product.phase }}
+              </small>
+            </div>
+            <h3>{{ product.title }}</h3>
+            <p>{{ product.description }}</p>
+            <NuxtLink v-if="product.live" to="/login" class="suite-link">
+              {{ product.action }}
+              <ArrowRight :size="14" />
+            </NuxtLink>
+            <span v-else class="suite-link planned">
+              Open-source roadmap
+            </span>
+          </article>
+        </div>
+        <div class="suite-principle">
+          <ShieldCheck :size="19" />
+          <p>
+            <strong>Automation should earn your trust.</strong>
+            Career Studio will prepare, personalize, and organize work before it
+            automates submission. You review what represents you.
+          </p>
         </div>
       </div>
     </section>
@@ -254,7 +304,7 @@
           </p>
           <div class="privacy-actions">
             <NuxtLink to="/privacy" class="btn btn-secondary">Read the privacy approach</NuxtLink>
-            <NuxtLink to="/open-source" class="btn btn-ghost">Inspect the open-source project</NuxtLink>
+            <a href="https://github.com/kromate/Career-Studio" class="btn btn-ghost" target="_blank" rel="noreferrer">Inspect the open-source project</a>
           </div>
         </div>
         <div class="privacy-points">
@@ -295,6 +345,7 @@
 import {
   ArrowRight,
   BadgeCheck,
+  BriefcaseBusiness,
   Check,
   CheckCircle2,
   Code2,
@@ -311,6 +362,7 @@ import {
   LockKeyhole,
   PencilLine,
   Repeat2,
+  Send,
   ShieldCheck,
   Sparkles,
   Target,
@@ -335,6 +387,63 @@ const steps = [
     icon: PencilLine,
     title: 'Build the next version',
     description: 'Edit directly or review evidence-preserving suggestions. Nothing is saved without your approval.',
+  },
+]
+
+const products = [
+  {
+    icon: FileCheck2,
+    title: 'Resume checker',
+    description: 'Score clarity, evidence, structure, consistency, searchability, and mechanics with a published, repeatable method.',
+    action: 'Check my resume',
+    phase: 'Available now',
+    live: true,
+    featured: true,
+  },
+  {
+    icon: PencilLine,
+    title: 'Resume builder',
+    description: 'Turn findings into stronger versions, review every change, and export an ATS-readable document without invented facts.',
+    action: 'Improve my resume',
+    phase: 'Available now',
+    live: true,
+    featured: false,
+  },
+  {
+    icon: Target,
+    title: 'Job match',
+    description: 'Compare one reviewed resume with one role and see supported requirements, evidence gaps, and a separate match score.',
+    action: 'Target a role',
+    phase: 'Available now',
+    live: true,
+    featured: false,
+  },
+  {
+    icon: BriefcaseBusiness,
+    title: 'Application tracker',
+    description: 'Connect saved jobs, tailored resume versions, and application stages so the history of every opportunity stays clear.',
+    action: 'Organize my search',
+    phase: 'Available now',
+    live: true,
+    featured: false,
+  },
+  {
+    icon: FileSearch,
+    title: 'Cover letter studio',
+    description: 'Draft job-specific letters from your approved resume evidence and writing preferences, with every new claim flagged for review.',
+    action: '',
+    phase: 'Planned next',
+    live: false,
+    featured: false,
+  },
+  {
+    icon: Send,
+    title: 'Application assistant',
+    description: 'Prepare application answers and autofill repeated details with a complete audit trail and confirmation before anything is sent.',
+    action: '',
+    phase: 'Later phase',
+    live: false,
+    featured: false,
   },
 ]
 
@@ -689,6 +798,134 @@ const workspaceFeatures = [
   font-family: var(--font-display);
   font-size: 12px;
   font-weight: 700;
+}
+
+.product-suite-section {
+  background: #f8f9fb;
+}
+
+.suite-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.65fr);
+  align-items: end;
+  gap: 70px;
+  margin-bottom: 42px;
+}
+
+.suite-heading h2,
+.suite-heading p {
+  margin-bottom: 0;
+}
+
+.suite-heading p {
+  color: var(--ink-soft);
+}
+
+.suite-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.suite-card {
+  display: flex;
+  min-height: 268px;
+  flex-direction: column;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
+}
+
+.suite-card.featured {
+  border-color: #d8cafa;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(96, 29, 237, 0.09), transparent 38%),
+    #fff;
+}
+
+.suite-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.suite-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--purple);
+  background: var(--purple-soft);
+}
+
+.suite-card small {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  background: var(--surface-soft);
+}
+
+.suite-card small.live {
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+.suite-card h3 {
+  margin: 0 0 9px;
+  font-size: 17px;
+}
+
+.suite-card p {
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.suite-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  color: var(--purple);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.suite-link.planned {
+  color: var(--muted);
+}
+
+.suite-principle {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-top: 15px;
+  padding: 18px 20px;
+  border: 1px solid #dfd7f2;
+  border-radius: 13px;
+  color: var(--purple);
+  background: var(--purple-soft);
+}
+
+.suite-principle p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.suite-principle strong {
+  color: var(--ink);
 }
 
 .section {
@@ -1143,8 +1380,17 @@ const workspaceFeatures = [
 
   .score-grid,
   .evidence-grid,
-  .privacy-card {
+  .privacy-card,
+  .suite-heading {
     grid-template-columns: 1fr;
+  }
+
+  .suite-heading {
+    gap: 20px;
+  }
+
+  .suite-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .workspace-grid {
@@ -1220,7 +1466,8 @@ const workspaceFeatures = [
 
   .process-grid,
   .score-cards,
-  .workspace-grid {
+  .workspace-grid,
+  .suite-grid {
     grid-template-columns: 1fr;
   }
 

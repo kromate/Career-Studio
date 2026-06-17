@@ -9,6 +9,7 @@ import {
   ACTION_VERBS,
   COMMON_SKILLS,
   DIMENSION_LABELS,
+  FILLER_PHRASES,
   PARSER_VERSION,
   SCORING_VERSION,
   TAXONOMY_VERSION,
@@ -81,6 +82,71 @@ function repeatedPhrases(lines: string[]): string[] {
   return [...starts.entries()].filter(([, count]) => count >= 3).map(([phrase]) => phrase)
 }
 
+function repeatedActionWords(lines: string[]): string[] {
+  const candidates = new Set([...ACTION_VERBS, 'used', 'worked', 'helped', 'supported'])
+  const counts = new Map<string, number>()
+
+  lines.forEach((line) => {
+    const words = new Set(line.toLowerCase().match(/[a-z]+/g) || [])
+    candidates.forEach((candidate) => {
+      if (words.has(candidate)) counts.set(candidate, (counts.get(candidate) || 0) + 1)
+    })
+  })
+
+  return [...counts.entries()]
+    .filter(([, count]) => count > 2)
+    .map(([word]) => word)
+}
+
+function dateStyle(line: string): string | null {
+  const normalized = line.toLowerCase()
+  if (!/\b(?:19|20)\d{2}\b/.test(normalized)) return null
+  if (/\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+(?:19|20)\d{2}\b/.test(normalized)) {
+    return 'month-name'
+  }
+  if (/\b(?:0?[1-9]|1[0-2])[/-](?:19|20)\d{2}\b/.test(normalized)) return 'month-number'
+  return 'year-only'
+}
+
+function hasReversedDateRange(line: string): boolean {
+  const years = line.match(/\b(?:19|20)\d{2}\b/g)?.map(Number) || []
+  return years.length >= 2 && years[1]! < years[0]!
+}
+
+function dateConsistency(lines: ParsedResume['lines']): { score: number; evidence: ScoreCheck['evidence'] } {
+  const datedLines = lines.filter(line => dateStyle(line.text))
+  if (datedLines.length === 0) return { score: 0, evidence: [] }
+
+  const styleCounts = new Map<string, number>()
+  datedLines.forEach((line) => {
+    const style = dateStyle(line.text)
+    if (style) styleCounts.set(style, (styleCounts.get(style) || 0) + 1)
+  })
+  const dominantCount = Math.max(...styleCounts.values())
+  const reversed = datedLines.filter(line => hasReversedDateRange(line.text))
+  const mixedStyles = styleCounts.size > 1
+  const score = clamp((dominantCount / datedLines.length) * 4 - reversed.length * 1.5, 0, 4)
+  const minorityStyles = new Set(
+    [...styleCounts.entries()]
+      .filter(([, count]) => count < dominantCount)
+      .map(([style]) => style),
+  )
+  const evidence = datedLines
+    .filter(line => reversed.includes(line) || (mixedStyles && minorityStyles.has(dateStyle(line.text) || '')))
+    .slice(0, 3)
+    .map(line => ({ lineId: line.id, section: line.section, quote: line.text }))
+
+  return { score, evidence }
+}
+
+function focusedLengthScore(words: number, pages: number): number {
+  const wordsPerPage = words / Math.max(1, pages)
+  if (pages === 1 && words >= 300 && words <= 750) return 3
+  if (pages <= 2 && words >= 350 && words <= 1_100 && wordsPerPage >= 250) return 3
+  if (pages <= 2 && words >= 200 && words <= 1_300 && wordsPerPage >= 180) return 1.5
+  return 0
+}
+
 export function scoreResume(
   parsed: ParsedResume,
   options: { resumeId?: string; versionId?: string; createdAt?: string } = {},
@@ -106,6 +172,18 @@ export function scoreResume(
   const firstPersonEvidence = evidenceFor(parsed, text => /\b(i|me|my|mine)\b/.test(text))
   const placeholders = evidenceFor(parsed, text => /\b(lorem ipsum|your name|company name|xxx+|tbd|n\/a)\b/.test(text))
   const repeated = repeatedPhrases(bulletTexts)
+  const repeatedWords = repeatedActionWords(bulletTexts)
+  const repeatedEvidence = [
+    ...repeated.flatMap(phrase => evidenceFor(parsed, text => text.startsWith(phrase), 2)),
+    ...repeatedWords.flatMap(word => evidenceFor(parsed, text => new RegExp(`\\b${word}\\b`).test(text), 2)),
+  ].slice(0, 3)
+  const fillerEvidence = evidenceFor(parsed, text => FILLER_PHRASES.some(phrase => text.includes(phrase)))
+  const fillerCount = parsed.lines.filter(line => FILLER_PHRASES.some(phrase => line.text.toLowerCase().includes(phrase))).length
+  const languageRiskEvidence = evidenceFor(
+    parsed,
+    text => /\b[a-z]{2,}\s+(?:fi|fl)\s+[a-z]{2,}\b/.test(text)
+      || /\b(?:writing of|was in charge of|assumed the responsibility)\b/.test(text),
+  )
   const sectionsFound = new Set(parsed.sections.map(section => section.type))
   const skillMatches = countSkillMatches(parsed.normalizedText)
   const titleLines = parsed.lines.filter(line => (
@@ -118,6 +196,8 @@ export function scoreResume(
   const punctuationConsistency = bullets.length < 2
     ? 0
     : (punctuationRatio <= 0.15 || punctuationRatio >= 0.85 ? 1 : 0.45)
+  const dateResult = dateConsistency(parsed.lines)
+  const quantifiedTarget = Math.max(1, Math.ceil(impactBullets.length * 0.5))
 
   const rules: RuleInput[] = [
     {
@@ -234,7 +314,7 @@ export function scoreResume(
       explanation: 'Numbers make the size and result of your work concrete.',
       recommendation: 'Where truthful, add verified volume, time, revenue, quality, or percentage outcomes.',
       maxPoints: 10,
-      earnedPoints: ratioScore(quantifiedBullets.length, Math.max(1, Math.min(impactBullets.length, 6)), 10),
+      earnedPoints: ratioScore(quantifiedBullets.length, quantifiedTarget, 10),
       evidence: impactBullets
         .filter(line => !quantifiedBullets.includes(line))
         .slice(0, 3)
@@ -265,8 +345,8 @@ export function scoreResume(
       title: 'Bullets are concise and complete',
       explanation: 'Focused bullets are easier to scan than fragments or multi-line paragraphs.',
       recommendation: 'Keep most bullets between 8 and 32 words and limit each bullet to one main outcome.',
-      maxPoints: 6,
-      earnedPoints: ratioScore(conciseBullets.length, bullets.length, 6),
+      maxPoints: 5,
+      earnedPoints: ratioScore(conciseBullets.length, bullets.length, 5),
       evidence: longEvidence,
     },
     {
@@ -275,8 +355,8 @@ export function scoreResume(
       title: 'Resume voice is concise',
       explanation: 'Resume bullets normally omit first-person pronouns.',
       recommendation: 'Remove “I”, “me”, and “my” where the subject is already understood.',
-      maxPoints: 3,
-      earnedPoints: firstPersonEvidence.length === 0 ? 3 : clamp(3 - firstPersonEvidence.length, 0, 3),
+      maxPoints: 2,
+      earnedPoints: firstPersonEvidence.length === 0 ? 2 : clamp(2 - firstPersonEvidence.length, 0, 2),
       evidence: firstPersonEvidence,
     },
     {
@@ -286,8 +366,12 @@ export function scoreResume(
       explanation: 'Repeated phrasing makes distinct achievements sound generic.',
       recommendation: 'Vary action verbs while keeping each claim precise.',
       maxPoints: 3,
-      earnedPoints: repeated.length === 0 ? 3 : repeated.length === 1 ? 1.5 : 0,
-      evidence: repeated.flatMap(phrase => evidenceFor(parsed, text => text.startsWith(phrase), 2)).slice(0, 3),
+      earnedPoints: repeated.length + repeatedWords.length === 0
+        ? 3
+        : repeated.length + repeatedWords.length === 1
+          ? 1.5
+          : 0,
+      evidence: repeatedEvidence,
     },
     {
       id: 'clarity.resume-length',
@@ -296,11 +380,17 @@ export function scoreResume(
       explanation: 'Most resumes should communicate relevant evidence without unnecessary volume.',
       recommendation: 'Prioritize recent, relevant evidence and remove duplicated or low-value content.',
       maxPoints: 3,
-      earnedPoints: parsed.stats.words >= 300 && parsed.stats.words <= 1100
-        ? 3
-        : parsed.stats.words >= 200 && parsed.stats.words <= 1400
-          ? 1.5
-          : 0,
+      earnedPoints: focusedLengthScore(parsed.stats.words, parsed.stats.pagesEstimated),
+    },
+    {
+      id: 'clarity.filler-words',
+      dimension: 'clarity',
+      title: 'Language is direct and economical',
+      explanation: 'Filler phrases add length without strengthening the evidence.',
+      recommendation: 'Remove filler phrases and state the action, scope, and outcome directly.',
+      maxPoints: 2,
+      earnedPoints: clamp(2 - fillerCount * 0.5, 0, 2),
+      evidence: fillerEvidence,
     },
     {
       id: 'consistency.punctuation',
@@ -318,7 +408,8 @@ export function scoreResume(
       explanation: 'Consistent date formats make the career timeline easier to scan.',
       recommendation: 'Use one date style throughout, such as “Jan 2023 - Mar 2025”.',
       maxPoints: 4,
-      earnedPoints: parsed.stats.datedLines >= 4 ? 4 : parsed.stats.datedLines >= 2 ? 2.5 : parsed.stats.datedLines ? 1 : 0,
+      earnedPoints: dateResult.score,
+      evidence: dateResult.evidence,
     },
     {
       id: 'consistency.headings',
@@ -366,8 +457,8 @@ export function scoreResume(
       title: 'No template placeholders remain',
       explanation: 'Unfinished placeholder text is a high-risk application error.',
       recommendation: 'Replace or remove all template placeholders before exporting.',
-      maxPoints: 2,
-      earnedPoints: placeholders.length === 0 ? 2 : 0,
+      maxPoints: 1,
+      earnedPoints: placeholders.length === 0 ? 1 : 0,
       evidence: placeholders,
     },
     {
@@ -385,8 +476,18 @@ export function scoreResume(
       title: 'Capitalization is readable',
       explanation: 'Long all-caps text is harder to scan and can look inconsistent.',
       recommendation: 'Reserve all caps for short section headings.',
+      maxPoints: 1,
+      earnedPoints: parsed.lines.filter(line => line.text.length > 35 && line.text === line.text.toUpperCase()).length === 0 ? 1 : 0.25,
+    },
+    {
+      id: 'mechanics.language-quality',
+      dimension: 'mechanics',
+      title: 'Text is free of obvious language artifacts',
+      explanation: 'Broken words and awkward constructions can indicate export, spelling, or grammar problems.',
+      recommendation: 'Proofread the extracted text and replace broken words or awkward constructions before applying.',
       maxPoints: 2,
-      earnedPoints: parsed.lines.filter(line => line.text.length > 35 && line.text === line.text.toUpperCase()).length === 0 ? 2 : 0.5,
+      earnedPoints: clamp(2 - languageRiskEvidence.length, 0, 2),
+      evidence: languageRiskEvidence,
     },
   ]
 

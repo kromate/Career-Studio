@@ -148,7 +148,7 @@
           </div>
           <div class="about-actions">
             <NuxtLink to="/methodology" class="btn btn-secondary">Read methodology</NuxtLink>
-            <NuxtLink to="/open-source" class="btn btn-secondary">Open-source project</NuxtLink>
+            <a href="https://github.com/kromate/Career-Studio" class="btn btn-secondary" target="_blank" rel="noreferrer">Open-source project</a>
           </div>
         </section>
       </main>

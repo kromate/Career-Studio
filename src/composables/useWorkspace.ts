@@ -9,6 +9,7 @@ import type {
   WorkspaceState,
 } from '@/types'
 import { matchResumeToJob } from '@/lib/resume/matching'
+import { SCORING_VERSION } from '@/lib/resume/constants'
 import { hashText, parseResumeText } from '@/lib/resume/parser'
 import { scoreResume } from '@/lib/resume/scoring'
 
@@ -25,7 +26,7 @@ function defaultSettings(): AppSettings {
 
 function initialState(): WorkspaceState {
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     ownerId: null,
     user: null,
     resumes: [],
@@ -74,10 +75,33 @@ function removeLegacyDemoData(workspace: WorkspaceState): WorkspaceState {
 
   return {
     ...workspace,
-    schemaVersion: 2,
+    schemaVersion: 3,
     resumes,
     jobs,
     applications: workspace.applications.filter(application => jobIds.has(application.jobId)),
+  }
+}
+
+function refreshOutdatedAnalyses(workspace: WorkspaceState): WorkspaceState {
+  return {
+    ...workspace,
+    resumes: workspace.resumes.map(resume => ({
+      ...resume,
+      versions: resume.versions.map((version) => {
+        if (version.analysis.scoringVersion === SCORING_VERSION) return version
+
+        const parsed = parseResumeText(version.text)
+        return {
+          ...version,
+          parsed,
+          analysis: scoreResume(parsed, {
+            resumeId: resume.id,
+            versionId: version.id,
+            createdAt: version.analysis.createdAt || version.createdAt,
+          }),
+        }
+      }),
+    })),
   }
 }
 
@@ -134,17 +158,21 @@ export function useWorkspace() {
       try {
         const parsed = JSON.parse(stored) as WorkspaceState
         const storedProvider = (parsed.user as { authProvider?: string } | null)?.authProvider
-        const migrated = removeLegacyDemoData({
+        const hasOutdatedAnalyses = parsed.resumes.some(resume => (
+          resume.versions.some(version => version.analysis.scoringVersion !== SCORING_VERSION)
+        ))
+        const migrated = refreshOutdatedAnalyses(removeLegacyDemoData({
           ...initialState(),
           ...parsed,
           ownerId: parsed.ownerId || parsed.user?.id || null,
           user: storedProvider === 'demo' ? null : parsed.user,
           settings: { ...defaultSettings(), ...parsed.settings },
           hydrated: true,
-        })
+        }))
         state.value = migrated
         if (
           storedProvider === 'demo'
+          || hasOutdatedAnalyses
           || parsed.schemaVersion !== migrated.schemaVersion
           || parsed.resumes.length !== migrated.resumes.length
           || parsed.jobs.length !== migrated.jobs.length

@@ -1,6 +1,6 @@
 # Product Research
 
-Research updated: June 13, 2026.
+Research updated: June 15, 2026.
 
 ## Executive Summary
 
@@ -50,6 +50,7 @@ work preferences, preparation, and transitions.
 | [Sorce](https://www.sorce.jobs/) | Mobile swipe-based discovery plus AI-assisted applications | Discovery can be delightfully simple, but automated submission creates trust and quality risks |
 | [LoopCV](https://www.loopcv.pro/) | Automated searches, applications, statistics, and job aggregation | Search automation is compelling after profile quality and targeting are reliable |
 | [Sonara](https://www.sonara.ai/) | Learns preferences, finds jobs, and applies continuously | Continuous automation requires strong controls, exclusions, and audit history |
+| [Wobo](https://www.wobo.ai/) | Packages job search as one journey, gives each tool a focused product page, uses strong product previews, and connects resume, persona, matching, and application automation | Career Studio should present a connected suite while keeping live and planned capabilities explicit |
 | [Exponent Practice](https://www.tryexponent.com/practice) | Live mock interviews with peers, collaborative practice, and structured feedback | Practice is more useful when it is realistic, repeatable, and followed by actionable feedback |
 | [Interviewing.io](https://interviewing.io/) | Technical mock interviews with detailed feedback and anonymous practice options | Psychological safety and useful feedback matter as much as question coverage |
 | [ADPList](https://adplist.org/) | Goal-led mentor discovery and bookable one-to-one conversations | Mentorship should begin with a specific goal and relevant experience, not a generic directory |
@@ -76,6 +77,39 @@ Employer systems do not all behave the same way.
 Therefore, a third-party product cannot truthfully promise one score that every
 ATS will assign. It can reliably test parseability, content quality, and
 alignment to a supplied job description.
+
+## Wobo Product and UX Review
+
+Wobo's strongest pattern is product packaging. Its homepage leads with one
+outcome, explains a four-step journey, demonstrates the product in realistic
+interface scenes, and then gives resume building, cover letters, ATS checking,
+and applications their own focused entry points.
+
+Patterns worth adapting:
+
+- a concise products menu with one-line outcomes;
+- a journey from profile to matching to applications and results;
+- realistic interface previews instead of abstract illustrations;
+- strong availability and action labels;
+- a shared profile that reduces repeated form filling;
+- product-specific landing pages as capabilities mature;
+- social proof based on real, attributable outcomes.
+
+Patterns Career Studio should handle differently:
+
+- do not imply that one third-party score is the score used by every ATS;
+- do not mix a general resume quality score with job-specific matching;
+- do not make autonomous application submission the default;
+- do not use staged "AI working" animations to imply technical work that is
+  not actually happening;
+- do not publish fabricated job, interview, or success metrics.
+
+Frontend inspection shows separate backend endpoints for resume parsing,
+resume scoring, keyword generation, professional summaries, skill
+recommendations, and bullet improvement. This suggests a hybrid architecture:
+AI-assisted extraction and writing combined with a stored backend score. The
+public frontend does not reveal the model provider or prove whether every score
+calculation invokes a language model.
 
 ## Recommended Positioning
 

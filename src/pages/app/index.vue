@@ -310,18 +310,16 @@
     <section class="career-roadmap card">
       <div class="section-card-header">
         <div>
-          <span class="section-kicker">Beyond the resume</span>
-          <h2>Career support that grows with you</h2>
+          <span class="section-kicker">Career Studio roadmap</span>
+          <h2>One profile, a growing set of career tools</h2>
+          <p>Available tools work today. Planned tools stay visible so the community can help shape them.</p>
         </div>
-        <a href="https://github.com/kromate/Career-Studio" target="_blank" rel="noreferrer">
-          Join the roadmap <ArrowUpRight :size="14" />
-        </a>
       </div>
       <div class="roadmap-grid">
         <article v-for="item in careerRoadmap" :key="item.title" :class="{ live: item.live }">
           <span class="roadmap-icon"><component :is="item.icon" :size="18" /></span>
           <div>
-            <small>{{ item.live ? 'Available now' : 'Planned' }}</small>
+            <small>{{ item.phase }}</small>
             <strong>{{ item.title }}</strong>
             <p>{{ item.description }}</p>
           </div>
@@ -340,17 +338,15 @@ import {
   ChevronRight,
   Clock3,
   FileSearch,
+  FilePenLine,
   FileUp,
   Files,
-  Building2,
   Compass,
   GitBranch,
-  GraduationCap,
   Gauge,
   ListChecks,
   LockKeyhole,
   MessagesSquare,
-  Mic2,
   RefreshCw,
   Send,
   ShieldCheck,
@@ -435,34 +431,46 @@ const nextAction = computed(() => {
 
 const careerRoadmap = [
   {
-    icon: FileSearch,
-    title: 'Resume review and rewriting',
-    description: 'Clarify your strongest evidence, tailor it to roles, and track every version.',
+    icon: ShieldCheck,
+    title: 'Resume checker',
+    description: 'Repeatable scoring, exact evidence, and prioritized findings.',
     live: true,
+    phase: 'Available',
   },
   {
-    icon: Mic2,
-    title: 'Practice interviews',
-    description: 'Practice live with peers and exchange structured, useful feedback.',
-    live: false,
+    icon: FilePenLine,
+    title: 'Resume builder',
+    description: 'Evidence-preserving edits, exports, and immutable version history.',
+    live: true,
+    phase: 'Available',
   },
   {
-    icon: GraduationCap,
-    title: 'Mentorship',
-    description: 'Book focused conversations with people who have relevant experience.',
-    live: false,
+    icon: Target,
+    title: 'Job match',
+    description: 'Role requirements, evidence gaps, and tailored resume versions.',
+    live: true,
+    phase: 'Available',
   },
   {
-    icon: Building2,
-    title: 'Company and pay insights',
-    description: 'Learn from anonymous interview, workplace, and compensation experiences.',
+    icon: FileSearch,
+    title: 'Cover letter studio',
+    description: 'Job-specific drafts grounded in approved resume evidence.',
     live: false,
+    phase: 'Planned next',
+  },
+  {
+    icon: Send,
+    title: 'Application assistant',
+    description: 'Prepare answers and autofill details with review before submission.',
+    live: false,
+    phase: 'Later phase',
   },
   {
     icon: Compass,
-    title: 'Career discovery',
-    description: 'Connect your skills and interests to roles and realistic transition paths.',
+    title: 'Job discovery',
+    description: 'Find relevant, verified opportunities without turning the workspace into a noisy job board.',
     live: false,
+    phase: 'Later phase',
   },
 ]
 </script>
@@ -611,6 +619,14 @@ const careerRoadmap = [
   padding: 20px 22px;
 }
 
+.career-roadmap .section-card-header p {
+  max-width: 620px;
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
 .career-roadmap .section-card-header > a {
   display: inline-flex;
   align-items: center;
@@ -642,7 +658,7 @@ const careerRoadmap = [
 }
 
 .roadmap-grid article:nth-last-child(-n + 2) {
-  grid-column: span 3;
+  grid-column: span 2;
 }
 
 .roadmap-grid article.live {

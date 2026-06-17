@@ -1,7 +1,7 @@
 import type { ResumeSectionType, ScoreDimension } from '@/types'
 
 export const PARSER_VERSION = 'resume-parser-v1.1.0'
-export const SCORING_VERSION = 'resume-quality-v1.2.0'
+export const SCORING_VERSION = 'resume-quality-v1.3.0'
 export const MATCH_SCORING_VERSION = 'job-match-v1.0.0'
 export const TAXONOMY_VERSION = 'skills-v1.0.0'
 
@@ -46,7 +46,7 @@ export const ACTION_VERBS = [
   'implemented', 'improved', 'increased', 'launched', 'led', 'managed', 'mentored',
   'negotiated', 'optimized', 'orchestrated', 'oversaw', 'owned', 'produced',
   'reduced', 'resolved', 'scaled', 'shipped', 'streamlined', 'supported',
-  'transformed', 'worked',
+  'transformed',
 ]
 
 export const TECHNOLOGY_LIST_PATTERN = /^(?:technologies?|tech stack|tools) used\s*:/i
@@ -54,12 +54,33 @@ export const TECHNOLOGY_LIST_PATTERN = /^(?:technologies?|tech stack|tools) used
 export const WEAK_PHRASES = [
   'responsible for',
   'worked on',
+  'worked with',
   'helped with',
   'helped to',
   'tasked with',
   'duties included',
   'participated in',
   'involved in',
+  'was in charge of',
+  'assumed the responsibility',
+]
+
+export const FILLER_PHRASES = [
+  'in order to',
+  'successfully',
+  'various',
+  'multiple different',
+  'a number of',
+  'as needed',
+  'as required',
+  'was able to',
+  'helped to',
+  'helped with',
+  'responsible for',
+  'duties included',
+  'tasked with',
+  'involved in',
+  'participated in',
 ]
 
 export const COMMON_SKILLS: Record<string, string[]> = {

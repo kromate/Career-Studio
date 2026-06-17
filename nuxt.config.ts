@@ -8,6 +8,7 @@ export default defineNuxtConfig({
   },
   ssr: true,
   routeRules: {
+    '/open-source': { redirect: 'https://github.com/kromate/Career-Studio' },
     '/login': { ssr: false },
     '/signup': { ssr: false },
     '/app': { ssr: false },
@@ -59,14 +60,14 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      firebaseApiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || '',
-      firebaseAuthDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
-      firebaseProjectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID || '',
-      firebaseStorageBucket: process.env.NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '',
-      firebaseMessagingSenderId: process.env.NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
-      firebaseAppId: process.env.NUXT_PUBLIC_FIREBASE_APP_ID || '',
-      goalmaticAppUrl: process.env.NUXT_PUBLIC_GOALMATIC_APP_URL || 'https://goalmatic.io',
-      appMode: process.env.NUXT_PUBLIC_APP_MODE || 'local',
+      firebaseApiKey: process.env.VITE_FIREBASE_API_KEY || '',
+      firebaseAuthDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN || '',
+      firebaseProjectId: process.env.VITE_FIREBASE_PROJECT_ID || '',
+      firebaseStorageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || '',
+      firebaseMessagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+      firebaseAppId: process.env.VITE_FIREBASE_APP_ID || '',
+      goalmaticAppUrl: process.env.VITE_GOALMATIC_APP_URL || 'https://goalmatic.io',
+      appMode: process.env.VITE_APP_MODE || 'local',
     },
   },
   vite: {

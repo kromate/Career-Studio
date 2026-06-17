@@ -11,15 +11,15 @@
       </div>
       <div class="footer-links">
         <strong>Product</strong>
-        <NuxtLink to="/#vision">Product vision</NuxtLink>
+        <NuxtLink to="/#products">Resume tools</NuxtLink>
+        <NuxtLink to="/#vision">Career roadmap</NuxtLink>
         <NuxtLink to="/methodology">Scoring methodology</NuxtLink>
         <NuxtLink to="/privacy">Privacy</NuxtLink>
         <NuxtLink to="/login">Sign in</NuxtLink>
       </div>
       <div class="footer-links">
         <strong>Community</strong>
-        <NuxtLink to="/open-source">Open source</NuxtLink>
-        <a href="https://github.com/kromate/Career-Studio" target="_blank" rel="noreferrer">GitHub repository</a>
+        <a href="https://github.com/kromate/Career-Studio" target="_blank" rel="noreferrer">Open source</a>
         <a href="https://goalmatic.io" target="_blank" rel="noreferrer">Goalmatic</a>
       </div>
     </div>
