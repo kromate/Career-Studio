@@ -21,7 +21,6 @@ export default defineNuxtConfig({
   },
   ssr: true,
   routeRules: {
-    '/__/auth/**': { proxy: 'https://goalmatics.firebaseapp.com/__/auth/**' },
     '/open-source': { redirect: 'https://github.com/kromate/Career-Studio' },
     '/login': { ssr: false, headers: firebaseAuthPopupHeaders },
     '/signup': { ssr: false, headers: firebaseAuthPopupHeaders },

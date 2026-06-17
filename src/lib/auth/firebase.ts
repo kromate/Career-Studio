@@ -60,15 +60,6 @@ export function hasGoogleSignInConfig(config: FirebasePublicConfig): boolean {
   return hasFirebaseConfig(config)
 }
 
-function resolveFirebaseAuthDomain(config: FirebasePublicConfig): string {
-  if (typeof window === 'undefined') return config.firebaseAuthDomain
-
-  const host = window.location.host
-  if (host === 'careerstudio.goalmatic.io') return host
-
-  return config.firebaseAuthDomain
-}
-
 async function getFirebaseClient(config: FirebasePublicConfig) {
   if (!hasFirebaseConfig(config)) {
     throw new Error('Firebase is not configured for this environment.')
@@ -82,7 +73,7 @@ async function getFirebaseClient(config: FirebasePublicConfig) {
     ? getApp()
     : initializeApp({
       apiKey: config.firebaseApiKey,
-      authDomain: resolveFirebaseAuthDomain(config),
+      authDomain: config.firebaseAuthDomain,
       projectId: config.firebaseProjectId,
       storageBucket: config.firebaseStorageBucket,
       messagingSenderId: config.firebaseMessagingSenderId,
