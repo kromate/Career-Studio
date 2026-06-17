@@ -28,7 +28,7 @@
         >
           <AppSpinner v-if="activeAction === 'google'" :size="18" />
           <span v-else class="google-logo">G</span>
-          {{ activeAction === 'google' ? 'Redirecting…' : 'Sign up with Google' }}
+          {{ activeAction === 'google' ? 'Connecting…' : 'Sign up with Google' }}
         </button>
         <div v-if="!otpStep && !googleReady" class="auth-coming-soon">
           <ComingSoonBadge />
@@ -182,11 +182,10 @@ import {
   UserRound,
 } from 'lucide-vue-next'
 import {
-  getGoalmaticGoogleRedirectResult,
   hasFirebaseConfig,
   hasGoogleSignInConfig,
   sendGoalmaticSignupOtp,
-  startGoalmaticGoogleRedirect,
+  signInWithGoalmaticGoogle,
   verifyGoalmaticSignupOtp,
 } from '@/lib/auth/firebase'
 
@@ -210,44 +209,17 @@ const useLocalOtp = computed(() => !hasFirebaseConfig(config))
 const googleReady = computed(() => hasGoogleSignInConfig(config))
 const referralCodeValid = computed(() => !referralCode.value || /^[A-Z0-9]{7}$/.test(referralCode.value))
 const goalmaticBaseUrl = computed(() => config.goalmaticAppUrl.replace(/\/$/, ''))
-const googleRedirectStorageKey = 'career-studio:google-redirect'
 let resendTimer: number | undefined
 
-onMounted(async () => {
+onMounted(() => {
   workspace.hydrate()
   if (workspace.state.value.user) {
     navigateTo('/app')
     return
   }
-  await completeGoogleRedirect()
   const referral = typeof route.query.ref === 'string' ? route.query.ref.toUpperCase() : ''
   if (/^[A-Z0-9]{7}$/.test(referral)) referralCode.value = referral
 })
-
-const completeGoogleRedirect = async () => {
-  if (!googleReady.value) return
-  const hadPendingRedirect = window.sessionStorage.getItem(googleRedirectStorageKey) === 'signup'
-  if (hadPendingRedirect) activeAction.value = 'google'
-  try {
-    const user = await getGoalmaticGoogleRedirectResult(config)
-    if (!user) return
-    window.sessionStorage.removeItem(googleRedirectStorageKey)
-    workspace.login(user)
-    await navigateTo('/app')
-  } catch (error) {
-    if (hadPendingRedirect) {
-      toast.show('Could not sign up with Google', {
-        message: error instanceof Error ? error.message : 'Please try again.',
-        tone: 'error',
-      })
-    }
-  } finally {
-    if (hadPendingRedirect) {
-      window.sessionStorage.removeItem(googleRedirectStorageKey)
-      activeAction.value = null
-    }
-  }
-}
 
 const normalizeReferralCode = () => {
   referralCode.value = referralCode.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 7)
@@ -289,14 +261,15 @@ const handleGoogle = async () => {
   if (!googleReady.value || !acceptedTerms.value) return
   activeAction.value = 'google'
   try {
-    window.sessionStorage.setItem(googleRedirectStorageKey, 'signup')
-    await startGoalmaticGoogleRedirect(config)
+    const user = await signInWithGoalmaticGoogle(config)
+    workspace.login(user)
+    await navigateTo('/app')
   } catch (error) {
-    window.sessionStorage.removeItem(googleRedirectStorageKey)
     toast.show('Could not sign up with Google', {
       message: error instanceof Error ? error.message : 'Please try again.',
       tone: 'error',
     })
+  } finally {
     activeAction.value = null
   }
 }

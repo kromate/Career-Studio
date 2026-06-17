@@ -22,7 +22,6 @@ interface FirebaseUserLike {
   displayName: string | null
   email: string | null
   photoURL: string | null
-  providerData?: Array<{ providerId?: string }>
 }
 
 function formatAuthFunctionError(error: unknown): Error {
@@ -121,26 +120,14 @@ function googleUserProfile(user: FirebaseUserLike): UserProfile {
   }
 }
 
-function isGoogleUser(user: FirebaseUserLike | null | undefined): user is FirebaseUserLike {
-  return Boolean(user?.providerData?.some(provider => provider.providerId === 'google.com'))
-}
-
-export async function startGoalmaticGoogleRedirect(
+export async function signInWithGoalmaticGoogle(
   config: FirebasePublicConfig,
-): Promise<void> {
+): Promise<UserProfile> {
   const { auth, authModule } = await getFirebaseClient(config)
   const provider = new authModule.GoogleAuthProvider()
   provider.setCustomParameters({ prompt: 'select_account' })
-  await authModule.signInWithRedirect(auth, provider)
-}
-
-export async function getGoalmaticGoogleRedirectResult(
-  config: FirebasePublicConfig,
-): Promise<UserProfile | null> {
-  const { auth, authModule } = await getFirebaseClient(config)
-  const credential = await authModule.getRedirectResult(auth)
-  if (credential?.user) return googleUserProfile(credential.user)
-  return isGoogleUser(auth.currentUser) ? googleUserProfile(auth.currentUser) : null
+  const credential = await authModule.signInWithPopup(auth, provider)
+  return googleUserProfile(credential.user)
 }
 
 export async function sendGoalmaticEmailOtp(

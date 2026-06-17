@@ -22,7 +22,7 @@
         <button v-if="!otpStep" class="google-button" type="button" :disabled="loading || !googleReady" @click="handleGoogle">
           <AppSpinner v-if="activeAction === 'google'" :size="18" />
           <span v-else class="google-logo">G</span>
-          {{ activeAction === 'google' ? 'Redirecting…' : 'Continue with Google' }}
+          {{ activeAction === 'google' ? 'Connecting…' : 'Continue with Google' }}
         </button>
         <div v-if="!otpStep && !googleReady" class="auth-coming-soon">
           <ComingSoonBadge />
@@ -100,11 +100,10 @@
 import type { ComponentPublicInstance } from 'vue'
 import { ArrowLeft, ArrowRight, Github, Info, KeyRound, Mail, Repeat2, ShieldCheck } from 'lucide-vue-next'
 import {
-  getGoalmaticGoogleRedirectResult,
   hasFirebaseConfig,
   hasGoogleSignInConfig,
   sendGoalmaticEmailOtp,
-  startGoalmaticGoogleRedirect,
+  signInWithGoalmaticGoogle,
   verifyGoalmaticEmailOtp,
 } from '@/lib/auth/firebase'
 
@@ -122,42 +121,12 @@ const otpRefs = ref<Array<HTMLInputElement | null>>([])
 const resendSeconds = ref(0)
 const useLocalOtp = computed(() => !hasFirebaseConfig(config))
 const googleReady = computed(() => hasGoogleSignInConfig(config))
-const googleRedirectStorageKey = 'career-studio:google-redirect'
 let resendTimer: number | undefined
 
-onMounted(async () => {
+onMounted(() => {
   workspace.hydrate()
-  if (workspace.state.value.user) {
-    navigateTo('/app')
-    return
-  }
-  await completeGoogleRedirect()
+  if (workspace.state.value.user) navigateTo('/app')
 })
-
-const completeGoogleRedirect = async () => {
-  if (!googleReady.value) return
-  const hadPendingRedirect = window.sessionStorage.getItem(googleRedirectStorageKey) === 'login'
-  if (hadPendingRedirect) activeAction.value = 'google'
-  try {
-    const user = await getGoalmaticGoogleRedirectResult(config)
-    if (!user) return
-    window.sessionStorage.removeItem(googleRedirectStorageKey)
-    workspace.login(user)
-    await navigateTo('/app')
-  } catch (error) {
-    if (hadPendingRedirect) {
-      toast.show('Could not sign in with Google', {
-        message: error instanceof Error ? error.message : 'Please try again.',
-        tone: 'error',
-      })
-    }
-  } finally {
-    if (hadPendingRedirect) {
-      window.sessionStorage.removeItem(googleRedirectStorageKey)
-      activeAction.value = null
-    }
-  }
-}
 
 const setOtpRef = (element: Element | ComponentPublicInstance | null, index: number) => {
   otpRefs.value[index] = element instanceof HTMLInputElement ? element : null
@@ -195,14 +164,15 @@ const handleGoogle = async () => {
   if (!googleReady.value) return
   activeAction.value = 'google'
   try {
-    window.sessionStorage.setItem(googleRedirectStorageKey, 'login')
-    await startGoalmaticGoogleRedirect(config)
+    const user = await signInWithGoalmaticGoogle(config)
+    workspace.login(user)
+    await navigateTo('/app')
   } catch (error) {
-    window.sessionStorage.removeItem(googleRedirectStorageKey)
     toast.show('Could not sign in with Google', {
       message: error instanceof Error ? error.message : 'Please try again.',
       tone: 'error',
     })
+  } finally {
     activeAction.value = null
   }
 }

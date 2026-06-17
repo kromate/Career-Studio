@@ -1,7 +1,9 @@
 import { fileURLToPath, URL } from 'node:url'
 
 const firebaseAuthPopupHeaders = {
-  'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+  'Cross-Origin-Embedder-Policy': 'unsafe-none',
+  'Cross-Origin-Opener-Policy': 'unsafe-none',
+  'Cross-Origin-Resource-Policy': 'same-origin',
 }
 
 const siteUrl = 'https://careerstudio.goalmatic.io'
