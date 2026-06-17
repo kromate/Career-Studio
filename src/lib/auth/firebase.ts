@@ -60,6 +60,14 @@ export function hasGoogleSignInConfig(config: FirebasePublicConfig): boolean {
   return hasFirebaseConfig(config)
 }
 
+function firebaseAuthDomain(config: FirebasePublicConfig): string {
+  if (config.firebaseProjectId === 'goalmatics' && config.firebaseAuthDomain === 'www.goalmatic.io') {
+    return 'goalmatics.firebaseapp.com'
+  }
+
+  return config.firebaseAuthDomain
+}
+
 async function getFirebaseClient(config: FirebasePublicConfig) {
   if (!hasFirebaseConfig(config)) {
     throw new Error('Firebase is not configured for this environment.')
@@ -73,7 +81,7 @@ async function getFirebaseClient(config: FirebasePublicConfig) {
     ? getApp()
     : initializeApp({
       apiKey: config.firebaseApiKey,
-      authDomain: config.firebaseAuthDomain,
+      authDomain: firebaseAuthDomain(config),
       projectId: config.firebaseProjectId,
       storageBucket: config.firebaseStorageBucket,
       messagingSenderId: config.firebaseMessagingSenderId,
