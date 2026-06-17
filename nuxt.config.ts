@@ -9,7 +9,7 @@ const firebaseAuthPopupHeaders = {
 const siteUrl = 'https://careerstudio.goalmatic.io'
 const siteName = 'Career Studio by Goalmatic'
 const siteTitle = 'Career Studio — Your complete career workspace'
-const siteDescription = 'Find jobs, tailor resumes, draft cover letters, prepare for interviews, and track applications in one open-source career workspace.'
+const siteDescription = 'Find jobs, tailor resumes, draft cover letters, prepare for interviews, and track applications in one career workspace.'
 const ogImageUrl = `${siteUrl}/og-image.png`
 const ogImageAlt = 'Career Studio preview showing a connected workspace for jobs, resumes, cover letters, interviews, and applications.'
 
