@@ -1,5 +1,9 @@
 import { fileURLToPath, URL } from 'node:url'
 
+const firebaseAuthPopupHeaders = {
+  'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+}
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: false },
@@ -9,8 +13,8 @@ export default defineNuxtConfig({
   ssr: true,
   routeRules: {
     '/open-source': { redirect: 'https://github.com/kromate/Career-Studio' },
-    '/login': { ssr: false },
-    '/signup': { ssr: false },
+    '/login': { ssr: false, headers: firebaseAuthPopupHeaders },
+    '/signup': { ssr: false, headers: firebaseAuthPopupHeaders },
     '/app': { ssr: false },
     '/app/**': { ssr: false },
   },
