@@ -72,6 +72,24 @@
             </div>
           </div>
           <div class="setting-rows">
+            <div class="setting-row theme-setting-row">
+              <div>
+                <strong>Appearance</strong>
+                <p>Use the system default or set a browser-specific theme.</p>
+              </div>
+              <div class="theme-choice-group" role="group" aria-label="Appearance preference">
+                <button
+                  v-for="option in themeOptions"
+                  :key="option.id"
+                  type="button"
+                  :class="{ active: isThemePreferenceActive(option.id) }"
+                  @click="saveThemePreference(option.id)"
+                >
+                  <component :is="option.icon" :size="15" />
+                  <span>{{ option.label }}</span>
+                </button>
+              </div>
+            </div>
             <label class="setting-row">
               <div><strong>Weekly job-search review</strong><p>Show progress prompts and a weekly focus on the dashboard.</p></div>
               <input v-model="preferences.weeklyReview" type="checkbox" @change="savePreferences">
@@ -172,8 +190,11 @@ import {
   Code2,
   Database,
   LockKeyhole,
+  Monitor,
+  Moon,
   ShieldCheck,
   SlidersHorizontal,
+  Sun,
   Trash2,
   UserRound,
 } from 'lucide-vue-next'
@@ -188,9 +209,15 @@ definePageMeta({ layout: 'app', middleware: 'auth' })
 
 const workspace = useWorkspace()
 const toast = useToast()
+const { preference: themePreference, setPreference: setThemePreference } = useTheme()
 const activeSection = ref<'profile' | 'preferences' | 'data' | 'about'>('profile')
 const deleteConfirm = ref(false)
 const preferences = reactive({ ...workspace.state.value.settings })
+const themeOptions = [
+  { id: 'system', label: 'System', icon: Monitor },
+  { id: 'light', label: 'Light', icon: Sun },
+  { id: 'dark', label: 'Dark', icon: Moon },
+] as const
 const sections: Array<{ id: typeof activeSection.value; label: string; icon: Component }> = [
   { id: 'profile', label: 'Profile', icon: UserRound },
   { id: 'preferences', label: 'Preferences', icon: SlidersHorizontal },
@@ -200,6 +227,7 @@ const sections: Array<{ id: typeof activeSection.value; label: string; icon: Com
 
 const initials = computed(() => workspace.state.value.user?.name.split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'G')
 const versionCount = computed(() => workspace.state.value.resumes.reduce((sum, resume) => sum + resume.versions.length, 0))
+const isThemePreferenceActive = (preference: typeof themeOptions[number]['id']) => themePreference.value === preference
 onMounted(() => {
   workspace.hydrate()
   Object.assign(preferences, workspace.state.value.settings)
@@ -207,6 +235,10 @@ onMounted(() => {
 const savePreferences = () => {
   workspace.updateSettings(preferences)
   toast.show('Preferences saved')
+}
+const saveThemePreference = (nextPreference: typeof themeOptions[number]['id']) => {
+  setThemePreference(nextPreference)
+  toast.show('Appearance preference saved')
 }
 const deleteAll = () => {
   workspace.deleteAllData()
@@ -387,7 +419,7 @@ const deleteAll = () => {
   height: 23px;
   position: relative;
   border-radius: 99px;
-  background: #dcd8e2;
+  background: var(--toggle-track);
   transition: background 160ms ease;
 }
 
@@ -399,7 +431,7 @@ const deleteAll = () => {
   left: 3px;
   border-radius: 50%;
   content: '';
-  background: #fff;
+  background: var(--document-surface);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   transition: transform 160ms ease;
 }
@@ -410,6 +442,40 @@ const deleteAll = () => {
 
 .setting-row input:checked + .toggle::after {
   transform: translateX(17px);
+}
+
+.theme-setting-row {
+  cursor: default;
+}
+
+.theme-choice-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.theme-choice-group button {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--control-bg);
+  cursor: pointer;
+}
+
+.theme-choice-group button:hover,
+.theme-choice-group button.active {
+  border-color: var(--purple-border);
+  color: var(--purple-dark);
+  background: var(--purple-soft);
 }
 
 .data-stats {

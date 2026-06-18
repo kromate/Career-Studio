@@ -34,7 +34,7 @@
 .public-footer {
   padding: 54px 0 24px;
   border-top: 1px solid var(--line);
-  background: #f9fafb;
+  background: var(--surface-subtle);
 }
 
 .footer-grid {

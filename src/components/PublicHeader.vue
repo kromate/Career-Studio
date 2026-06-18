@@ -115,8 +115,8 @@ const products = [
   position: sticky;
   z-index: 30;
   top: 0;
-  border-bottom: 1px solid rgba(232, 229, 239, 0.78);
-  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid var(--line-subtle);
+  background: var(--topbar-bg);
   backdrop-filter: blur(14px);
 }
 
@@ -170,7 +170,7 @@ const products = [
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 15px;
-  background: #fff;
+  background: var(--popover-bg);
   box-shadow: 0 20px 45px rgba(16, 24, 40, 0.14);
 }
 
@@ -252,7 +252,7 @@ const products = [
   gap: 2px;
   padding: 10px 20px 18px;
   border-top: 1px solid var(--line);
-  background: #fff;
+  background: var(--popover-bg);
 }
 
 .mobile-nav > span {

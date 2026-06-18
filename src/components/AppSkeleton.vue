@@ -26,12 +26,12 @@ withDefaults(defineProps<{
 .app-skeleton {
   display: block;
   max-width: 100%;
-  border: 1px solid #eaecf0;
+  border: 1px solid var(--line);
   background: linear-gradient(
     90deg,
-    #f2f4f7 0%,
-    #fff 45%,
-    #f2f4f7 100%
+    var(--skeleton-bg) 0%,
+    var(--skeleton-highlight) 45%,
+    var(--skeleton-bg) 100%
   );
   background-size: 220% 100%;
   animation: app-skeleton-shimmer 1.35s ease-in-out infinite;

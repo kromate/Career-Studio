@@ -494,7 +494,7 @@ const workspaceFeatures = [
   padding: 78px 0 88px;
   background:
     radial-gradient(circle at 78% 22%, rgba(96, 29, 237, 0.1), transparent 32%),
-    linear-gradient(180deg, #fff 0%, #f9fafb 100%);
+    linear-gradient(180deg, var(--app-bg) 0%, var(--surface-subtle) 100%);
 }
 
 .hero-noise {
@@ -521,12 +521,12 @@ const workspaceFeatures = [
   gap: 7px;
   margin-bottom: 20px;
   padding: 7px 11px;
-  border: 1px solid #ded3fa;
+  border: 1px solid var(--purple-border-soft);
   border-radius: 8px;
   color: var(--purple-dark);
   font-size: 11px;
   font-weight: 700;
-  background: rgba(245, 241, 254, 0.9);
+  background: var(--purple-soft);
 }
 
 .hero-copy h1 span {
@@ -575,7 +575,7 @@ const workspaceFeatures = [
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 16px;
-  background: #fff;
+  background: var(--card-bg);
   box-shadow: 0 20px 50px rgba(16, 24, 40, 0.12);
 }
 
@@ -589,7 +589,7 @@ const workspaceFeatures = [
   border-bottom: 1px solid var(--line);
   color: var(--muted);
   font-size: 11px;
-  background: #fbfafc;
+  background: var(--surface-subtle);
 }
 
 .browser-bar>span {
@@ -600,7 +600,7 @@ const workspaceFeatures = [
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
-  background: #fff;
+  background: var(--control-bg);
 }
 
 .browser-dots {
@@ -612,14 +612,14 @@ const workspaceFeatures = [
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #d8d3df;
+  background: var(--document-line);
 }
 
 .product-shell {
   display: grid;
   grid-template-columns: 62px 1fr;
   min-height: 450px;
-  background: #f9fafb;
+  background: var(--surface-subtle);
 }
 
 .product-sidebar {
@@ -629,7 +629,7 @@ const workspaceFeatures = [
   flex-direction: column;
   padding: 15px 11px;
   border-right: 1px solid var(--line);
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .product-sidebar i {
@@ -637,7 +637,7 @@ const workspaceFeatures = [
   width: 30px;
   height: 30px;
   border-radius: 9px;
-  background: #f1eff4;
+  background: var(--track-bg);
 }
 
 .product-sidebar i.active {
@@ -676,7 +676,7 @@ const workspaceFeatures = [
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .finding-preview {
@@ -685,9 +685,9 @@ const workspaceFeatures = [
   align-items: start;
   gap: 12px;
   padding: 16px;
-  border: 1px solid #e4dcff;
+  border: 1px solid var(--purple-border-soft);
   border-radius: 12px;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .finding-icon {
@@ -713,7 +713,7 @@ const workspaceFeatures = [
 
 .finding-preview del {
   color: var(--red);
-  text-decoration-color: #e7a8b1;
+  text-decoration-color: var(--red-border);
 }
 
 .finding-preview ins {
@@ -741,7 +741,7 @@ const workspaceFeatures = [
   border: 1px solid var(--line);
   border-radius: 10px;
   color: var(--purple);
-  background: rgba(255, 255, 255, 0.97);
+  background: var(--popover-bg);
   box-shadow: 0 10px 24px rgba(16, 24, 40, 0.1);
 }
 
@@ -773,7 +773,7 @@ const workspaceFeatures = [
 
 .proof-strip {
   border-block: 1px solid var(--line);
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .proof-inner {
@@ -801,7 +801,7 @@ const workspaceFeatures = [
 }
 
 .product-suite-section {
-  background: #f8f9fb;
+  background: var(--surface-subtle);
 }
 
 .suite-heading {
@@ -834,15 +834,15 @@ const workspaceFeatures = [
   padding: 24px;
   border: 1px solid var(--line);
   border-radius: 15px;
-  background: #fff;
+  background: var(--card-bg);
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
 }
 
 .suite-card.featured {
-  border-color: #d8cafa;
+  border-color: var(--purple-border);
   background:
     radial-gradient(circle at 100% 0%, rgba(96, 29, 237, 0.09), transparent 38%),
-    #fff;
+    var(--card-bg);
 }
 
 .suite-card-top {
@@ -911,7 +911,7 @@ const workspaceFeatures = [
   gap: 13px;
   margin-top: 15px;
   padding: 18px 20px;
-  border: 1px solid #dfd7f2;
+  border: 1px solid var(--purple-border-soft);
   border-radius: 13px;
   color: var(--purple);
   background: var(--purple-soft);
@@ -943,7 +943,7 @@ const workspaceFeatures = [
 }
 
 .process-section {
-  background: #fff;
+  background: var(--app-bg);
 }
 
 .process-grid {
@@ -958,14 +958,14 @@ const workspaceFeatures = [
   padding: 28px;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: #f9fafb;
+  background: var(--surface-subtle);
 }
 
 .step-number {
   position: absolute;
   top: 25px;
   right: 25px;
-  color: #c8c1d1;
+  color: var(--muted-subtle);
   font-family: var(--font-display);
   font-size: 12px;
   font-weight: 700;
@@ -1043,15 +1043,15 @@ const workspaceFeatures = [
   border: 1px solid var(--line);
   border-radius: 14px;
   color: var(--ink);
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .score-type-card.quality {
-  border-color: #d7c8fa;
+  border-color: var(--purple-border);
 }
 
 .score-type-card.match {
-  border-color: #c9e2d8;
+  border-color: var(--green-border);
 }
 
 .score-number {
@@ -1096,7 +1096,7 @@ const workspaceFeatures = [
 }
 
 .evidence-section {
-  background: #f9fafb;
+  background: var(--surface-subtle);
 }
 
 .evidence-grid {
@@ -1144,14 +1144,14 @@ const workspaceFeatures = [
 .resume-snippet {
   padding: 37px;
   border-right: 1px solid var(--line);
-  background: #f4f2f7;
+  background: var(--document-preview-bg);
 }
 
 .resume-snippet>span {
   display: block;
   margin-bottom: 22px;
   padding-bottom: 7px;
-  border-bottom: 1px solid #3b3545;
+  border-bottom: 1px solid var(--document-ink);
   font-family: Arial, sans-serif;
   font-size: 11px;
   font-weight: 700;
@@ -1180,7 +1180,7 @@ const workspaceFeatures = [
 
 .resume-snippet .flagged {
   border-left: 3px solid var(--amber);
-  background: #fff1ca;
+  background: var(--document-highlight-bg);
 }
 
 .finding-panel {
@@ -1242,7 +1242,7 @@ const workspaceFeatures = [
 }
 
 .workspace-section {
-  background: #fff;
+  background: var(--app-bg);
 }
 
 .workspace-grid {
@@ -1255,7 +1255,7 @@ const workspaceFeatures = [
   padding: 25px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .workspace-card small {
@@ -1283,7 +1283,7 @@ const workspaceFeatures = [
 
 .privacy-section {
   padding-top: 40px;
-  background: #fff;
+  background: var(--app-bg);
 }
 
 .privacy-card {
@@ -1291,7 +1291,7 @@ const workspaceFeatures = [
   grid-template-columns: 1fr 0.8fr;
   gap: 70px;
   padding: 52px;
-  border: 1px solid #ded3fa;
+  border: 1px solid var(--purple-border-soft);
   border-radius: 16px;
   background: var(--purple-soft);
 }
@@ -1313,7 +1313,7 @@ const workspaceFeatures = [
   padding: 19px;
   border: 1px solid rgba(217, 210, 235, 0.8);
   border-radius: 10px;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .privacy-points svg {
@@ -1340,28 +1340,28 @@ const workspaceFeatures = [
 
 .cta-section {
   padding: 100px 0;
-  background: #fff;
+  background: var(--app-bg);
 }
 
 .cta-card {
   padding: 72px 40px;
   border-radius: 18px;
-  color: #fff;
+  color: var(--cta-ink);
   text-align: center;
   background:
     radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.12), transparent 22%),
     radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.1), transparent 26%),
-    #212028;
+    var(--cta-bg);
 }
 
 .cta-card .eyebrow {
-  color: #bca5f8;
+  color: var(--cta-accent);
 }
 
 .cta-card .body-lg {
   max-width: 650px;
   margin: 0 auto 30px;
-  color: #bcb6c9;
+  color: var(--cta-muted);
 }
 
 @media (max-width: 1050px) {

@@ -159,7 +159,7 @@ onBeforeUnmount(() => {
   border: 1px solid var(--line);
   border-radius: 16px;
   outline: none;
-  background: #fff;
+  background: var(--card-bg);
   box-shadow: 0 28px 80px rgba(23, 20, 38, 0.24);
 }
 
@@ -227,7 +227,7 @@ onBeforeUnmount(() => {
   gap: 9px;
   padding: 16px 22px;
   border-top: 1px solid var(--line);
-  background: #f9fafb;
+  background: var(--surface-subtle);
 }
 
 .modal-fade-enter-active,

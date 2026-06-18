@@ -131,7 +131,7 @@ const limitations = [
 .info-hero {
   padding: 78px 0 64px;
   border-bottom: 1px solid var(--line);
-  background: linear-gradient(180deg, var(--purple-soft), #fff);
+  background: linear-gradient(180deg, var(--purple-soft), var(--app-bg));
 }
 
 .narrow {
@@ -155,7 +155,7 @@ const limitations = [
   color: var(--ink-soft);
   font-size: 10px;
   font-weight: 650;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .info-section {
@@ -254,7 +254,7 @@ const limitations = [
   gap: 25px;
   margin: 85px 0;
   padding: 32px;
-  border: 1px solid #ded3fa;
+  border: 1px solid var(--purple-border-soft);
   border-radius: 12px;
   background: var(--purple-soft);
 }
@@ -329,9 +329,9 @@ const limitations = [
   margin-top: 85px;
   padding: 45px;
   border-radius: 20px;
-  color: #fff;
+  color: var(--cta-ink);
   text-align: center;
-  background: var(--ink);
+  background: var(--cta-bg);
 }
 
 .info-cta h2 {
@@ -341,7 +341,7 @@ const limitations = [
 
 .info-cta p {
   margin-bottom: 23px;
-  color: #bcb6c9;
+  color: var(--cta-muted);
   font-size: 13px;
 }
 

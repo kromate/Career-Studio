@@ -177,7 +177,7 @@ const formatActionDate = (date: string) => new Intl.DateTimeFormat('en', {
   border-radius: 99px;
   color: var(--muted);
   font-size: 11px;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .pipeline-summary strong {
@@ -229,7 +229,7 @@ const formatActionDate = (date: string) => new Intl.DateTimeFormat('en', {
   border-radius: 6px;
   color: var(--muted);
   font-size: 10px;
-  background: #eef0f3;
+  background: var(--badge-bg);
 }
 
 .pipeline-cards {
@@ -240,7 +240,7 @@ const formatActionDate = (date: string) => new Intl.DateTimeFormat('en', {
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 10px;
-  background: #f9fafb;
+  background: var(--surface-subtle);
 }
 
 .application-card {
@@ -289,7 +289,7 @@ const formatActionDate = (date: string) => new Intl.DateTimeFormat('en', {
   padding: 6px;
   border: 1px solid var(--line);
   border-radius: 9px;
-  background: #fff;
+  background: var(--popover-bg);
   box-shadow: var(--shadow-md);
 }
 
@@ -399,7 +399,7 @@ const formatActionDate = (date: string) => new Intl.DateTimeFormat('en', {
   width: 35px;
   height: 5px;
   border-radius: 99px;
-  background: #ddd9e3;
+  background: var(--track-bg);
 }
 
 .column-empty p {

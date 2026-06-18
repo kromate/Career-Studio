@@ -326,7 +326,7 @@ const saveVersion = async () => {
 <style scoped>
 .rewrite-page {
   min-height: calc(100vh - 64px);
-  background: #f9fafb;
+  background: var(--app-bg);
 }
 
 .rewrite-header {
@@ -340,7 +340,7 @@ const saveVersion = async () => {
   top: 64px;
   padding: 0 18px;
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.97);
+  background: var(--topbar-bg);
   backdrop-filter: blur(15px);
 }
 
@@ -409,7 +409,7 @@ const saveVersion = async () => {
   justify-content: space-between;
   gap: 24px;
   padding: 14px 18px;
-  border-bottom: 1px solid #ded3fa;
+  border-bottom: 1px solid var(--purple-border-soft);
   background: var(--purple-soft);
 }
 
@@ -434,17 +434,17 @@ const saveVersion = async () => {
 
 .target-gaps span {
   padding: 5px 8px;
-  border: 1px solid #d5cbf7;
+  border: 1px solid var(--purple-border-soft);
   border-radius: 6px;
   color: var(--purple-dark);
   font-size: 10px;
   font-weight: 700;
-  background: #fff;
+  background: var(--control-bg);
 }
 
 .target-gaps span.all-covered {
   color: var(--green);
-  border-color: #bfe6d8;
+  border-color: var(--green-border);
 }
 
 .rewrite-workspace {
@@ -458,7 +458,7 @@ const saveVersion = async () => {
 .live-preview-panel {
   min-width: 0;
   border-right: 1px solid var(--line);
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .suggestion-panel,
@@ -514,7 +514,7 @@ const saveVersion = async () => {
 
 .suggestion-card:hover,
 .suggestion-card.selected {
-  border-color: #cfc3fa;
+  border-color: var(--purple-border);
   background: var(--purple-soft);
 }
 
@@ -577,13 +577,13 @@ const saveVersion = async () => {
 }
 
 .editor-panel {
-  background: #f7f7f7;
+  background: var(--document-preview-bg);
 }
 
 .suggestion-detail {
   padding: 20px;
   border-bottom: 1px solid var(--line);
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .detail-heading {
@@ -609,13 +609,13 @@ const saveVersion = async () => {
 .diff-grid > div {
   min-height: 90px;
   padding: 12px;
-  border: 1px solid #f0d2d7;
+  border: 1px solid var(--red-border);
   border-radius: 9px;
   background: var(--red-soft);
 }
 
 .diff-grid > div.after {
-  border-color: #bfe6d8;
+  border-color: var(--green-border);
   background: var(--green-soft);
 }
 
@@ -692,12 +692,12 @@ const saveVersion = async () => {
   padding: 26px;
   border: 1px solid var(--line);
   border-radius: 3px;
-  color: #28232f;
+  color: var(--document-ink);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px;
   line-height: 1.65;
   resize: vertical;
-  background: #fff;
+  background: var(--document-surface);
   box-shadow: 0 8px 24px rgba(16, 24, 40, 0.07);
 }
 
@@ -709,11 +709,11 @@ const saveVersion = async () => {
 
 .live-preview-panel {
   border-right: 0;
-  background: #f7f7f7;
+  background: var(--document-preview-bg);
 }
 
 .preview-toolbar {
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .live-document {
@@ -733,7 +733,7 @@ const saveVersion = async () => {
   gap: 10px;
   padding: 15px 18px;
   border-top: 1px solid var(--line);
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .preview-document {
@@ -741,7 +741,7 @@ const saveVersion = async () => {
   place-items: start center;
   min-height: 640px;
   padding: 12px;
-  background: #eef0f3;
+  background: var(--document-preview-bg);
 }
 
 .rewrite-loading {

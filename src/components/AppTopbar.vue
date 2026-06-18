@@ -94,7 +94,7 @@ const handleLogout = async () => {
   top: 0;
   padding: 0 28px;
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--topbar-bg);
   backdrop-filter: blur(14px);
 }
 
@@ -105,7 +105,7 @@ const handleLogout = async () => {
   place-items: center;
   border: 1px solid var(--line);
   border-radius: 10px;
-  background: #fff;
+  background: var(--control-bg);
 }
 
 .topbar-title {
@@ -213,7 +213,7 @@ const handleLogout = async () => {
   padding: 7px;
   border: 1px solid var(--line);
   border-radius: 10px;
-  background: #fff;
+  background: var(--popover-bg);
   box-shadow: var(--shadow-md);
 }
 

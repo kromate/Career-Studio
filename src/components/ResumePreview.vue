@@ -32,9 +32,9 @@ withDefaults(defineProps<{
   width: min(100%, 700px);
   min-height: 760px;
   padding: 52px 56px;
-  border: 1px solid #ddd9e5;
-  color: #262230;
-  background: #fff;
+  border: 1px solid var(--document-border);
+  color: var(--document-ink);
+  background: var(--document-surface);
   box-shadow: 0 18px 50px rgba(35, 27, 61, 0.1);
 }
 
@@ -69,7 +69,7 @@ withDefaults(defineProps<{
 .resume-contact {
   justify-content: center;
   margin-bottom: 3px;
-  color: #4e4857;
+  color: var(--document-muted);
   font-size: 10px;
 }
 
@@ -90,8 +90,8 @@ withDefaults(defineProps<{
 }
 
 .highlighted {
-  background: #fff0cc;
-  box-shadow: inset 3px 0 0 #d18a16;
+  background: var(--document-highlight-bg);
+  box-shadow: inset 3px 0 0 var(--document-highlight-bar);
 }
 
 @media (max-width: 680px) {

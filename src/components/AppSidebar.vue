@@ -75,7 +75,7 @@ const navigation = computed(() => [
   z-index: 40;
   inset: 0 auto 0 0;
   border-right: 1px solid var(--line);
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .sidebar-top {
@@ -101,7 +101,7 @@ const navigation = computed(() => [
 
 .nav-section-label {
   padding: 20px 22px 7px;
-  color: #98a2b3;
+  color: var(--muted-subtle);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -136,7 +136,7 @@ const navigation = computed(() => [
 }
 
 .app-nav a.router-link-exact-active {
-  border-color: #ded3fa;
+  border-color: var(--purple-border-soft);
   color: var(--purple);
   background: var(--purple-soft);
 }
@@ -151,12 +151,12 @@ const navigation = computed(() => [
   border-radius: 999px;
   color: var(--muted);
   font-size: 10px;
-  background: #eef0f3;
+  background: var(--badge-bg);
 }
 
 .app-nav a.router-link-exact-active .nav-badge {
   color: var(--purple);
-  background: #e9e1fc;
+  background: var(--badge-active-bg);
 }
 
 .sidebar-bottom {
@@ -174,7 +174,7 @@ const navigation = computed(() => [
   padding: 12px 10px;
   border: 1px solid var(--line);
   border-radius: 10px;
-  background: #f9fafb;
+  background: var(--surface-subtle);
 }
 
 .goalmatic-mark {

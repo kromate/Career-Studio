@@ -499,10 +499,10 @@ const careerRoadmap = [
 .focus-panel {
   overflow: hidden;
   margin-bottom: 18px;
-  border-color: #d8cdf6;
+  border-color: var(--purple-border);
   background:
     radial-gradient(circle at 0 0, rgba(96, 29, 237, 0.1), transparent 32%),
-    var(--surface);
+    var(--card-bg);
 }
 
 .focus-main {
@@ -518,7 +518,7 @@ const careerRoadmap = [
   width: 50px;
   height: 50px;
   place-items: center;
-  border: 1px solid #dfd3ff;
+  border: 1px solid var(--purple-border-soft);
   border-radius: 14px;
   color: var(--purple);
   background: var(--purple-soft);
@@ -554,14 +554,14 @@ const careerRoadmap = [
 .focus-context {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(110px, 0.65fr));
-  border-top: 1px solid #e5def7;
-  background: rgba(250, 248, 255, 0.78);
+  border-top: 1px solid var(--purple-border-soft);
+  background: var(--surface-subtle);
 }
 
 .focus-context > div {
   min-width: 0;
   padding: 13px 18px;
-  border-left: 1px solid #e5def7;
+  border-left: 1px solid var(--purple-border-soft);
 }
 
 .focus-context > div:first-child {
@@ -653,7 +653,7 @@ const careerRoadmap = [
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fafafa;
+  background: var(--surface-subtle);
   grid-column: span 2;
 }
 
@@ -662,8 +662,8 @@ const careerRoadmap = [
 }
 
 .roadmap-grid article.live {
-  border-color: #c7eadf;
-  background: #f1fbf7;
+  border-color: var(--green-border);
+  background: var(--green-soft);
 }
 
 .roadmap-icon {
@@ -678,7 +678,7 @@ const careerRoadmap = [
 
 .roadmap-grid article.live .roadmap-icon {
   color: var(--green);
-  background: #ddf5ec;
+  background: var(--green-soft);
 }
 
 .roadmap-grid small,
@@ -814,12 +814,12 @@ const careerRoadmap = [
   padding: 13px;
   border: 1px solid var(--line);
   border-radius: 11px;
-  background: #fcfcfd;
+  background: var(--surface-tint);
   transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
 }
 
 .summary-stats a:hover {
-  border-color: #d2c8f1;
+  border-color: var(--purple-border);
   background: var(--purple-soft);
   transform: translateY(-1px);
 }
@@ -853,7 +853,7 @@ const careerRoadmap = [
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 11px;
-  background: #fafafa;
+  background: var(--surface-subtle);
 }
 
 .weekly-top {
@@ -868,7 +868,7 @@ const careerRoadmap = [
   height: 6px;
   overflow: hidden;
   border-radius: 99px;
-  background: #e7e3ed;
+  background: var(--track-bg);
 }
 
 .weekly-track span {
@@ -921,7 +921,7 @@ const careerRoadmap = [
 
 .finding-row:hover,
 .job-row:hover {
-  background: #faf8ff;
+  background: var(--surface-hover);
 }
 
 .severity-mark {
@@ -1012,10 +1012,10 @@ const careerRoadmap = [
   grid-template-columns: minmax(0, 1.12fr) minmax(420px, 0.88fr);
   overflow: hidden;
   min-height: 470px;
-  border-color: #d9dfe7;
+  border-color: var(--line);
   background:
     radial-gradient(circle at 12% 8%, rgba(96, 29, 237, 0.12), transparent 30%),
-    linear-gradient(135deg, #fff 0%, #fdfcff 56%, #f8f5ff 100%);
+    linear-gradient(135deg, var(--card-bg) 0%, var(--surface-warm) 56%, var(--surface-soft) 100%);
 }
 
 .onboarding-copy {
@@ -1032,7 +1032,7 @@ const careerRoadmap = [
   gap: 7px;
   margin-bottom: 22px;
   padding: 7px 10px;
-  border: 1px solid #dfd5f8;
+  border: 1px solid var(--purple-border-soft);
   border-radius: 999px;
   color: var(--purple-dark);
   font-size: 10px;
@@ -1086,7 +1086,7 @@ const careerRoadmap = [
   flex-direction: column;
   padding: 40px;
   border-left: 1px solid var(--line);
-  background: rgba(249, 248, 252, 0.82);
+  background: var(--surface-subtle);
 }
 
 .preview-heading {
@@ -1147,10 +1147,10 @@ const careerRoadmap = [
   width: 36px;
   height: 36px;
   place-items: center;
-  border: 1px solid #e2dafa;
+  border: 1px solid var(--purple-border-soft);
   border-radius: 10px;
   color: var(--purple);
-  background: #fff;
+  background: var(--control-bg);
 }
 
 .outcome-list strong {
@@ -1172,7 +1172,7 @@ const careerRoadmap = [
   gap: 10px;
   margin-top: 5px;
   padding: 13px 14px;
-  border: 1px solid #caeadc;
+  border: 1px solid var(--green-border-soft);
   border-radius: 11px;
   color: var(--green);
   background: var(--green-soft);
@@ -1185,7 +1185,7 @@ const careerRoadmap = [
 
 .privacy-note p {
   margin: 0;
-  color: #285c46;
+  color: var(--privacy-note-text);
   font-size: 10px;
   line-height: 1.5;
 }
@@ -1199,7 +1199,7 @@ const careerRoadmap = [
   padding: 23px;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: #fcfcfd;
+  background: var(--surface-tint);
 }
 
 .getting-started-heading h2 {
@@ -1221,7 +1221,7 @@ const careerRoadmap = [
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 11px;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .step-grid article > span {
@@ -1292,7 +1292,7 @@ const careerRoadmap = [
   }
 
   .focus-context > div:nth-child(n + 3) {
-    border-top: 1px solid #e5def7;
+    border-top: 1px solid var(--purple-border-soft);
   }
 
   .onboarding-hero {
@@ -1338,7 +1338,7 @@ const careerRoadmap = [
   }
 
   .focus-context > div {
-    border-top: 1px solid #e5def7;
+    border-top: 1px solid var(--purple-border-soft);
     border-left: 0;
   }
 

@@ -111,7 +111,7 @@ const relativeDate = (date: string) => {
   place-items: center;
   position: relative;
   border-bottom: 1px solid var(--line);
-  background: #f7f7f7;
+  background: var(--document-preview-bg);
 }
 
 .document-lines {
@@ -119,7 +119,7 @@ const relativeDate = (date: string) => {
   height: 136px;
   padding: 16px 13px;
   border-radius: 3px;
-  background: #fff;
+  background: var(--document-surface);
   box-shadow: 0 8px 18px rgba(16, 24, 40, 0.1);
 }
 
@@ -129,7 +129,7 @@ const relativeDate = (date: string) => {
   height: 4px;
   margin-bottom: 7px;
   border-radius: 99px;
-  background: #d8d3df;
+  background: var(--document-line);
 }
 
 .document-lines i.wide { width: 100%; }
@@ -151,7 +151,7 @@ const relativeDate = (date: string) => {
   color: var(--ink-soft);
   font-size: 11px;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--document-badge-bg);
   backdrop-filter: blur(6px);
 }
 

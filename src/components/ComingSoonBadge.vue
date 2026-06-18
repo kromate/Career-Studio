@@ -15,7 +15,7 @@ import { Clock3 } from 'lucide-vue-next'
   align-items: center;
   gap: 4px;
   padding: 4px 7px;
-  border: 1px solid #ded3fa;
+  border: 1px solid var(--purple-border-soft);
   border-radius: 99px;
   color: var(--purple-dark);
   font-size: 9px;

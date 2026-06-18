@@ -101,7 +101,7 @@
   gap: 1px;
   padding: 12px 18px;
   border-top: 1px solid var(--line);
-  background: #faf8ff;
+  background: var(--surface-hover);
 }
 
 .loading-grid {

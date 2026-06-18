@@ -304,7 +304,7 @@ const confirmAndAnalyze = async () => {
   place-items: center;
   align-content: center;
   padding: 35px;
-  border: 1.5px dashed #cfc8da;
+  border: 1.5px dashed var(--line-strong);
   border-radius: 16px;
   text-align: center;
   background: var(--surface-soft);
@@ -509,7 +509,7 @@ const confirmAndAnalyze = async () => {
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  border: 1px solid #f0d3a4;
+  border: 1px solid var(--amber-border);
   border-radius: 9px;
   color: var(--amber);
   font-size: 10px;

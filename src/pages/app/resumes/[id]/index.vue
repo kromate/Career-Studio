@@ -434,7 +434,7 @@ const confirmDelete = async () => {
   padding: 7px;
   border: 1px solid var(--line);
   border-radius: 11px;
-  background: #fff;
+  background: var(--popover-bg);
   box-shadow: var(--shadow-md);
 }
 
@@ -467,7 +467,7 @@ const confirmDelete = async () => {
   padding: 4px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .analysis-tabs button {
@@ -497,7 +497,7 @@ const confirmDelete = async () => {
   place-items: center;
   border-radius: 99px;
   font-size: 11px;
-  background: #e7e3ed;
+  background: var(--track-bg);
 }
 
 .score-hero {
@@ -620,7 +620,7 @@ const confirmDelete = async () => {
   border: 1px solid var(--line);
   border-radius: 9px;
   color: var(--muted);
-  background: #fff;
+  background: var(--control-bg);
   cursor: pointer;
 }
 
@@ -644,7 +644,7 @@ const confirmDelete = async () => {
   border: 0;
   border-top: 1px solid var(--line);
   text-align: left;
-  background: #fff;
+  background: var(--card-bg);
   cursor: pointer;
 }
 
@@ -766,7 +766,7 @@ const confirmDelete = async () => {
   gap: 11px;
   margin: 22px 0;
   padding: 15px;
-  border: 1px solid #ddd5ff;
+  border: 1px solid var(--purple-border-soft);
   border-radius: 11px;
   background: var(--purple-soft);
 }
@@ -842,7 +842,7 @@ const confirmDelete = async () => {
   overflow: auto;
   place-items: start center;
   padding: 25px;
-  background: #f1eff4;
+  background: var(--document-preview-bg);
 }
 
 .versions-layout {
@@ -876,7 +876,7 @@ const confirmDelete = async () => {
   border: 0;
   border-top: 1px solid var(--line);
   text-align: left;
-  background: #fff;
+  background: var(--card-bg);
   cursor: pointer;
 }
 

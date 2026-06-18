@@ -12,6 +12,20 @@ const siteTitle = 'Career Studio — Your complete career workspace'
 const siteDescription = 'Find jobs, tailor resumes, draft cover letters, prepare for interviews, and track applications in one career workspace.'
 const ogImageUrl = `${siteUrl}/og-image.png`
 const ogImageAlt = 'Career Studio preview showing a connected workspace for jobs, resumes, cover letters, interviews, and applications.'
+const themeBootstrapScript = `(() => {
+  try {
+    const storedPreference = window.localStorage.getItem('career-studio:theme:v1')
+    const preference = ['light', 'dark', 'system'].includes(storedPreference || '') ? storedPreference : 'system'
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    const theme = preference === 'system' ? systemTheme : preference
+    const root = document.documentElement
+    root.dataset.theme = theme
+    root.style.colorScheme = theme
+
+    const themeColor = document.querySelector('meta[name="theme-color"]')
+    if (themeColor) themeColor.setAttribute('content', theme === 'dark' ? '#171521' : '#601ded')
+  } catch {}
+})()`
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
@@ -82,6 +96,14 @@ export default defineNuxtConfig({
         { name: 'twitter:description', content: siteDescription },
         { name: 'twitter:image', content: ogImageUrl },
         { name: 'twitter:image:alt', content: ogImageAlt },
+      ],
+      script: [
+        {
+          key: 'theme-bootstrap',
+          tagPosition: 'head',
+          tagPriority: 'critical',
+          innerHTML: themeBootstrapScript,
+        },
       ],
       link: [
         { rel: 'canonical', href: siteUrl },

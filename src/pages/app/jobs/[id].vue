@@ -394,13 +394,13 @@ const deleteJob = async () => {
   grid-template-columns: auto 1fr;
   gap: 1px 8px;
   padding: 11px;
-  border: 1px solid #f0d2d7;
+  border: 1px solid var(--red-border);
   border-radius: 9px;
   background: var(--red-soft);
 }
 
 .requirement-row.matched {
-  border-color: #c5e5d9;
+  border-color: var(--green-border);
   background: var(--green-soft);
 }
 
@@ -412,7 +412,7 @@ const deleteJob = async () => {
   place-items: center;
   border-radius: 6px;
   color: var(--red);
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .requirement-row.matched > span {

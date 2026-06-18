@@ -61,7 +61,7 @@ const dismiss = toast.dismiss
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: #fff;
+  background: var(--popover-bg);
   box-shadow: 0 18px 50px rgba(23, 20, 38, 0.15);
 }
 

@@ -53,7 +53,7 @@ const color = computed(() => {
   height: 6px;
   overflow: hidden;
   border-radius: 999px;
-  background: #ece9f2;
+  background: var(--track-bg);
 }
 
 .dimension-track span {
