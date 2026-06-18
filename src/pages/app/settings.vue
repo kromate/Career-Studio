@@ -72,7 +72,7 @@
             </div>
           </div>
           <div class="setting-rows">
-            <div class="setting-row theme-setting-row">
+             <div class="setting-row theme-setting-row">
               <div>
                 <strong>Appearance</strong>
                 <p>Use the system default or set a browser-specific theme.</p>
