@@ -875,7 +875,7 @@ const careerRoadmap = [
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--purple);
+  background: var(--purple-solid);
 }
 
 .weekly-review p {
@@ -928,7 +928,7 @@ const careerRoadmap = [
   width: 7px;
   height: 36px;
   border-radius: 99px;
-  background: var(--purple);
+  background: var(--purple-solid);
 }
 
 .severity-mark.high { background: var(--red); }

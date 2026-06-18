@@ -658,7 +658,7 @@ const confirmDelete = async () => {
 }
 
 .finding-item.active {
-  box-shadow: inset 3px 0 0 var(--purple);
+  box-shadow: inset 3px 0 0 var(--purple-solid);
 }
 
 .finding-item.intentional {

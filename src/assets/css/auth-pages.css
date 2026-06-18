@@ -245,7 +245,7 @@
 .otp-inputs input:focus {
   border-color: var(--purple);
   outline: 0;
-  box-shadow: 0 0 0 3px rgba(91, 50, 223, 0.1);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .otp-actions {

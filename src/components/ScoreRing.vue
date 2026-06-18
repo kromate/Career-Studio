@@ -44,7 +44,7 @@ const offset = computed(() => circumference.value * (1 - (props.score || 0) / 10
 const progressColor = computed(() => {
   if (props.score === null) return 'var(--amber)'
   if (props.score >= 80) return 'var(--green)'
-  if (props.score >= 60) return 'var(--purple)'
+  if (props.score >= 60) return 'var(--purple-solid)'
   if (props.score >= 40) return 'var(--amber)'
   return 'var(--red)'
 })
@@ -65,7 +65,7 @@ const progressColor = computed(() => {
 }
 
 .score-track {
-  stroke: #ece9f2;
+  stroke: var(--score-track);
 }
 
 .score-progress {

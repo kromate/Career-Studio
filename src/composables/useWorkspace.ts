@@ -2,12 +2,21 @@ import type {
   AppSettings,
   ApplicationRecord,
   ApplicationStatus,
+  EditableResumeDocument,
+  ResumeBuilderSource,
+  ResumeExperienceLevel,
   ResumeRecord,
   ResumeVersion,
   SavedJob,
   UserProfile,
   WorkspaceState,
 } from '@/types'
+import {
+  builderDocumentToParsedResume,
+  builderDocumentToText,
+  createEmptyBuilderDocument,
+  mergeBuilderDocument,
+} from '@/lib/resume/builder'
 import { matchResumeToJob } from '@/lib/resume/matching'
 import { SCORING_VERSION } from '@/lib/resume/constants'
 import { hashText, parseResumeText } from '@/lib/resume/parser'
@@ -26,7 +35,7 @@ function defaultSettings(): AppSettings {
 
 function initialState(): WorkspaceState {
   return {
-    schemaVersion: 3,
+    schemaVersion: 4,
     ownerId: null,
     user: null,
     resumes: [],
@@ -75,7 +84,7 @@ function removeLegacyDemoData(workspace: WorkspaceState): WorkspaceState {
 
   return {
     ...workspace,
-    schemaVersion: 3,
+    schemaVersion: 4,
     resumes,
     jobs,
     applications: workspace.applications.filter(application => jobIds.has(application.jobId)),
@@ -87,6 +96,9 @@ function refreshOutdatedAnalyses(workspace: WorkspaceState): WorkspaceState {
     ...workspace,
     resumes: workspace.resumes.map(resume => ({
       ...resume,
+      builderDocument: resume.builderDocument
+        ? mergeBuilderDocument(resume.builderDocument)
+        : undefined,
       versions: resume.versions.map((version) => {
         if (version.analysis.scoringVersion === SCORING_VERSION) return version
 
@@ -139,6 +151,43 @@ function createVersion(
     parsed,
     analysis,
     targetJobId,
+  }
+}
+
+function syncBuilderVersion(
+  resume: ResumeRecord,
+  document: EditableResumeDocument,
+  timestamp = now(),
+): ResumeRecord {
+  const text = builderDocumentToText(document)
+  const parsed = builderDocumentToParsedResume(document)
+  const existing = resume.versions.find(version => version.source === 'builder')
+  const versionId = existing?.id || createId('version')
+  const analysis = scoreResume(parsed, {
+    resumeId: resume.id,
+    versionId,
+    createdAt: timestamp,
+  })
+  const version: ResumeVersion = {
+    id: versionId,
+    label: 'Builder resume',
+    createdAt: existing?.createdAt || timestamp,
+    source: 'builder',
+    text,
+    parsed,
+    analysis,
+    intentionalRuleIds: existing?.intentionalRuleIds,
+  }
+
+  return {
+    ...resume,
+    targetJobTitle: document.profile.targetRole,
+    experienceLevel: document.profile.experienceLevel,
+    builderSource: document.source,
+    builderDocument: document,
+    updatedAt: timestamp,
+    activeVersionId: version.id,
+    versions: [version, ...resume.versions.filter(item => item.id !== versionId)],
   }
 }
 
@@ -239,6 +288,101 @@ export function useWorkspace() {
     state.value.resumes.unshift(resume)
     persist()
     return resume
+  }
+
+  const addBuilderResume = (input: {
+    name: string
+    targetJobTitle: string
+    experienceLevel: ResumeExperienceLevel
+    source?: ResumeBuilderSource
+    originalFileName?: string
+    fileType?: string
+    sourceText?: string
+  }): ResumeRecord => {
+    const resumeId = createId('resume')
+    const createdAt = now()
+    const name = input.name.trim() || input.targetJobTitle.trim() || 'Untitled resume'
+    const document = createEmptyBuilderDocument({
+      id: createId('builder'),
+      source: input.source || 'new',
+      targetRole: input.targetJobTitle,
+      experienceLevel: input.experienceLevel,
+      now: createdAt,
+    })
+    const resume: ResumeRecord = {
+      id: resumeId,
+      name,
+      originalFileName: input.originalFileName || `${name}.txt`,
+      fileType: input.fileType || 'text/plain',
+      targetJobTitle: input.targetJobTitle,
+      experienceLevel: input.experienceLevel,
+      builderSource: input.source || 'new',
+      builderDocument: document,
+      createdAt,
+      updatedAt: createdAt,
+      activeVersionId: '',
+      versions: input.sourceText?.trim()
+        ? [createVersion(resumeId, input.sourceText, 'Imported resume', 'upload')]
+        : [],
+    }
+    const synced = syncBuilderVersion(resume, document, createdAt)
+    state.value.resumes.unshift(synced)
+    persist()
+    return synced
+  }
+
+  const updateBuilderDocument = (
+    resumeId: string,
+    updater: (document: EditableResumeDocument) => EditableResumeDocument,
+  ) => {
+    const index = state.value.resumes.findIndex(item => item.id === resumeId)
+    if (index < 0) return
+    const resume = state.value.resumes[index]!
+    const baseDocument = mergeBuilderDocument(resume.builderDocument || createEmptyBuilderDocument({
+      targetRole: resume.targetJobTitle || '',
+      experienceLevel: resume.experienceLevel || 'entry',
+    }))
+    const timestamp = now()
+    const document = mergeBuilderDocument({ ...updater(baseDocument), updatedAt: timestamp })
+    state.value.resumes[index] = syncBuilderVersion(resume, document, timestamp)
+    persist()
+  }
+
+  const duplicateResume = (resumeId: string): ResumeRecord | undefined => {
+    const resume = state.value.resumes.find(item => item.id === resumeId)
+    if (!resume) return undefined
+    const createdAt = now()
+    const duplicateId = createId('resume')
+    const versionIds = new Map<string, string>()
+    const versions = resume.versions.map((version) => {
+      const versionId = createId('version')
+      versionIds.set(version.id, versionId)
+      return {
+        ...version,
+        id: versionId,
+        createdAt,
+        analysis: scoreResume(version.parsed, {
+          resumeId: duplicateId,
+          versionId,
+          createdAt,
+        }),
+      }
+    })
+    const duplicate: ResumeRecord = {
+      ...resume,
+      id: duplicateId,
+      name: `${resume.name} copy`,
+      createdAt,
+      updatedAt: createdAt,
+      activeVersionId: versionIds.get(resume.activeVersionId) || versions[0]?.id || '',
+      versions,
+      builderDocument: resume.builderDocument
+        ? mergeBuilderDocument({ ...JSON.parse(JSON.stringify(resume.builderDocument)), id: createId('builder'), updatedAt: createdAt })
+        : undefined,
+    }
+    state.value.resumes.unshift(duplicate)
+    persist()
+    return duplicate
   }
 
   const addResumeVersion = (
@@ -428,7 +572,10 @@ export function useWorkspace() {
     login,
     logout,
     addResume,
+    addBuilderResume,
     addResumeVersion,
+    updateBuilderDocument,
+    duplicateResume,
     setActiveVersion,
     toggleFindingIntentional,
     renameResume,

@@ -437,7 +437,7 @@ const deleteAll = () => {
 }
 
 .setting-row input:checked + .toggle {
-  background: var(--purple);
+  background: var(--purple-solid);
 }
 
 .setting-row input:checked + .toggle::after {

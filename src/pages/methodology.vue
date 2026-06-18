@@ -266,7 +266,7 @@ const limitations = [
   place-items: center;
   border-radius: 10px;
   color: #fff;
-  background: var(--purple);
+  background: var(--purple-solid);
 }
 
 .principle-block h2 {

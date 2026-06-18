@@ -1,19 +1,19 @@
 :root,
 :root[data-theme='light'] {
   color-scheme: light;
-  --ink: #212028;
-  --ink-soft: #37363d;
-  --muted: #646368;
-  --muted-subtle: #a7a1b2;
-  --line: #dce3ea;
-  --line-strong: #d6e0eb;
-  --line-subtle: rgba(232, 229, 239, 0.78);
+  --ink: #1f1d29;
+  --ink-soft: #34313d;
+  --muted: #5f5a66;
+  --muted-subtle: #6f687a;
+  --line: #cbd5e1;
+  --line-strong: #aeb9c8;
+  --line-subtle: rgba(203, 195, 222, 0.84);
   --surface: #ffffff;
-  --surface-soft: #f7f7f7;
+  --surface-soft: #f3f4f6;
   --surface-warm: #f9f8fb;
-  --surface-subtle: #f9fafb;
+  --surface-subtle: #f6f8fb;
   --surface-tint: #fcfcfd;
-  --surface-hover: #faf8ff;
+  --surface-hover: #f1ebff;
   --app-bg: #ffffff;
   --card-bg: #ffffff;
   --control-bg: #ffffff;
@@ -22,9 +22,12 @@
   --topbar-bg: rgba(255, 255, 255, 0.96);
   --purple: #601ded;
   --purple-dark: #4d15c6;
-  --purple-soft: #f5f1fe;
-  --purple-border: #d8cdf6;
-  --purple-border-soft: #ded3fa;
+  --purple-solid: #601ded;
+  --purple-solid-hover: #4d15c6;
+  --purple-contrast: #ffffff;
+  --purple-soft: #f1ebff;
+  --purple-border: #c7b8ee;
+  --purple-border-soft: #d0c1f3;
   --green: #067647;
   --green-soft: #ecfdf3;
   --green-border: #c5e5d9;
@@ -40,7 +43,8 @@
   --badge-bg: #eef0f3;
   --badge-active-bg: #e9e1fc;
   --toggle-track: #dcd8e2;
-  --track-bg: #e7e3ed;
+  --track-bg: #d9d3e5;
+  --score-track: #d9d3e5;
   --document-surface: #ffffff;
   --document-ink: #28232f;
   --document-muted: #4e4857;
@@ -69,30 +73,33 @@
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --ink: #f0ecf9;
-  --ink-soft: #d7d0e6;
-  --muted: #aaa2bd;
-  --muted-subtle: #80778f;
-  --line: #352f49;
-  --line-strong: #4a425e;
-  --line-subtle: rgba(70, 64, 92, 0.82);
+  --ink: #f5f2fb;
+  --ink-soft: #ddd6eb;
+  --muted: #c6bed3;
+  --muted-subtle: #a89fb8;
+  --line: #4f465f;
+  --line-strong: #655b78;
+  --line-subtle: rgba(118, 106, 146, 0.74);
   --surface: #171521;
-  --surface-soft: #211d2e;
-  --surface-warm: #262236;
-  --surface-subtle: #1f1b2a;
-  --surface-tint: #211d2e;
-  --surface-hover: #2b263a;
+  --surface-soft: #292436;
+  --surface-warm: #1d1a28;
+  --surface-subtle: #231f30;
+  --surface-tint: #282338;
+  --surface-hover: #332b48;
   --app-bg: #171521;
   --card-bg: #262236;
   --control-bg: #211d2e;
-  --elevated-bg: #2b263a;
-  --popover-bg: #262236;
-  --topbar-bg: rgba(23, 21, 33, 0.92);
-  --purple: #601ded;
-  --purple-dark: #c6b8ff;
-  --purple-soft: rgba(96, 29, 237, 0.26);
-  --purple-border: #514575;
-  --purple-border-soft: #4b4166;
+  --elevated-bg: #312b3f;
+  --popover-bg: #2b2638;
+  --topbar-bg: rgba(23, 21, 33, 0.96);
+  --purple: #c4b5ff;
+  --purple-dark: #e1dbff;
+  --purple-solid: #6f35f4;
+  --purple-solid-hover: #7241f5;
+  --purple-contrast: #ffffff;
+  --purple-soft: rgba(124, 88, 255, 0.22);
+  --purple-border: #7868a6;
+  --purple-border-soft: #63557f;
   --green: #76e4b5;
   --green-soft: rgba(21, 133, 100, 0.2);
   --green-border: rgba(118, 228, 181, 0.32);
@@ -105,10 +112,11 @@
   --red-border: rgba(255, 138, 154, 0.3);
   --blue: #8fb7ff;
   --blue-soft: rgba(23, 92, 211, 0.22);
-  --badge-bg: #302b3e;
-  --badge-active-bg: rgba(96, 29, 237, 0.32);
-  --toggle-track: #4a445c;
-  --track-bg: #342f46;
+  --badge-bg: #342f42;
+  --badge-active-bg: rgba(124, 88, 255, 0.28);
+  --toggle-track: #655b78;
+  --track-bg: #41394f;
+  --score-track: #41394f;
   --document-surface: #faf9fd;
   --document-ink: #28232f;
   --document-muted: #4e4857;
@@ -191,7 +199,7 @@ h4 {
 
 ::selection {
   color: #fff;
-  background: var(--purple);
+  background: var(--purple-solid);
 }
 
 :focus-visible {
@@ -321,14 +329,14 @@ h4 {
 }
 
 .btn-primary {
-  color: #fff;
-  background: var(--purple);
+  color: var(--purple-contrast);
+  background: var(--purple-solid);
   box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--purple-dark);
-  border-color: var(--purple-dark);
+  background: var(--purple-solid-hover);
+  border-color: var(--purple-solid-hover);
   box-shadow: var(--shadow-sm);
 }
 
@@ -444,7 +452,7 @@ h4 {
 .select:focus {
   border-color: var(--purple);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(91, 50, 223, 0.11);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .input::placeholder,

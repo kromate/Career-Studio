@@ -20,7 +20,7 @@ const props = defineProps<{
 const percentage = computed(() => Math.round((props.score / props.maxScore) * 100))
 const color = computed(() => {
   if (percentage.value >= 80) return 'var(--green)'
-  if (percentage.value >= 60) return 'var(--purple)'
+  if (percentage.value >= 60) return 'var(--purple-solid)'
   if (percentage.value >= 40) return 'var(--amber)'
   return 'var(--red)'
 })

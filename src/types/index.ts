@@ -1,6 +1,133 @@
 export type ParseConfidence = 'high' | 'medium' | 'low'
 export type FindingSeverity = 'high' | 'medium' | 'low'
 export type ApplicationStatus = 'saved' | 'applied' | 'interview' | 'offer' | 'rejected'
+export type ResumeExperienceLevel = 'entry' | 'mid' | 'senior'
+export type ResumeBuilderSource = 'profile' | 'new' | 'import'
+export type ResumeBuilderSectionKey =
+  | 'profile'
+  | 'work'
+  | 'education'
+  | 'skills'
+  | 'projects'
+  | 'volunteer'
+  | 'certifications'
+  | 'publications'
+  | 'awards'
+  | 'custom'
+
+export interface ResumeBuilderLink {
+  id: string
+  label: string
+  url: string
+}
+
+export interface ResumeBuilderBullet {
+  id: string
+  text: string
+}
+
+export interface ResumeProfileSection {
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  location: string
+  links: ResumeBuilderLink[]
+  summary: string
+  targetRole: string
+  experienceLevel: ResumeExperienceLevel
+}
+
+export interface ResumeExperienceEntry {
+  id: string
+  jobTitle: string
+  employer: string
+  location: string
+  startDate: string
+  endDate: string
+  current: boolean
+  hideDates: boolean
+  bullets: ResumeBuilderBullet[]
+}
+
+export interface ResumeEducationEntry {
+  id: string
+  school: string
+  degree: string
+  location: string
+  startDate: string
+  endDate: string
+  details: ResumeBuilderBullet[]
+}
+
+export interface ResumeSkillGroup {
+  id: string
+  title: string
+  skills: string[]
+}
+
+export interface ResumeProjectEntry {
+  id: string
+  name: string
+  role: string
+  url: string
+  startDate: string
+  endDate: string
+  bullets: ResumeBuilderBullet[]
+}
+
+export interface ResumeSimpleEntry {
+  id: string
+  title: string
+  subtitle: string
+  date: string
+  location: string
+  bullets: ResumeBuilderBullet[]
+}
+
+export interface ResumeCustomSection {
+  id: string
+  title: string
+  entries: ResumeSimpleEntry[]
+}
+
+export interface ResumeDesignSettings {
+  template: 'classic' | 'compact'
+  pageSize: 'letter' | 'a4'
+  marginY: number
+  marginX: number
+  fontFamily: string
+  fontSize: number
+  lineHeight: number
+  accentColor: string
+  dateFormat: 'MM/YYYY' | 'MMM YYYY' | 'YYYY'
+}
+
+export interface ResumeBuilderSectionSetting {
+  key: ResumeBuilderSectionKey
+  title: string
+  visible: boolean
+  optional: boolean
+  order: number
+}
+
+export interface EditableResumeDocument {
+  id: string
+  source: ResumeBuilderSource
+  profile: ResumeProfileSection
+  workExperiences: ResumeExperienceEntry[]
+  educations: ResumeEducationEntry[]
+  skills: ResumeSkillGroup[]
+  projects: ResumeProjectEntry[]
+  volunteerExperiences: ResumeSimpleEntry[]
+  certifications: ResumeSimpleEntry[]
+  publications: ResumeSimpleEntry[]
+  awards: ResumeSimpleEntry[]
+  customSections: ResumeCustomSection[]
+  design: ResumeDesignSettings
+  sectionSettings: ResumeBuilderSectionSetting[]
+  updatedAt: string
+}
 
 export interface ToastMessage {
   id: number
@@ -122,7 +249,7 @@ export interface ResumeVersion {
   id: string
   label: string
   createdAt: string
-  source: 'upload' | 'edit' | 'rewrite' | 'tailored'
+  source: 'upload' | 'edit' | 'rewrite' | 'tailored' | 'builder'
   text: string
   parsed: ParsedResume
   analysis: ResumeAnalysis
@@ -135,6 +262,10 @@ export interface ResumeRecord {
   name: string
   originalFileName: string
   fileType: string
+  targetJobTitle?: string
+  experienceLevel?: ResumeExperienceLevel
+  builderSource?: ResumeBuilderSource
+  builderDocument?: EditableResumeDocument
   createdAt: string
   updatedAt: string
   activeVersionId: string
