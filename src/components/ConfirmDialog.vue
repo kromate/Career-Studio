@@ -6,11 +6,12 @@
     size="sm"
     :busy="loading"
     :close-on-backdrop="!loading"
+    header-align="left"
     @close="$emit('close')"
   >
     <template #icon>
-      <span class="confirm-icon" :class="tone">
-        <TriangleAlert v-if="tone === 'danger' || tone === 'warning'" :size="20" />
+      <span v-if="tone !== 'warning'" class="confirm-icon" :class="tone">
+        <TriangleAlert v-if="tone === 'danger'" :size="20" />
         <Info v-else :size="20" />
       </span>
     </template>
@@ -33,7 +34,7 @@
       </button>
       <button
         class="btn"
-        :class="tone === 'danger' ? 'btn-danger' : 'btn-primary'"
+        :class="confirmButtonClass"
         type="button"
         :disabled="loading || !canConfirm"
         @click="$emit('confirm')"
@@ -73,6 +74,11 @@ const typedConfirmation = ref('')
 const canConfirm = computed(() => (
   !props.confirmationText || typedConfirmation.value === props.confirmationText
 ))
+const confirmButtonClass = computed(() => {
+  if (props.tone === 'danger') return 'btn-danger'
+  if (props.tone === 'warning') return 'btn-warning'
+  return 'btn-primary'
+})
 
 watch(() => props.open, (open) => {
   if (!open) typedConfirmation.value = ''
@@ -104,5 +110,16 @@ watch(() => props.open, (open) => {
 .field {
   display: grid;
   gap: 7px;
+}
+
+.btn-warning {
+  border-color: #ff5a3c;
+  color: #ffffff;
+  background: #ff5a3c;
+}
+
+.btn-warning:hover:not(:disabled) {
+  border-color: #f04b2d;
+  background: #f04b2d;
 }
 </style>

@@ -7,48 +7,59 @@
       <span>{{ label }}</span>
     </div>
     <div class="topbar-actions">
-      <NuxtLink to="/methodology" class="method-link">
-        <ShieldCheck :size="16" />
-        Resume scoring
-      </NuxtLink>
-      <button class="profile-button" type="button" @click="profileOpen = !profileOpen">
-        <span class="avatar">
-          <img v-if="workspace.state.value.user?.avatarUrl" :src="workspace.state.value.user.avatarUrl" alt="">
-          <template v-else>{{ initials }}</template>
-        </span>
-        <span class="profile-copy">
-          <strong>{{ workspace.state.value.user?.name }}</strong>
-          <small>{{ workspace.state.value.user?.email }}</small>
-        </span>
-        <ChevronDown :size="15" />
-      </button>
-      <div v-if="profileOpen" class="profile-menu">
-        <NuxtLink to="/app/settings" @click="profileOpen = false">
-          <Settings :size="16" />
-          Settings
-        </NuxtLink>
-        <button type="button" @click="handleLogout">
-          <LogOut :size="16" />
-          Sign out
-        </button>
-      </div>
+      <DropdownMenuRoot>
+        <DropdownMenuTrigger as-child>
+          <button class="profile-button" type="button" aria-label="Open account menu">
+            <span class="avatar">
+              <img v-if="workspace.state.value.user?.avatarUrl" :src="workspace.state.value.user.avatarUrl" alt="">
+              <template v-else>{{ initials }}</template>
+            </span>
+            <span class="profile-copy">
+              <strong>{{ workspace.state.value.user?.name }}</strong>
+              <small>{{ workspace.state.value.user?.email }}</small>
+            </span>
+            <ChevronDown :size="15" />
+          </button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuPortal>
+          <DropdownMenuContent class="profile-menu" side="bottom" align="end" :side-offset="10" :collision-padding="12">
+            <DropdownMenuItem as-child>
+              <NuxtLink class="profile-menu-item" to="/app/settings">
+                <Settings :size="16" />
+                Settings
+              </NuxtLink>
+            </DropdownMenuItem>
+            <DropdownMenuItem class="profile-menu-item" @select.prevent="handleLogout">
+              <LogOut :size="16" />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenuPortal>
+      </DropdownMenuRoot>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import { ChevronDown, LogOut, Menu, Settings, ShieldCheck } from 'lucide-vue-next'
+import { ChevronDown, LogOut, Menu, Settings } from 'lucide-vue-next'
+import {
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuRoot,
+  DropdownMenuTrigger,
+} from 'radix-vue'
 import { signOutFirebase } from '@/lib/auth/firebase'
 
 defineEmits<{ menu: [] }>()
 
 const route = useRoute()
 const workspace = useWorkspace()
-const profileOpen = ref(false)
 
 const routeLabels: Record<string, string> = {
   '/app': 'Overview',
-  '/app/resumes': 'Resumes',
+  '/app/resumes': 'Resumes Hub',
   '/app/target': 'Compare with a job',
   '/app/jobs': 'Saved jobs',
   '/app/applications': 'Applications',
@@ -72,7 +83,6 @@ const initials = computed(() => (
 ))
 
 const handleLogout = async () => {
-  profileOpen.value = false
   try {
     await signOutFirebase()
   } catch {
@@ -202,39 +212,54 @@ const handleLogout = async () => {
   white-space: nowrap;
 }
 
-.profile-menu {
+:global(.profile-menu) {
   display: grid;
-  width: 190px;
+  min-width: 190px;
   gap: 3px;
-  position: absolute;
-  z-index: 20;
-  top: 50px;
-  right: 0;
+  z-index: 1000;
   padding: 7px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--popover-bg);
   box-shadow: var(--shadow-md);
+  outline: none;
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+  animation: profile-menu-in 120ms ease-out;
 }
 
-.profile-menu a,
-.profile-menu button {
+:global(.profile-menu-item) {
   display: flex;
+  width: 100%;
   min-height: 39px;
   align-items: center;
   gap: 9px;
   padding: 8px 10px;
   border: 0;
   border-radius: 9px;
+  color: var(--ink);
   font-size: 12px;
   font-weight: 600;
+  text-align: left;
   background: transparent;
   cursor: pointer;
+  outline: none;
 }
 
-.profile-menu a:hover,
-.profile-menu button:hover {
+:global(.profile-menu-item:hover),
+:global(.profile-menu-item[data-highlighted]) {
   background: var(--surface-soft);
+}
+
+@keyframes profile-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(-2px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 @media (max-width: 900px) {

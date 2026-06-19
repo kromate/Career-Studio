@@ -2,7 +2,7 @@ export type ParseConfidence = 'high' | 'medium' | 'low'
 export type FindingSeverity = 'high' | 'medium' | 'low'
 export type ApplicationStatus = 'saved' | 'applied' | 'interview' | 'offer' | 'rejected'
 export type ResumeExperienceLevel = 'entry' | 'mid' | 'senior'
-export type ResumeBuilderSource = 'profile' | 'new' | 'import'
+export type ResumeBuilderSource = 'new' | 'import'
 export type ResumeBuilderSectionKey =
   | 'profile'
   | 'work'

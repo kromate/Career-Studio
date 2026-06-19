@@ -16,6 +16,7 @@ import {
   builderDocumentToText,
   createEmptyBuilderDocument,
   mergeBuilderDocument,
+  parsedResumeToBuilderDocument,
 } from '@/lib/resume/builder'
 import { matchResumeToJob } from '@/lib/resume/matching'
 import { SCORING_VERSION } from '@/lib/resume/constants'
@@ -126,6 +127,39 @@ function createId(prefix: string): string {
 
 function now(): string {
   return new Date().toISOString()
+}
+ 
+function stripFileExtension(fileName?: string): string {
+  return fileName?.replace(/\.(pdf|docx|txt)$/i, '').replace(/[-_]+/g, ' ').trim() || ''
+}
+
+function fullName(document: EditableResumeDocument): string {
+  return `${document.profile.firstName} ${document.profile.lastName}`.trim()
+}
+
+function inferTargetRole(document: EditableResumeDocument, fallback = ''): string {
+  return fallback.trim() || document.profile.targetRole.trim() || document.workExperiences[0]?.jobTitle.trim() || ''
+}
+
+function dateYear(value: string): number | null {
+  const year = value.match(/(?:19|20)\d{2}/)?.[0]
+  return year ? Number(year) : null
+}
+
+function inferExperienceLevel(document: EditableResumeDocument, timestamp: string): ResumeExperienceLevel {
+  const titles = document.workExperiences.map(entry => entry.jobTitle).join(' ')
+  if (/\b(senior|lead|staff|principal|head|director|manager)\b/i.test(titles)) return 'senior'
+
+  const years = document.workExperiences
+    .flatMap(entry => [dateYear(entry.startDate), dateYear(entry.current ? timestamp : entry.endDate)])
+    .filter((year): year is number => typeof year === 'number')
+  const earliest = Math.min(...years)
+  const latest = Math.max(...years, new Date(timestamp).getFullYear())
+  const span = Number.isFinite(earliest) ? latest - earliest : 0
+
+  if (span >= 5 || document.workExperiences.length >= 3) return 'senior'
+  if (span >= 2 || document.workExperiences.length >= 2) return 'mid'
+  return 'entry'
 }
 
 function createVersion(
@@ -291,9 +325,9 @@ export function useWorkspace() {
   }
 
   const addBuilderResume = (input: {
-    name: string
-    targetJobTitle: string
-    experienceLevel: ResumeExperienceLevel
+    name?: string
+    targetJobTitle?: string
+    experienceLevel?: ResumeExperienceLevel
     source?: ResumeBuilderSource
     originalFileName?: string
     fileType?: string
@@ -301,31 +335,53 @@ export function useWorkspace() {
   }): ResumeRecord => {
     const resumeId = createId('resume')
     const createdAt = now()
-    const name = input.name.trim() || input.targetJobTitle.trim() || 'Untitled resume'
-    const document = createEmptyBuilderDocument({
-      id: createId('builder'),
-      source: input.source || 'new',
-      targetRole: input.targetJobTitle,
-      experienceLevel: input.experienceLevel,
-      now: createdAt,
+    const sourceText = input.sourceText?.trim()
+    const document = sourceText
+      ? parsedResumeToBuilderDocument({
+        parsed: parseResumeText(sourceText),
+        targetRole: input.targetJobTitle,
+        experienceLevel: input.experienceLevel,
+        now: createdAt,
+      })
+      : createEmptyBuilderDocument({
+        id: createId('builder'),
+        source: input.source || 'new',
+        targetRole: input.targetJobTitle || '',
+        experienceLevel: input.experienceLevel || 'entry',
+        now: createdAt,
+      })
+    const targetJobTitle = inferTargetRole(document, input.targetJobTitle)
+    const experienceLevel = input.experienceLevel || (sourceText ? inferExperienceLevel(document, createdAt) : 'entry')
+    const hydratedDocument = mergeBuilderDocument({
+      ...document,
+      profile: {
+        ...document.profile,
+        targetRole: targetJobTitle,
+        experienceLevel,
+      },
     })
+    const name = input.name?.trim()
+      || fullName(hydratedDocument)
+      || stripFileExtension(input.originalFileName)
+      || targetJobTitle
+      || 'Untitled resume'
     const resume: ResumeRecord = {
       id: resumeId,
       name,
       originalFileName: input.originalFileName || `${name}.txt`,
       fileType: input.fileType || 'text/plain',
-      targetJobTitle: input.targetJobTitle,
-      experienceLevel: input.experienceLevel,
+      targetJobTitle,
+      experienceLevel,
       builderSource: input.source || 'new',
-      builderDocument: document,
+      builderDocument: hydratedDocument,
       createdAt,
       updatedAt: createdAt,
       activeVersionId: '',
-      versions: input.sourceText?.trim()
-        ? [createVersion(resumeId, input.sourceText, 'Imported resume', 'upload')]
+      versions: sourceText
+        ? [createVersion(resumeId, sourceText, 'Imported resume', 'upload')]
         : [],
     }
-    const synced = syncBuilderVersion(resume, document, createdAt)
+    const synced = syncBuilderVersion(resume, hydratedDocument, createdAt)
     state.value.resumes.unshift(synced)
     persist()
     return synced

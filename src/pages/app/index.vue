@@ -13,9 +13,9 @@
           <Target :size="16" />
           Compare with a job
         </NuxtLink>
-        <NuxtLink to="/app/resumes/new" class="btn btn-primary">
+        <NuxtLink to="/app/resumes" class="btn btn-primary">
           <FileUp :size="16" />
-          Upload resume
+          Create resume
         </NuxtLink>
       </div>
     </header>
@@ -222,9 +222,9 @@
             and a workspace for preparing role by role.
           </p>
           <div class="onboarding-actions">
-            <NuxtLink to="/app/resumes/new" class="btn btn-primary btn-lg">
+            <NuxtLink to="/app/resumes" class="btn btn-primary btn-lg">
               <FileUp :size="17" />
-              Upload your resume
+              Create your resume
             </NuxtLink>
             <NuxtLink to="/methodology" class="btn btn-ghost btn-lg">
               How scoring works

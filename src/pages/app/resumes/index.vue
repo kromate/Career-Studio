@@ -1,63 +1,35 @@
 <template>
   <CollectionLoadingState v-if="!workspace.state.value.hydrated" />
   <div v-else class="resume-hub-shell">
-    <header class="hub-header">
-      <div>
-        <h1>Resume Hub</h1>
-      </div>
-      <div class="hub-actions">
-        <span class="credit-pill"><Sparkles :size="14" /> 20 AI</span>
-      </div>
-    </header>
 
-    <section class="active-resume-banner">
-      <span><FileText :size="19" /></span>
-      <div>
-        <strong>No Active Resume</strong>
-        <p>Upload a resume to your profile to see your score</p>
-      </div>
-      <button class="btn btn-secondary btn-sm" type="button" @click="openCreate('import')">
-        <Upload :size="14" />
-        Upload Resume
-      </button>
-    </section>
-
-    <section class="hub-section-head">
-      <h2>Resumes{{ sortedResumes.length ? ` (${sortedResumes.length})` : '' }}</h2>
-      <label class="sort-select">
-        <span class="sr-only">Sort resumes</span>
-        <select v-model="sortBy" class="select">
-          <option value="updatedAt">Last Modified</option>
-          <option value="createdAt">Created</option>
-          <option value="name">Name</option>
-          <option value="score">Score</option>
-        </select>
-      </label>
-    </section>
 
     <div class="resume-hub-grid">
       <button class="create-resume-tile" type="button" @click="openCreate('new')">
         <span><Plus :size="24" /></span>
         <strong>Create New Resume</strong>
-        <small>Upload, paste, or start fresh</small>
+        <small>Start blank or upload a resume</small>
       </button>
 
       <article v-for="resume in sortedResumes" :key="resume.id" class="hub-resume-card">
         <button class="resume-thumb" type="button" @click="openBuilder(resume.id)">
-          <ResumeBuilderPreview
-            v-if="resume.builderDocument"
-            :document="resume.builderDocument"
-          />
-          <div v-else class="document-lines">
-            <i class="wide" />
-            <i />
-            <i class="short" />
-            <b />
-            <i class="wide" />
-            <i />
-            <i class="wide" />
+          <div class="thumb-paper">
+            <ResumeBuilderPreview
+              v-if="resume.builderDocument"
+              :document="resume.builderDocument"
+            />
+            <div v-else class="document-lines">
+              <i class="wide" />
+              <i />
+              <i class="short" />
+              <b />
+              <i class="wide" />
+              <i />
+              <i class="wide" />
+            </div>
           </div>
-          <span v-if="scoreFor(resume) !== null" class="score-chip">{{ scoreFor(resume) }}/100</span>
+          <span v-if="scoreFor(resume) !== null" class="score-chip" :class="scoreTone(scoreFor(resume))">
+            {{ scoreFor(resume) }}/100
+          </span>
         </button>
         <div class="hub-card-body">
           <div class="card-time">{{ relativeDate(resume.updatedAt) }}</div>
@@ -90,39 +62,12 @@
       :open="createOpen"
       title="Create new resume"
       size="md"
-      :busy="creating"
+      :busy="creating || extracting"
       @close="closeCreate"
     >
       <div class="create-form">
-        <label class="field">
-          <span class="field-label">Document title</span>
-          <input v-model.trim="createForm.title" class="input" placeholder="e.g. Senior Product Designer - 2026">
-          <small>This is the name you'll see in your resume list. Pick something you can recognize at a glance.</small>
-        </label>
-
-        <label class="field">
-          <span class="field-label">Target job title</span>
-          <input v-model.trim="createForm.targetJobTitle" class="input" placeholder="What role is this resume for?">
-        </label>
-
         <div class="field">
-          <span class="field-label">Experience level</span>
-          <div class="segmented-control">
-            <button
-              v-for="level in levels"
-              :key="level.value"
-              type="button"
-              :class="{ active: createForm.experienceLevel === level.value }"
-              @click="createForm.experienceLevel = level.value"
-            >
-              <strong>{{ level.label }}</strong>
-              <span>{{ level.years }}</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="field">
-          <span class="field-label">Resume source</span>
+          <span class="field-label">How do you want to start?</span>
           <div class="source-grid">
             <button
               v-for="source in sources"
@@ -137,24 +82,29 @@
           </div>
         </div>
 
-        <div v-if="createForm.source === 'profile'" class="source-note">
-          Your Career Studio profile is empty. Add work history and education in your profile first.
+        <div v-if="createForm.source === 'new'" class="source-note">
+          Start with an empty builder and add each section yourself.
         </div>
 
-        <label v-if="createForm.source === 'import'" class="import-picker">
+        <label v-else class="import-picker" :class="{ extracting }">
           <input
             ref="importInput"
             type="file"
             accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
             @change="handleImportFile"
           >
-          <span><FileText :size="14" /> {{ importFileName || 'Choose PDF, DOCX, or TXT' }}</span>
+          <span>
+            <AppSpinner v-if="extracting" :size="14" />
+            <FileText v-else :size="14" />
+            {{ importFileName || 'Upload a PDF, DOCX, or TXT resume' }}
+          </span>
+          <small v-if="importFileText">Extracted text will be placed into the builder sections.</small>
         </label>
       </div>
 
       <template #footer>
-        <button class="btn btn-secondary" type="button" :disabled="creating" @click="closeCreate">Cancel</button>
-        <button class="btn btn-primary" type="button" :disabled="!canCreate || creating" @click="createResume">
+        <button class="btn btn-secondary" type="button" :disabled="creating || extracting" @click="closeCreate">Cancel</button>
+        <button class="btn btn-primary" type="button" :disabled="!canCreate || creating || extracting" @click="createResume">
           <AppSpinner v-if="creating" :size="15" light />
           {{ creating ? 'Creating...' : 'Create resume' }}
         </button>
@@ -163,9 +113,10 @@
 
     <ConfirmDialog
       :open="Boolean(deleteTarget)"
-      title="Delete this resume?"
-      description="This removes every local version and builder edit for this resume."
-      confirm-label="Delete resume"
+      title="Delete Resume"
+      description="Are you sure you want to delete this resume?"
+      confirm-label="Confirm"
+      tone="warning"
       @close="deleteTarget = null"
       @confirm="confirmDelete"
     />
@@ -183,10 +134,8 @@ import {
   FileText,
   PencilLine,
   Plus,
-  Sparkles,
   Trash2,
   Upload,
-  UserRound,
 } from 'lucide-vue-next'
 import { extractTextFromFile } from '@/lib/resume/parser'
 import { exportResumePdf } from '@/lib/export/resume'
@@ -198,31 +147,20 @@ const toast = useToast()
 const sortBy = ref<'updatedAt' | 'createdAt' | 'name' | 'score'>('updatedAt')
 const createOpen = ref(false)
 const creating = ref(false)
+const extracting = ref(false)
 const importInput = ref<HTMLInputElement | null>(null)
 const importFileName = ref('')
 const importFileText = ref('')
 const importFileType = ref('text/plain')
 const deleteTarget = ref<ResumeRecord | null>(null)
 const createForm = reactive<{
-  title: string
-  targetJobTitle: string
-  experienceLevel: ResumeExperienceLevel
   source: ResumeBuilderSource
 }>({
-  title: '',
-  targetJobTitle: '',
-  experienceLevel: 'entry',
   source: 'new',
 })
-const levels: Array<{ value: ResumeExperienceLevel; label: string; years: string }> = [
-  { value: 'entry', label: 'Entry', years: '0-2 yrs' },
-  { value: 'mid', label: 'Mid', years: '2-5 yrs' },
-  { value: 'senior', label: 'Senior', years: '5+ yrs' },
-]
 const sources: Array<{ value: ResumeBuilderSource; label: string; icon: Component }> = [
-  { value: 'profile', label: 'Career Profile', icon: UserRound },
-  { value: 'new', label: 'Create New', icon: FilePlus2 },
-  { value: 'import', label: 'Import Existing', icon: Upload },
+  { value: 'new', label: 'Blank Resume', icon: FilePlus2 },
+  { value: 'import', label: 'Upload Resume', icon: Upload },
 ]
 const sortedResumes = computed(() => [...workspace.state.value.resumes].sort((a, b) => {
   const sortKey = sortBy.value
@@ -231,13 +169,17 @@ const sortedResumes = computed(() => [...workspace.state.value.resumes].sort((a,
   return new Date(b[sortKey]).getTime() - new Date(a[sortKey]).getTime()
 }))
 const canCreate = computed(() => (
-  Boolean(createForm.title.trim() && createForm.targetJobTitle.trim())
-  && createForm.source !== 'profile'
-  && (createForm.source !== 'import' || Boolean(importFileText.value.trim()))
+  createForm.source === 'new' || Boolean(importFileText.value.trim())
 ))
 
 const activeVersion = (resume: ResumeRecord) => workspace.getActiveVersion(resume)
 const scoreFor = (resume: ResumeRecord) => activeVersion(resume)?.analysis.score ?? null
+const scoreTone = (score: number | null) => {
+  if (score === null) return 'score-low'
+  if (score >= 70) return 'score-high'
+  if (score >= 50) return 'score-mid'
+  return 'score-low'
+}
 const experienceLabel = (level?: ResumeExperienceLevel) => {
   if (level === 'senior') return 'Senior Level'
   if (level === 'mid') return 'Mid Level'
@@ -253,9 +195,6 @@ const relativeDate = (date: string) => {
   return `${Math.floor(hours / 24)} days ago`
 }
 const resetCreate = () => {
-  createForm.title = ''
-  createForm.targetJobTitle = ''
-  createForm.experienceLevel = 'entry'
   createForm.source = 'new'
   importFileName.value = ''
   importFileText.value = ''
@@ -268,24 +207,26 @@ const openCreate = (source: ResumeBuilderSource) => {
   createOpen.value = true
 }
 const closeCreate = () => {
-  if (!creating.value) createOpen.value = false
+  if (!creating.value && !extracting.value) createOpen.value = false
 }
 const handleImportFile = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0]
   if (!file) return
-  creating.value = true
+  extracting.value = true
   try {
-    importFileText.value = await extractTextFromFile(file)
+    const text = await extractTextFromFile(file)
+    if (text.trim().length < 20) throw new Error('Very little text could be extracted from this file.')
+    importFileText.value = text
     importFileName.value = file.name
     importFileType.value = file.type || 'application/octet-stream'
-    if (!createForm.title) createForm.title = file.name.replace(/\.(pdf|docx|txt)$/i, '').replace(/[-_]+/g, ' ')
+    toast.show('Resume extracted', { message: 'The builder will prefill sections from this file.' })
   } catch (error) {
     toast.show('Could not import resume', {
       message: error instanceof Error ? error.message : 'Try another PDF, DOCX, or TXT file.',
       tone: 'error',
     })
   } finally {
-    creating.value = false
+    extracting.value = false
   }
 }
 const createResume = async () => {
@@ -293,15 +234,16 @@ const createResume = async () => {
   creating.value = true
   try {
     const resume = workspace.addBuilderResume({
-      name: createForm.title,
-      targetJobTitle: createForm.targetJobTitle,
-      experienceLevel: createForm.experienceLevel,
       source: createForm.source,
       originalFileName: importFileName.value || undefined,
       fileType: importFileType.value,
-      sourceText: importFileText.value || undefined,
+      sourceText: createForm.source === 'import' ? importFileText.value : undefined,
     })
-    toast.show('Resume created', { message: 'Your builder workspace is ready.' })
+    toast.show('Resume created', {
+      message: createForm.source === 'import'
+        ? 'Extracted sections are ready in the builder.'
+        : 'Your blank builder workspace is ready.',
+    })
     createOpen.value = false
     await navigateTo(`/app/resumes/${resume.id}/builder`)
   } finally {
@@ -330,7 +272,7 @@ const confirmDelete = () => {
 <style scoped>
 .resume-hub-shell {
   min-height: calc(100vh - 64px);
-  padding: 30px 32px 64px;
+  padding: 22px 32px 64px;
   background: var(--surface-warm);
 }
 
@@ -343,7 +285,7 @@ const confirmDelete = () => {
 }
 
 .hub-header {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .hub-header h1 {
@@ -352,36 +294,35 @@ const confirmDelete = () => {
   letter-spacing: 0;
 }
 
-.hub-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.credit-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  color: var(--purple);
-  font-size: 12px;
-  font-weight: 800;
-  background: var(--purple-soft);
-}
-
 .active-resume-banner {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 12px;
-  max-width: 520px;
-  min-height: 64px;
+  width: 376px;
+  min-height: 59px;
   margin-bottom: 26px;
-  padding: 12px 16px;
+  padding: 11px 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--card-bg);
+}
+
+.banner-upload-button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.banner-upload-button:hover {
+  color: var(--purple);
+  background: var(--purple-soft);
 }
 
 .active-resume-banner > span {
@@ -406,7 +347,7 @@ const confirmDelete = () => {
 }
 
 .hub-section-head {
-  margin-bottom: 14px;
+  margin-bottom: 20px;
 }
 
 .hub-section-head h2 {
@@ -420,13 +361,14 @@ const confirmDelete = () => {
 
 .resume-hub-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, 255px);
+  align-items: start;
+  gap: 12px;
 }
 
 .create-resume-tile,
 .hub-resume-card {
-  min-height: 258px;
+  min-height: 238px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--card-bg);
@@ -467,27 +409,40 @@ const confirmDelete = () => {
 }
 
 .hub-resume-card {
+  display: grid;
+  grid-template-columns: 132px 1fr;
   overflow: hidden;
+  padding: 13px 13px 12px;
 }
 
 .resume-thumb {
   display: grid;
   overflow: hidden;
-  width: 100%;
-  height: 158px;
+  width: 118px;
+  height: 184px;
   place-items: center;
   position: relative;
   border: 0;
-  border-bottom: 1px solid var(--line);
-  background: var(--document-preview-bg);
+  border-radius: 6px;
+  background: transparent;
   cursor: pointer;
 }
 
-.resume-thumb :deep(.builder-paper) {
-  width: 180px;
+.thumb-paper {
+  display: grid;
+  width: 118px;
+  height: 184px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--document-preview-bg);
+}
+
+.thumb-paper :deep(.builder-paper) {
+  width: 170px;
   min-height: 235px;
-  padding: 14px;
-  font-size: 3.3px;
+  padding: 13px;
+  font-size: 3.15px;
   transform: scale(0.78);
   transform-origin: center;
 }
@@ -519,30 +474,39 @@ const confirmDelete = () => {
 
 .score-chip {
   position: absolute;
-  right: 10px;
-  bottom: 10px;
-  padding: 5px 8px;
+  top: 6px;
+  left: 6px;
+  padding: 4px 5px;
   border-radius: 99px;
-  color: var(--purple);
-  font-size: 11px;
+  color: var(--red);
+  font-size: 10px;
   font-weight: 800;
-  background: var(--purple-soft);
+  background: var(--card-bg);
 }
 
+.score-chip.score-high { color: var(--green); }
+.score-chip.score-mid { color: var(--amber); }
+.score-chip.score-low { color: var(--red); }
+
 .hub-card-body {
-  padding: 13px;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 2px 0 0;
 }
 
 .card-time {
-  margin-bottom: 8px;
+  order: 5;
+  margin-top: auto;
+  margin-bottom: 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .hub-card-body h3 {
   overflow: hidden;
   margin: 0 0 6px;
-  font-size: 15px;
+  font-size: 14px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -551,13 +515,14 @@ const confirmDelete = () => {
   overflow: hidden;
   margin: 0 0 9px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .level-chip {
   display: inline-flex;
+  align-self: flex-start;
   margin-bottom: 10px;
   padding: 5px 8px;
   border-radius: 8px;
@@ -569,13 +534,16 @@ const confirmDelete = () => {
 
 .edit-button {
   width: 100%;
+  min-height: 32px;
   margin-bottom: 8px;
+  margin-top: auto;
 }
 
 .card-icon-actions {
   display: flex;
   justify-content: flex-end;
   gap: 4px;
+  order: 4;
 }
 
 .icon-action {
@@ -597,29 +565,39 @@ const confirmDelete = () => {
 
 .create-form {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 
 .create-form small {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 9px;
+  line-height: 1.25;
 }
 
-.segmented-control,
+.create-form .field {
+  gap: 5px;
+}
+
+.create-form .field-label {
+  font-size: 11px;
+}
+
+.create-form .input {
+  height: 31px;
+  padding: 0 10px;
+  font-size: 11px;
+}
+
 .source-grid {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
-.segmented-control,
-.source-grid {
-  grid-template-columns: repeat(3, 1fr);
-}
+.source-grid { grid-template-columns: repeat(2, 1fr); }
 
-.segmented-control button,
 .source-grid button {
   display: grid;
-  min-height: 42px;
+  min-height: 28px;
   place-items: center;
   gap: 2px;
   border: 1px solid var(--line);
@@ -630,7 +608,10 @@ const confirmDelete = () => {
   cursor: pointer;
 }
 
-.segmented-control button.active,
+.source-grid button {
+  min-height: 50px;
+}
+
 .source-grid button.active {
   border-color: var(--purple);
   color: var(--purple);
@@ -638,26 +619,26 @@ const confirmDelete = () => {
   box-shadow: 0 0 0 1px var(--purple-border);
 }
 
-.segmented-control span {
-  color: var(--muted);
-  font-size: 10px;
-}
-
 .source-note,
 .import-picker {
-  min-height: 38px;
-  padding: 10px 12px;
+  min-height: 34px;
+  padding: 8px 11px;
   border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
   background: var(--surface-subtle);
 }
 
 .import-picker {
-  display: flex;
-  align-items: center;
+  display: grid;
+  gap: 5px;
+  min-height: 42px;
   cursor: pointer;
+}
+
+.import-picker.extracting {
+  cursor: progress;
 }
 
 .import-picker input {
@@ -692,8 +673,7 @@ const confirmDelete = () => {
     width: 100%;
   }
 
-  .source-grid,
-  .segmented-control {
+  .source-grid {
     grid-template-columns: 1fr;
   }
 }

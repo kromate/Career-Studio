@@ -12,9 +12,16 @@ import type {
     ResumeProfileSection,
     ResumeProjectEntry,
     ResumeSimpleEntry,
+    ResumeSectionType,
     ResumeSkillGroup,
 } from '@/types'
 import { parseResumeText } from './parser'
+
+const EMAIL_PATTERN = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i
+const PHONE_PATTERN = /(?:\+?\d[\d\s().-]{7,}\d)/
+const DATE_RANGE_PATTERN = /\b(?:(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+)?(?:19|20)\d{2}\b/i
+const PRESENT_PATTERN = /\bpresent\b|\bcurrent\b/i
+const URL_PATTERN = /(?:https?:\/\/)?(?:www\.)?[\w.-]+\.[a-z]{2,}(?:\/[^\s|]*)?/i
 
 const SECTION_DEFAULTS: Array<Omit<ResumeBuilderSectionSetting, 'order'>> = [
     { key: 'profile', title: 'Personal Information', visible: true, optional: false },
@@ -153,6 +160,203 @@ export function createEmptyBullet(): ResumeBuilderBullet {
     }
 }
 
+function createBullet(text: string): ResumeBuilderBullet {
+    return {
+        id: createBuilderId('bullet'),
+        text,
+    }
+}
+
+function cleanLine(text: string): string {
+    return text.replace(/^[-*+•◦▪‣]\s*/, '').replace(/\s+/g, ' ').trim()
+}
+
+function titleCaseNamePart(text: string): string {
+    if (text !== text.toUpperCase()) return text
+    return text.toLowerCase().replace(/\b[a-z]/g, character => character.toUpperCase())
+}
+
+function splitName(name: string): Pick<ResumeProfileSection, 'firstName' | 'lastName'> {
+    const parts = name.split(/\s+/).map(titleCaseNamePart).filter(Boolean)
+    if (parts.length <= 1) return { firstName: parts[0] || '', lastName: '' }
+    return {
+        firstName: parts.slice(0, -1).join(' '),
+        lastName: parts.at(-1) || '',
+    }
+}
+
+function sectionLines(parsed: ParsedResume, type: ResumeSectionType): string[] {
+    return parsed.lines
+        .filter(line => line.section === type && line.kind !== 'heading')
+        .map(line => cleanLine(line.text))
+        .filter(Boolean)
+}
+
+function sectionBodyLines(parsed: ParsedResume, type: ResumeSectionType): string[] {
+    return parsed.lines
+        .filter(line => line.section === type && line.kind !== 'heading' && line.kind !== 'bullet')
+        .map(line => cleanLine(line.text))
+        .filter(Boolean)
+}
+
+function sectionBullets(parsed: ParsedResume, type: ResumeSectionType): string[] {
+    return parsed.lines
+        .filter(line => line.section === type && line.kind === 'bullet')
+        .map(line => cleanLine(line.text))
+        .filter(Boolean)
+}
+
+function looksLikeDateLine(text: string): boolean {
+    return DATE_RANGE_PATTERN.test(text) || PRESENT_PATTERN.test(text)
+}
+
+function splitDateRange(text = ''): { startDate: string; endDate: string; current: boolean } {
+    const normalized = text.replace(/[–—]/g, '-').replace(/\s+to\s+/i, ' - ')
+    const parts = normalized.split(/\s+-\s+/).map(part => part.trim()).filter(Boolean)
+    const current = PRESENT_PATTERN.test(parts.at(-1) || normalized)
+    return {
+        startDate: parts[0] || normalized,
+        endDate: current ? '' : parts.slice(1).join(' - '),
+        current,
+    }
+}
+
+function looksLikeLocation(text: string): boolean {
+    return /\b(remote|hybrid)\b/i.test(text) || /\b[A-Z][a-z]+,\s*(?:[A-Z]{2}|[A-Z][a-z]+)\b/.test(text)
+}
+
+function createExperienceEntry(headerLines: string[], bulletTexts: string[]): ResumeExperienceEntry | null {
+    const dateLine = headerLines.find(looksLikeDateLine) || ''
+    const headingLines = headerLines.filter(line => line !== dateLine)
+    let location = ''
+    const locationIndex = headingLines.findIndex(looksLikeLocation)
+    if (locationIndex >= 0) {
+        location = headingLines[locationIndex] || ''
+        headingLines.splice(locationIndex, 1)
+    } else if (headingLines.length > 2) {
+        location = headingLines.pop() || ''
+    }
+    const dates = splitDateRange(dateLine)
+
+    if (!headingLines.length && !bulletTexts.length) return null
+    return {
+        id: createBuilderId('experience'),
+        jobTitle: headingLines[0] || '',
+        employer: headingLines[1] || '',
+        location,
+        startDate: dates.startDate,
+        endDate: dates.endDate,
+        current: dates.current,
+        hideDates: !dateLine,
+        bullets: bulletTexts.map(createBullet),
+    }
+}
+
+function experienceEntriesFromParsed(parsed: ParsedResume): ResumeExperienceEntry[] {
+    const entries: ResumeExperienceEntry[] = []
+    let headerLines: string[] = []
+    let bulletTexts: string[] = []
+
+    const flush = () => {
+        const entry = createExperienceEntry(headerLines, bulletTexts)
+        if (entry) entries.push(entry)
+        headerLines = []
+        bulletTexts = []
+    }
+
+    parsed.lines
+        .filter(line => line.section === 'experience' && line.kind !== 'heading')
+        .forEach((line) => {
+            const text = cleanLine(line.text)
+            if (!text) return
+            if (line.kind === 'bullet') {
+                bulletTexts.push(text)
+                return
+            }
+            if (bulletTexts.length) flush()
+            headerLines.push(text)
+        })
+
+    flush()
+    return entries
+}
+
+function educationEntriesFromParsed(parsed: ParsedResume): ResumeEducationEntry[] {
+    const lines = sectionBodyLines(parsed, 'education')
+    if (!lines.length) return []
+    const dateLine = lines.find(looksLikeDateLine) || ''
+    const headingLines = lines.filter(line => line !== dateLine)
+    const details = sectionBullets(parsed, 'education')
+    let location = ''
+    const locationIndex = headingLines.findIndex(looksLikeLocation)
+    if (locationIndex >= 0) {
+        location = headingLines[locationIndex] || ''
+        headingLines.splice(locationIndex, 1)
+    }
+    const dates = splitDateRange(dateLine)
+
+    return [{
+        id: createBuilderId('education'),
+        degree: headingLines[0] || '',
+        school: headingLines[1] || '',
+        location,
+        startDate: dates.startDate,
+        endDate: dates.endDate,
+        details: details.map(createBullet),
+    }]
+}
+
+function skillGroupsFromParsed(parsed: ParsedResume): ResumeSkillGroup[] {
+    return sectionLines(parsed, 'skills')
+        .map((line) => {
+            const [rawTitle, rawSkills] = line.includes(':') ? line.split(/:(.*)/s) : ['', line]
+            const skills = (rawSkills || '')
+                .split(/[,;|]/)
+                .map(skill => skill.trim())
+                .filter(Boolean)
+            if (!skills.length) return null
+            return {
+                id: createBuilderId('skills'),
+                title: rawTitle?.trim() || '',
+                skills,
+            }
+        })
+        .filter((group): group is ResumeSkillGroup => Boolean(group))
+}
+
+function projectEntriesFromParsed(parsed: ParsedResume): ResumeProjectEntry[] {
+    const lines = sectionBodyLines(parsed, 'projects')
+    if (!lines.length) return []
+    const dateLine = lines.find(looksLikeDateLine) || ''
+    const urlLine = lines.find(line => URL_PATTERN.test(line)) || ''
+    const headingLines = lines.filter(line => line !== dateLine && line !== urlLine)
+    const dates = splitDateRange(dateLine)
+
+    return [{
+        id: createBuilderId('project'),
+        name: headingLines[0] || '',
+        role: headingLines[1] || '',
+        url: urlLine,
+        startDate: dates.startDate,
+        endDate: dates.endDate,
+        bullets: sectionBullets(parsed, 'projects').map(createBullet),
+    }]
+}
+
+function simpleEntriesFromLines(prefix: string, lines: string[]): ResumeSimpleEntry[] {
+    if (!lines.length) return []
+    const dateLine = lines.find(looksLikeDateLine) || ''
+    const headingLines = lines.filter(line => line !== dateLine)
+    return [{
+        id: createBuilderId(prefix),
+        title: headingLines[0] || '',
+        subtitle: headingLines.slice(1).join(' | '),
+        date: dateLine,
+        location: '',
+        bullets: [],
+    }]
+}
+
 function cleanParts(parts: Array<string | undefined>): string {
     return parts.map(part => part?.trim()).filter(Boolean).join(' | ')
 }
@@ -260,6 +464,44 @@ export function builderDocumentToText(document: EditableResumeDocument): string 
 
 export function builderDocumentToParsedResume(document: EditableResumeDocument): ParsedResume {
     return parseResumeText(builderDocumentToText(document))
+}
+
+export function parsedResumeToBuilderDocument(input: {
+    parsed: ParsedResume
+    targetRole?: string
+    experienceLevel?: ResumeExperienceLevel
+    now?: string
+}): EditableResumeDocument {
+    const document = createEmptyBuilderDocument({
+        source: 'import',
+        targetRole: input.targetRole,
+        experienceLevel: input.experienceLevel,
+        now: input.now,
+    })
+    const headerLines = sectionLines(input.parsed, 'header')
+    const nameLine = headerLines.find(line => !EMAIL_PATTERN.test(line) && !PHONE_PATTERN.test(line) && !URL_PATTERN.test(line)) || ''
+    const name = splitName(nameLine)
+    const links = [input.parsed.contacts.linkedIn, input.parsed.contacts.website]
+        .filter((link): link is string => Boolean(link))
+        .map(link => ({ id: createBuilderId('link'), label: link.includes('linkedin.com') ? 'LinkedIn' : 'Website', url: link }))
+
+    return mergeBuilderDocument({
+        ...document,
+        profile: {
+            ...document.profile,
+            ...name,
+            email: input.parsed.contacts.email || '',
+            phone: input.parsed.contacts.phone || '',
+            location: input.parsed.contacts.location || '',
+            links,
+            summary: sectionLines(input.parsed, 'summary').join(' '),
+        },
+        workExperiences: experienceEntriesFromParsed(input.parsed),
+        educations: educationEntriesFromParsed(input.parsed),
+        skills: skillGroupsFromParsed(input.parsed),
+        projects: projectEntriesFromParsed(input.parsed),
+        certifications: simpleEntriesFromLines('certification', sectionBodyLines(input.parsed, 'certifications')),
+    })
 }
 
 export function mergeBuilderDocument(document: EditableResumeDocument): EditableResumeDocument {

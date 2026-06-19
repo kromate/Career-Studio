@@ -11,7 +11,7 @@
             v-if="open"
             ref="panel"
             class="modal-panel"
-            :class="`modal-${size}`"
+            :class="[`modal-${size}`, `modal-header-${headerAlign}`]"
             role="dialog"
             aria-modal="true"
             :aria-labelledby="titleId"
@@ -61,12 +61,14 @@ const props = withDefaults(defineProps<{
   busy?: boolean
   closeOnBackdrop?: boolean
   showClose?: boolean
+  headerAlign?: 'center' | 'left'
 }>(), {
   description: '',
   size: 'md',
   busy: false,
   closeOnBackdrop: true,
   showClose: true,
+  headerAlign: 'center',
 })
 
 const emit = defineEmits<{ close: [] }>()
@@ -148,22 +150,23 @@ onBeforeUnmount(() => {
   z-index: 200;
   inset: 0;
   padding: 20px;
-  background: rgba(23, 20, 38, 0.48);
-  backdrop-filter: blur(4px);
+  background: rgba(9, 7, 16, 0.48);
+  backdrop-filter: none;
 }
 
 .modal-panel {
   overflow: hidden;
-  width: min(100%, 540px);
+  width: min(100%, 400px);
   max-height: min(88dvh, 840px);
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 12px;
   outline: none;
   background: var(--card-bg);
   box-shadow: 0 28px 80px rgba(23, 20, 38, 0.24);
 }
 
 .modal-sm { max-width: 430px; }
+.modal-md { max-width: 400px; }
 .modal-lg { max-width: 900px; }
 .modal-full {
   width: min(100%, 1100px);
@@ -172,23 +175,40 @@ onBeforeUnmount(() => {
 
 .modal-header {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: center;
   gap: 18px;
-  padding: 21px 22px;
-  border-bottom: 1px solid var(--line);
+  position: relative;
+  padding: 20px 48px 14px;
+  border-bottom: 0;
+}
+
+.modal-header-left .modal-header {
+  justify-content: flex-start;
+  padding: 20px 48px 10px 22px;
+}
+
+.modal-header-left .modal-heading {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.modal-header-left .modal-heading h2 {
+  font-size: 18px;
 }
 
 .modal-heading {
   display: flex;
   min-width: 0;
   align-items: flex-start;
+  justify-content: center;
   gap: 12px;
+  text-align: center;
 }
 
 .modal-heading h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .modal-heading p {
@@ -200,21 +220,24 @@ onBeforeUnmount(() => {
 
 .modal-close {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   flex: 0 0 auto;
   place-items: center;
+  position: absolute;
+  top: 13px;
+  right: 13px;
   border: 0;
-  border-radius: 9px;
+  border-radius: 50%;
   color: var(--muted);
-  background: var(--surface-soft);
+  background: transparent;
   cursor: pointer;
 }
 
 .modal-content {
   overflow-y: auto;
   max-height: calc(88dvh - 145px);
-  padding: 22px;
+  padding: 0 16px 10px;
 }
 
 .modal-full .modal-content {
@@ -225,9 +248,9 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: flex-end;
   gap: 9px;
-  padding: 16px 22px;
+  padding: 12px 16px;
   border-top: 1px solid var(--line);
-  background: var(--surface-subtle);
+  background: var(--card-bg);
 }
 
 .modal-fade-enter-active,
