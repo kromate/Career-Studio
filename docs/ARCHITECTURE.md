@@ -12,6 +12,7 @@ The open-source application is a Nuxt 3, Vue, and TypeScript project. The
 working local preview uses:
 
 - browser-side PDF, DOCX, TXT, and pasted-text extraction;
+- optional Gemini Lite assisted structuring for imported resume text;
 - a canonical parsed-resume model;
 - versioned deterministic scoring and matching modules;
 - evidence-preserving rewrite suggestions;
@@ -86,6 +87,7 @@ the input hash, parser version, scoring version, and taxonomy version.
 Upload
   -> virus/type/size validation
   -> deterministic text and layout extraction
+  -> optional Gemini Lite structuring of already-extracted text
   -> canonical structured resume
   -> parse-quality report
   -> deterministic rule evaluation

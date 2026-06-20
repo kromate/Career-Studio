@@ -332,11 +332,18 @@ export function useWorkspace() {
     originalFileName?: string
     fileType?: string
     sourceText?: string
+    builderDocument?: EditableResumeDocument
   }): ResumeRecord => {
     const resumeId = createId('resume')
     const createdAt = now()
     const sourceText = input.sourceText?.trim()
-    const document = sourceText
+    const document = input.builderDocument
+      ? mergeBuilderDocument({
+        ...input.builderDocument,
+        source: input.source || input.builderDocument.source,
+        updatedAt: createdAt,
+      })
+      : sourceText
       ? parsedResumeToBuilderDocument({
         parsed: parseResumeText(sourceText),
         targetRole: input.targetJobTitle,
@@ -351,7 +358,9 @@ export function useWorkspace() {
         now: createdAt,
       })
     const targetJobTitle = inferTargetRole(document, input.targetJobTitle)
-    const experienceLevel = input.experienceLevel || (sourceText ? inferExperienceLevel(document, createdAt) : 'entry')
+    const experienceLevel = input.experienceLevel
+      || (input.builderDocument ? document.profile.experienceLevel : undefined)
+      || (sourceText ? inferExperienceLevel(document, createdAt) : 'entry')
     const hydratedDocument = mergeBuilderDocument({
       ...document,
       profile: {

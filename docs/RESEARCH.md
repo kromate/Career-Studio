@@ -50,7 +50,7 @@ work preferences, preparation, and transitions.
 | [Sorce](https://www.sorce.jobs/) | Mobile swipe-based discovery plus AI-assisted applications | Discovery can be delightfully simple, but automated submission creates trust and quality risks |
 | [LoopCV](https://www.loopcv.pro/) | Automated searches, applications, statistics, and job aggregation | Search automation is compelling after profile quality and targeting are reliable |
 | [Sonara](https://www.sonara.ai/) | Learns preferences, finds jobs, and applies continuously | Continuous automation requires strong controls, exclusions, and audit history |
-| [Wobo](https://www.wobo.ai/) | Packages job search as one journey, gives each tool a focused product page, uses strong product previews, and connects resume, persona, matching, and application automation | Career Studio should present a connected suite while keeping live and planned capabilities explicit |
+| AI job-search suite | Packages job search as one journey, gives each tool a focused product page, uses strong product previews, and connects resume, persona, matching, and application automation | Career Studio should present a connected suite while keeping live and planned capabilities explicit |
 | [Exponent Practice](https://www.tryexponent.com/practice) | Live mock interviews with peers, collaborative practice, and structured feedback | Practice is more useful when it is realistic, repeatable, and followed by actionable feedback |
 | [Interviewing.io](https://interviewing.io/) | Technical mock interviews with detailed feedback and anonymous practice options | Psychological safety and useful feedback matter as much as question coverage |
 | [ADPList](https://adplist.org/) | Goal-led mentor discovery and bookable one-to-one conversations | Mentorship should begin with a specific goal and relevant experience, not a generic directory |
@@ -78,12 +78,12 @@ Therefore, a third-party product cannot truthfully promise one score that every
 ATS will assign. It can reliably test parseability, content quality, and
 alignment to a supplied job description.
 
-## Wobo Product and UX Review
+## AI Job-Search Suite Product and UX Review
 
-Wobo's strongest pattern is product packaging. Its homepage leads with one
-outcome, explains a four-step journey, demonstrates the product in realistic
-interface scenes, and then gives resume building, cover letters, ATS checking,
-and applications their own focused entry points.
+The strongest pattern is product packaging. The homepage leads with one outcome,
+explains a four-step journey, demonstrates the product in realistic interface
+scenes, and then gives resume building, cover letters, ATS checking, and
+applications their own focused entry points.
 
 Patterns worth adapting:
 

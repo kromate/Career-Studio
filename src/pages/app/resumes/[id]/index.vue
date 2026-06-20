@@ -374,7 +374,7 @@ const versionIcon = (source: ResumeVersion['source']): Component => {
 const exportPdf = async () => {
   if (!resume.value || !version.value) return
   exportOpen.value = false
-  await exportResumePdf(version.value.parsed, resume.value.name)
+  await exportResumePdf(resume.value.builderDocument || version.value.parsed, resume.value.name)
   toast.show('PDF exported')
 }
 const exportDocx = async () => {

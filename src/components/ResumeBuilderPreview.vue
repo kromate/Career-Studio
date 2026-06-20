@@ -98,12 +98,20 @@ const contactLine = computed(() => [
 const linkLine = computed(() => props.document.profile.links.map(link => link.url || link.label).filter(Boolean).join(' | '))
 const hasHeader = computed(() => Boolean(fullName.value || contactLine.value || linkLine.value))
 const visibleSkillGroups = computed(() => props.document.skills.filter(group => group.skills.some(Boolean)))
+const pageDimensions = computed(() => (
+  props.document.design.pageSize === 'a4'
+    ? { width: 794, height: 1123 }
+    : { width: 816, height: 1056 }
+))
 const paperStyle = computed(() => ({
   '--builder-accent': props.document.design.accentColor,
   '--builder-font-size': `${props.document.design.fontSize}px`,
   '--builder-line-height': String(props.document.design.lineHeight),
   '--builder-margin-y': `${props.document.design.marginY}px`,
   '--builder-margin-x': `${props.document.design.marginX}px`,
+  '--builder-page-width': `${pageDimensions.value.width}px`,
+  '--builder-page-height': `${pageDimensions.value.height}px`,
+  '--builder-page-ratio': `${pageDimensions.value.width} / ${pageDimensions.value.height}`,
   fontFamily: `${props.document.design.fontFamily}, Arial, sans-serif`,
 }))
 const sectionTitle = (key: ResumeBuilderSectionKey) => (
@@ -125,8 +133,9 @@ const simpleSections = computed<Array<{ key: string; title: string; entries: Res
 
 <style scoped>
 .builder-paper {
-  width: min(100%, 760px);
-  min-height: 840px;
+  width: min(100%, var(--builder-page-width, 816px));
+  min-height: var(--builder-page-height, 1056px);
+  aspect-ratio: var(--builder-page-ratio, 816 / 1056);
   padding: var(--builder-margin-y) var(--builder-margin-x);
   border: 1px solid var(--document-border);
   color: var(--document-ink);
@@ -208,8 +217,7 @@ ul {
 
 @media (max-width: 760px) {
   .builder-paper {
-    min-height: 650px;
-    padding: 28px 24px;
+    min-height: auto;
   }
 }
 </style>

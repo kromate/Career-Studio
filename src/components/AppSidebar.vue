@@ -9,8 +9,8 @@
         :aria-expanded="!collapsed"
         @click="$emit('toggle-collapse')"
       >
-        <PanelLeftOpen v-if="collapsed" :size="17" />
-        <PanelLeftClose v-else :size="17" />
+        <ChevronRight v-if="collapsed" :size="15" />
+        <ChevronLeft v-else :size="15" />
       </button>
       <button class="sidebar-close" type="button" aria-label="Close navigation" @click="$emit('close')">
         <X :size="19" />
@@ -63,8 +63,8 @@ import {
   Files,
   Github,
   LayoutDashboard,
-  PanelLeftClose,
-  PanelLeftOpen,
+  ChevronLeft,
+  ChevronRight,
   Settings,
   Sparkles,
   Target,

@@ -66,6 +66,17 @@
       @close="closeCreate"
     >
       <div class="create-form">
+        <label class="field">
+          <span class="field-label">Resume name</span>
+          <input
+            v-model="createForm.name"
+            class="input"
+            type="text"
+            placeholder="e.g. Product Manager Resume"
+            autocomplete="off"
+          >
+        </label>
+
         <div class="field">
           <span class="field-label">How do you want to start?</span>
           <div class="source-grid">
@@ -74,7 +85,7 @@
               :key="source.value"
               type="button"
               :class="{ active: createForm.source === source.value }"
-              @click="createForm.source = source.value"
+              @click="selectCreateSource(source.value)"
             >
               <component :is="source.icon" :size="16" />
               <strong>{{ source.label }}</strong>
@@ -86,7 +97,7 @@
           Start with an empty builder and add each section yourself.
         </div>
 
-        <label v-else class="import-picker" :class="{ extracting }">
+        <label v-else class="import-picker" :class="{ extracting, 'has-error': importAssistState === 'error' }">
           <input
             ref="importInput"
             type="file"
@@ -98,7 +109,9 @@
             <FileText v-else :size="14" />
             {{ importFileName || 'Upload a PDF, DOCX, or TXT resume' }}
           </span>
-          <small v-if="importFileText">Extracted text will be placed into the builder sections.</small>
+          <small v-if="importAssistMessage" :class="{ 'import-error': importAssistState === 'error' }">
+            {{ importAssistMessage }}
+          </small>
         </label>
       </div>
 
@@ -125,7 +138,7 @@
 
 <script setup lang="ts">
 import type { Component } from 'vue'
-import type { ResumeBuilderSource, ResumeExperienceLevel, ResumeRecord } from '@/types'
+import type { EditableResumeDocument, ResumeBuilderSource, ResumeExperienceLevel, ResumeRecord, StructuredResumeImport } from '@/types'
 import {
   Copy,
   Download,
@@ -139,6 +152,7 @@ import {
 } from 'lucide-vue-next'
 import { extractTextFromFile } from '@/lib/resume/parser'
 import { exportResumePdf } from '@/lib/export/resume'
+import { structuredResumeToBuilderDocument } from '@/lib/resume/import-assist'
 
 definePageMeta({ layout: 'app', middleware: 'auth' })
 
@@ -152,10 +166,15 @@ const importInput = ref<HTMLInputElement | null>(null)
 const importFileName = ref('')
 const importFileText = ref('')
 const importFileType = ref('text/plain')
+const importBuilderDocument = ref<EditableResumeDocument | null>(null)
+const importAssistState = ref<'idle' | 'extracting' | 'structuring' | 'ready' | 'error'>('idle')
+const importAssistMessage = ref('')
 const deleteTarget = ref<ResumeRecord | null>(null)
 const createForm = reactive<{
+  name: string
   source: ResumeBuilderSource
 }>({
+  name: '',
   source: 'new',
 })
 const sources: Array<{ value: ResumeBuilderSource; label: string; icon: Component }> = [
@@ -168,9 +187,11 @@ const sortedResumes = computed(() => [...workspace.state.value.resumes].sort((a,
   if (sortKey === 'score') return (scoreFor(b) ?? -1) - (scoreFor(a) ?? -1)
   return new Date(b[sortKey]).getTime() - new Date(a[sortKey]).getTime()
 }))
-const canCreate = computed(() => (
-  createForm.source === 'new' || Boolean(importFileText.value.trim())
-))
+const canCreate = computed(() => {
+  if (!createForm.name.trim()) return false
+  if (createForm.source === 'new') return true
+  return Boolean(importBuilderDocument.value)
+})
 
 const activeVersion = (resume: ResumeRecord) => workspace.getActiveVersion(resume)
 const scoreFor = (resume: ResumeRecord) => activeVersion(resume)?.analysis.score ?? null
@@ -194,11 +215,39 @@ const relativeDate = (date: string) => {
   if (hours < 24) return `${hours} hours ago`
   return `${Math.floor(hours / 24)} days ago`
 }
+const resumeNameFromFile = (fileName: string) => (
+  fileName.replace(/\.(pdf|docx|txt)$/i, '').replace(/[-_]+/g, ' ').trim() || fileName
+)
+const importAssistErrorMessage = (error: unknown) => {
+  const candidate = error as {
+    data?: { message?: string; statusMessage?: string; statusCode?: number }
+    message?: string
+    statusCode?: number
+    statusMessage?: string
+  }
+  const message = candidate.data?.statusMessage || candidate.data?.message || candidate.statusMessage || candidate.message || 'Gemini import assist failed.'
+  const statusCode = candidate.data?.statusCode || candidate.statusCode
+  if (statusCode === 503 || message.includes('not configured')) {
+    return 'Gemini import assist is not configured. Add VITE_GEMINI_API_KEY to .env.dev and restart the dev server.'
+  }
+  return message
+}
+const structureImportedResume = async (text: string): Promise<EditableResumeDocument | null> => {
+  const response = await $fetch<{ resume: StructuredResumeImport }>('/api/resumes/import', {
+    method: 'POST',
+    body: { text },
+  })
+  return structuredResumeToBuilderDocument(response.resume)
+}
 const resetCreate = () => {
+  createForm.name = ''
   createForm.source = 'new'
   importFileName.value = ''
   importFileText.value = ''
   importFileType.value = 'text/plain'
+  importBuilderDocument.value = null
+  importAssistState.value = 'idle'
+  importAssistMessage.value = ''
   if (importInput.value) importInput.value.value = ''
 }
 const openCreate = (source: ResumeBuilderSource) => {
@@ -209,35 +258,72 @@ const openCreate = (source: ResumeBuilderSource) => {
 const closeCreate = () => {
   if (!creating.value && !extracting.value) createOpen.value = false
 }
+const openImportPicker = async () => {
+  createForm.source = 'import'
+  await nextTick()
+  importInput.value?.click()
+}
+const selectCreateSource = (source: ResumeBuilderSource) => {
+  if (source === 'import') {
+    openImportPicker()
+    return
+  }
+  createForm.source = source
+}
 const handleImportFile = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0]
   if (!file) return
   extracting.value = true
+  importBuilderDocument.value = null
+  importFileName.value = file.name
+  importFileText.value = ''
+  importFileType.value = file.type || 'application/octet-stream'
+  importAssistState.value = 'extracting'
+  importAssistMessage.value = 'Extracting text from the selected file...'
   try {
     const text = await extractTextFromFile(file)
     if (text.trim().length < 20) throw new Error('Very little text could be extracted from this file.')
     importFileText.value = text
-    importFileName.value = file.name
-    importFileType.value = file.type || 'application/octet-stream'
-    toast.show('Resume extracted', { message: 'The builder will prefill sections from this file.' })
+    if (!createForm.name.trim()) createForm.name = resumeNameFromFile(file.name)
+    importAssistState.value = 'structuring'
+    importAssistMessage.value = 'Gemini is organizing the resume into builder sections...'
+    importBuilderDocument.value = await structureImportedResume(text)
+    importAssistState.value = 'ready'
+    importAssistMessage.value = 'Gemini structured the resume. Review the sections before exporting.'
+    toast.show('Resume extracted', {
+      message: 'Gemini organized the document into builder sections.',
+    })
   } catch (error) {
-    toast.show('Could not import resume', {
-      message: error instanceof Error ? error.message : 'Try another PDF, DOCX, or TXT file.',
+    const message = importAssistErrorMessage(error)
+    importAssistState.value = 'error'
+    importAssistMessage.value = message
+    toast.show(importFileText.value ? 'Gemini import failed' : 'Could not import resume', {
+      message,
       tone: 'error',
     })
   } finally {
     extracting.value = false
+    if (importInput.value) importInput.value.value = ''
   }
 }
 const createResume = async () => {
+  if (createForm.source === 'import' && !importBuilderDocument.value) {
+    toast.show('Gemini import is not ready', {
+      message: importAssistMessage.value || 'Upload a resume and wait for Gemini to structure it first.',
+      tone: 'warning',
+    })
+    return
+  }
   if (!canCreate.value) return
   creating.value = true
   try {
     const resume = workspace.addBuilderResume({
+      name: createForm.name.trim(),
       source: createForm.source,
       originalFileName: importFileName.value || undefined,
       fileType: importFileType.value,
       sourceText: createForm.source === 'import' ? importFileText.value : undefined,
+      builderDocument: createForm.source === 'import' ? importBuilderDocument.value || undefined : undefined,
     })
     toast.show('Resume created', {
       message: createForm.source === 'import'
@@ -258,7 +344,7 @@ const duplicate = (resumeId: string) => {
 const download = async (resume: ResumeRecord) => {
   const version = activeVersion(resume)
   if (!version) return
-  await exportResumePdf(version.parsed, resume.name)
+  await exportResumePdf(resume.builderDocument || version.parsed, resume.name)
   toast.show('PDF exported')
 }
 const confirmDelete = () => {
@@ -635,6 +721,15 @@ const confirmDelete = () => {
   gap: 5px;
   min-height: 42px;
   cursor: pointer;
+}
+
+.import-picker.has-error {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.import-picker small.import-error {
+  color: var(--red);
 }
 
 .import-picker.extracting {

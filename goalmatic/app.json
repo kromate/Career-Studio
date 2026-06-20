@@ -18,7 +18,8 @@
     ],
     "agents": [
       "resume_coach",
-      "job_requirements_extractor"
+      "job_requirements_extractor",
+      "resume_import_structurer"
     ],
     "workflows": [
       "analyze_resume",
@@ -28,7 +29,8 @@
     ],
     "integrations": [
       "goalmatic_auth",
-      "goalmatic_tables"
+      "goalmatic_tables",
+      "google_gemini"
     ]
   }
 }

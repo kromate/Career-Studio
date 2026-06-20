@@ -85,6 +85,58 @@ export interface ResumeSimpleEntry {
   bullets: ResumeBuilderBullet[]
 }
 
+export interface StructuredResumeSimpleEntry {
+  title: string
+  subtitle: string
+  date: string
+  location: string
+  bullets: string[]
+}
+
+export interface StructuredResumeImport {
+  profile: {
+    firstName: string
+    lastName: string
+    email: string
+    phone: string
+    location: string
+    links: Array<{ label: string; url: string }>
+    summary: string
+    targetRole: string
+    experienceLevel: ResumeExperienceLevel
+  }
+  workExperiences: Array<{
+    jobTitle: string
+    employer: string
+    location: string
+    startDate: string
+    endDate: string
+    current: boolean
+    bullets: string[]
+  }>
+  educations: Array<{
+    school: string
+    degree: string
+    location: string
+    startDate: string
+    endDate: string
+    details: string[]
+  }>
+  skills: Array<{ title: string; skills: string[] }>
+  projects: Array<{
+    name: string
+    role: string
+    url: string
+    startDate: string
+    endDate: string
+    bullets: string[]
+  }>
+  volunteerExperiences: StructuredResumeSimpleEntry[]
+  certifications: StructuredResumeSimpleEntry[]
+  publications: StructuredResumeSimpleEntry[]
+  awards: StructuredResumeSimpleEntry[]
+}
+
 export interface ResumeCustomSection {
   id: string
   title: string
