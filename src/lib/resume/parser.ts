@@ -1,5 +1,5 @@
 import type { ParsedResume, ResumeLine, ResumeSection, ResumeSectionType } from '@/types'
-import { SECTION_HEADINGS } from './constants'
+import { CANONICAL_SCHEMA_VERSION, SECTION_HEADINGS } from './constants'
 
 const EMAIL_PATTERN = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i
 const PHONE_PATTERN = /(?:\+?\d[\d\s().-]{7,}\d)/
@@ -254,6 +254,7 @@ export function parseResumeText(input: string): ParsedResume {
       : 'low'
 
   return {
+    canonicalSchemaVersion: CANONICAL_SCHEMA_VERSION,
     normalizedText,
     contentHash: hashText(normalizedText),
     lines,

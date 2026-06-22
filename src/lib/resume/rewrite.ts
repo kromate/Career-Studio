@@ -33,13 +33,17 @@ export function generateRewriteSuggestions(
         const proposedText = line.text.replace(pattern, replacement).replace(/\s+/g, ' ').trim()
         suggestions.push({
           id: `rewrite-${hashText(`${line.id}:${proposedText}`)}`,
+          targetPath: `lines.${line.index}.text`,
           lineId: line.id,
           sourceText: line.text,
+          originalText: line.text,
           proposedText,
+          rationale: reason,
           reason,
           addressedRuleIds: weakRule ? [weakRule.ruleId, actionRule?.ruleId].filter(Boolean) as string[] : [],
           expectedPointRecovery: 2,
           requiresFactConfirmation: false,
+          riskFlags: [],
           status: 'pending',
         })
       }
@@ -50,13 +54,17 @@ export function generateRewriteSuggestions(
         if (firstClause && firstClause !== line.text && firstClause.split(/\s+/).length >= 8) {
           suggestions.push({
             id: `rewrite-${hashText(`${line.id}:${firstClause}`)}`,
+            targetPath: `lines.${line.index}.text`,
             lineId: line.id,
             sourceText: line.text,
+            originalText: line.text,
             proposedText: firstClause.replace(/[,.]$/, ''),
+            rationale: 'Focus this bullet on one clear contribution. Review the removed clause before accepting.',
             reason: 'Focus this bullet on one clear contribution. Review the removed clause before accepting.',
             addressedRuleIds: longRule ? [longRule.ruleId] : [],
             expectedPointRecovery: 1,
             requiresFactConfirmation: false,
+            riskFlags: [],
             status: 'pending',
           })
           return
@@ -69,13 +77,17 @@ export function generateRewriteSuggestions(
       ) {
         suggestions.push({
           id: `rewrite-${hashText(`${line.id}:evidence-prompt`)}`,
+          targetPath: `lines.${line.index}.text`,
           lineId: line.id,
           sourceText: line.text,
+          originalText: line.text,
           proposedText: line.text,
+          rationale: 'New metrics or scope claims need user-supplied evidence before export.',
           reason: 'Add a verified result, scale, volume, time saved, or quality improvement if one exists.',
           addressedRuleIds: metricRule ? [metricRule.ruleId] : [],
           expectedPointRecovery: 1,
           requiresFactConfirmation: true,
+          riskFlags: ['new_metric'],
           status: 'pending',
         })
       }

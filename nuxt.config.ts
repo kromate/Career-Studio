@@ -40,6 +40,7 @@ export default defineNuxtConfig({
     '/signup': { ssr: false, headers: firebaseAuthPopupHeaders },
     '/app': { ssr: false },
     '/app/**': { ssr: false },
+    '/share/**': { ssr: false },
   },
   css: ['@/assets/css/main.css', '@/assets/css/auth-pages.css'],
   alias: {

@@ -21,6 +21,10 @@
             <Sparkles :size="15" />
             Tailor resume
           </button>
+          <NuxtLink :to="`/app/jobs/${job.id}/cover-letter`" class="btn btn-secondary">
+            <FilePenLine :size="15" />
+            Cover letter
+          </NuxtLink>
         </div>
       </header>
 
@@ -67,11 +71,22 @@
                     <Check v-if="item.matched" :size="14" />
                     <X v-else :size="14" />
                   </span>
-                  <strong>{{ item.label }}</strong>
-                  <small>{{ item.matched ? 'Evidence found' : 'Not explicit' }}</small>
+                  <div>
+                    <strong>{{ item.label }}</strong>
+                    <small>{{ item.priority }} · {{ item.matched ? 'Evidence found' : 'Not explicit' }}</small>
+                    <p v-if="item.sourceSentences.length" class="job-source">{{ item.sourceSentences[0] }}</p>
+                    <blockquote v-if="item.evidenceLocations.length">{{ item.evidenceLocations[0]?.quote }}</blockquote>
+                    <p v-else class="missing-action">{{ missingAction(item.id) }}</p>
+                  </div>
                 </div>
               </div>
             </section>
+          </div>
+          <div v-if="job.match?.warnings.length" class="coverage-warnings">
+            <TriangleAlert :size="15" />
+            <ul>
+              <li v-for="warning in job.match.warnings" :key="warning">{{ warning }}</li>
+            </ul>
           </div>
         </article>
 
@@ -85,9 +100,18 @@
                 {{ recommendation }}
               </li>
             </ul>
+            <div v-if="job.match?.missing.length" class="missing-list">
+              <strong>Missing evidence</strong>
+              <p v-for="item in job.match.missing.slice(0, 5)" :key="item.requirementId">
+                {{ item.label }}
+              </p>
+            </div>
             <button class="btn btn-primary full-button" type="button" @click="prepareTailoredVersion">
               Create tailored version
             </button>
+            <NuxtLink :to="`/app/jobs/${job.id}/cover-letter`" class="btn btn-secondary full-button">
+              Draft cover letter
+            </NuxtLink>
           </article>
 
           <article class="card card-pad">
@@ -142,9 +166,11 @@ import {
   ArrowLeft,
   Check,
   ExternalLink,
+  FilePenLine,
   Lightbulb,
   Sparkles,
   Trash2,
+  TriangleAlert,
   X,
 } from 'lucide-vue-next'
 
@@ -156,13 +182,15 @@ const toast = useToast()
 const selectedResumeId = ref('')
 const deleteConfirm = ref(false)
 const deleteLoading = ref(false)
-const statuses: ApplicationStatus[] = ['saved', 'applied', 'interview', 'offer', 'rejected']
+const statuses: ApplicationStatus[] = ['saved', 'drafting', 'applied', 'interview', 'offer', 'rejected', 'withdrawn']
 const statusLabels: Record<ApplicationStatus, string> = {
   saved: 'Saved',
+  drafting: 'Drafting materials',
   applied: 'Applied',
   interview: 'Interviewing',
   offer: 'Offer received',
   rejected: 'Closed',
+  withdrawn: 'Withdrawn',
 }
 
 const job = computed(() => workspace.getJob(route.params.id as string))
@@ -184,9 +212,13 @@ const requirementGroups = computed(() => {
   return [
     group('required', 'Required skills'),
     group('responsibility', 'Responsibilities'),
+    group('credential', 'Education and credentials'),
     group('preferred', 'Preferred skills'),
   ].filter(item => item.items.length)
 })
+const missingAction = (requirementId: string) => (
+  job.value?.match?.missing.find(item => item.requirementId === requirementId)?.suggestedAction || 'Add evidence only if it is truthful.'
+)
 
 onMounted(() => {
   workspace.hydrate()
@@ -385,14 +417,14 @@ const deleteJob = async () => {
 
 .requirement-groups section > div {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 7px;
 }
 
 .requirement-row {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 1px 8px;
+  gap: 8px;
   padding: 11px;
   border: 1px solid var(--red-border);
   border-radius: 9px;
@@ -408,7 +440,6 @@ const deleteJob = async () => {
   display: grid;
   width: 20px;
   height: 20px;
-  grid-row: 1 / 3;
   place-items: center;
   border-radius: 6px;
   color: var(--red);
@@ -425,6 +456,49 @@ const deleteJob = async () => {
 
 .requirement-row small {
   color: var(--muted);
+  font-size: 10px;
+  text-transform: capitalize;
+}
+
+.job-source,
+.missing-action,
+.requirement-row blockquote {
+  margin: 7px 0 0;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.job-source {
+  color: var(--muted);
+}
+
+.missing-action {
+  color: var(--red);
+}
+
+.requirement-row blockquote {
+  padding-left: 9px;
+  border-left: 2px solid var(--green-border);
+  color: var(--ink-soft);
+}
+
+.coverage-warnings {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  margin: 0 20px 20px;
+  padding: 12px;
+  border-radius: 8px;
+  color: var(--amber);
+  background: var(--amber-soft);
+}
+
+.coverage-warnings ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 16px;
+  color: var(--ink-soft);
   font-size: 10px;
 }
 
@@ -458,6 +532,26 @@ const deleteJob = async () => {
 .recommendations svg {
   flex: 0 0 auto;
   color: var(--amber);
+}
+
+.missing-list {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--red-soft);
+}
+
+.missing-list strong {
+  color: var(--red);
+  font-size: 11px;
+}
+
+.missing-list p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 10px;
 }
 
 .full-button {

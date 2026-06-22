@@ -45,8 +45,8 @@ export function createBuilderId(prefix: string): string {
 
 export function defaultResumeDesignSettings(): ResumeDesignSettings {
     return {
-        template: 'classic',
-        ...resumeTemplatePreset('classic'),
+        template: 'ats-clean',
+        ...resumeTemplatePreset('ats-clean'),
     }
 }
 

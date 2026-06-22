@@ -11,9 +11,9 @@
     </nav>
     <div class="builder-actions">
       <span class="saved-pill"><Check :size="14" /> Saved just now</span>
-      <button class="ai-pill" type="button" @click="activeTab = 'analysis'">
+      <button class="ai-pill" type="button" @click="$emit('open-enrichment')">
         <Sparkles :size="15" />
-        <span>20</span>
+        <span>{{ enrichmentCount }}</span>
         <strong>AI</strong>
       </button>
       <button class="builder-export-button" type="button" @click="$emit('export-pdf')">
@@ -32,9 +32,11 @@ const activeTab = defineModel<'content' | 'design' | 'analysis'>('activeTab', { 
 defineProps<{
   score: number
   scoreLabel: string
+  enrichmentCount: number
 }>()
 
 defineEmits<{
   'export-pdf': []
+  'open-enrichment': []
 }>()
 </script>

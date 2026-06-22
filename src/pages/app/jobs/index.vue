@@ -113,8 +113,9 @@ const visibleJobs = computed(() => {
 })
 const statusBadge = (status?: ApplicationStatus) => {
   if (status === 'offer' || status === 'interview') return 'badge-green'
+  if (status === 'withdrawn') return 'badge-amber'
   if (status === 'rejected') return 'badge-red'
-  if (status === 'applied') return 'badge-purple'
+  if (status === 'applied' || status === 'drafting') return 'badge-purple'
   return ''
 }
 </script>

@@ -234,6 +234,13 @@ body.career-builder-body {
   background: transparent;
 }
 
+.preview-artboard {
+  width: min(100%, 816px);
+  min-height: 920px;
+  transform-origin: top center;
+  transition: transform 160ms ease;
+}
+
 .section-list,
 .drill-panel,
 .design-panel,
@@ -844,12 +851,26 @@ body.career-builder-body {
 
 .preview-page-control button {
   display: grid;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   place-items: center;
   border: 0;
   color: inherit;
-  font-size: 18px;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.preview-page-control button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.preview-page-control button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.preview-page-control button:disabled:hover {
   background: transparent;
 }
 

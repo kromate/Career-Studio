@@ -1,7 +1,7 @@
 <template>
   <div
     class="builder-paper"
-    :class="`template-${document.design.template}`"
+    :class="`template-${templateStyle}`"
     :style="paperStyle"
   >
     <header v-if="hasHeader" class="builder-header">
@@ -76,6 +76,7 @@
 
 <script setup lang="ts">
 import type { EditableResumeDocument, ResumeBuilderSectionKey, ResumeSimpleEntry, ResumeSkillGroup } from '@/types'
+import { resumeTemplateStyleId } from '@/lib/resume/templates'
 
 interface PreviewEntry {
   id: string
@@ -105,9 +106,10 @@ const contactLine = computed(() => [
 const linkLine = computed(() => props.document.profile.links.map(link => link.url || link.label).filter(Boolean).join(' | '))
 const hasHeader = computed(() => Boolean(fullName.value || targetRoleLine.value || contactLine.value || linkLine.value))
 const visibleSkillGroups = computed(() => props.document.skills.filter(group => group.skills.some(Boolean)))
-const isBlueprintTemplate = computed(() => props.document.design.template === 'blueprint')
-const usesUploadedTemplateTitles = computed(() => ['blueprint', 'coral', 'green', 'mono'].includes(props.document.design.template))
-const showTargetRole = computed(() => props.document.design.template === 'green')
+const templateStyle = computed(() => resumeTemplateStyleId(props.document.design.template))
+const isBlueprintTemplate = computed(() => templateStyle.value === 'blueprint')
+const usesUploadedTemplateTitles = computed(() => ['blueprint', 'coral', 'green', 'mono'].includes(templateStyle.value))
+const showTargetRole = computed(() => templateStyle.value === 'green')
 const pageDimensions = computed(() => (
   props.document.design.pageSize === 'a4'
     ? { width: 794, height: 1123 }
@@ -202,7 +204,7 @@ const visibleSections = computed<PreviewSection[]>(() => {
     })),
   ]
   const sections: PreviewSection[] = sectionCandidates.flatMap(section => section ? [section] : [])
-  if (!['coral', 'green', 'mono'].includes(props.document.design.template)) return sections
+  if (!['coral', 'green', 'mono'].includes(templateStyle.value)) return sections
   const templateOrder = ['summary', 'skills', 'work', 'education', 'projects', 'volunteer', 'certifications', 'publications', 'awards']
   const orderIndex = (key: string) => {
     const index = templateOrder.indexOf(key)

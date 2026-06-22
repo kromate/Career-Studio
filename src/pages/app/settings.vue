@@ -106,6 +106,35 @@
               <input v-model="preferences.scoringDetails" type="checkbox" @change="savePreferences">
               <span class="toggle" />
             </label>
+            <div class="provider-settings">
+              <div class="provider-heading">
+                <strong>AI provider</strong>
+                <p>Configure local-preview enrichment metadata. API keys are not stored in the browser.</p>
+              </div>
+              <div class="provider-grid">
+                <label class="field">
+                  <span class="field-label">Provider</span>
+                  <select v-model="aiProvider.provider" class="select" @change="saveAiProvider">
+                    <option value="local-preview">Local preview</option>
+                    <option value="openai-compatible">OpenAI-compatible</option>
+                    <option value="ollama">Ollama</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span class="field-label">Model</span>
+                  <input v-model.trim="aiProvider.model" class="input" placeholder="deterministic-local" @change="saveAiProvider">
+                </label>
+                <label class="field provider-url">
+                  <span class="field-label">Base URL</span>
+                  <input v-model.trim="aiProvider.baseUrl" class="input" placeholder="http://localhost:11434" @change="saveAiProvider">
+                </label>
+                <button class="btn btn-secondary" type="button" @click="testAiProvider">
+                  <PlugZap :size="15" />
+                  Test
+                </button>
+              </div>
+              <small>Last status: {{ aiProvider.lastStatus || 'untested' }}</small>
+            </div>
             <div class="setting-row unavailable">
               <div>
                 <div class="setting-title"><strong>Retain original upload</strong><ComingSoonBadge /></div>
@@ -135,6 +164,40 @@
               <strong>Local preview storage</strong>
               <p>This development workspace stores extracted resume text and app state in this browser's local storage. It does not upload source files.</p>
             </div>
+          </div>
+          <div class="data-actions">
+            <div>
+              <h3>Export local workspace</h3>
+              <p>Download a full-fidelity Career Studio JSON file for this browser workspace.</p>
+            </div>
+            <button class="btn btn-secondary" type="button" @click="exportData">
+              <Download :size="15" />
+              Export JSON
+            </button>
+          </div>
+          <div class="data-actions">
+            <div>
+              <h3>Import local workspace</h3>
+              <p>Load a Career Studio JSON export, recompute hashes and scores, and replace this browser workspace.</p>
+            </div>
+            <button class="btn btn-secondary" type="button" @click="importInput?.click()">
+              <Upload :size="15" />
+              Import JSON
+            </button>
+            <input ref="importInput" class="sr-only" type="file" accept="application/json,.json" @change="importData">
+          </div>
+          <div v-if="workspace.state.value.resumes.length" class="resume-data-list">
+            <h3>Delete one resume</h3>
+            <article v-for="resume in workspace.state.value.resumes" :key="resume.id">
+              <div>
+                <strong>{{ resume.name }}</strong>
+                <p>{{ resume.versions.length }} version{{ resume.versions.length === 1 ? '' : 's' }} · {{ resume.isMaster ? 'Master resume' : 'Resume' }}</p>
+              </div>
+              <button class="btn btn-secondary btn-sm" type="button" @click="deleteResumeTarget = resume">
+                <Trash2 :size="14" />
+                Delete
+              </button>
+            </article>
           </div>
           <div class="danger-zone">
             <div>
@@ -181,21 +244,34 @@
       @close="deleteConfirm = false"
       @confirm="deleteAll"
     />
+    <ConfirmDialog
+      :open="Boolean(deleteResumeTarget)"
+      title="Delete this resume?"
+      :description="deleteResumeTarget ? `This removes ${deleteResumeTarget.name}, every local version, and linked analyses from this browser.` : ''"
+      confirm-label="Delete resume"
+      confirmation-text="DELETE"
+      @close="deleteResumeTarget = null"
+      @confirm="deleteOneResume"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Component } from 'vue'
+import type { ResumeRecord } from '@/types'
 import {
   Code2,
   Database,
+  Download,
   LockKeyhole,
   Monitor,
   Moon,
+  PlugZap,
   ShieldCheck,
   SlidersHorizontal,
   Sun,
   Trash2,
+  Upload,
   UserRound,
 } from 'lucide-vue-next'
 import {
@@ -209,10 +285,14 @@ definePageMeta({ layout: 'app', middleware: 'auth' })
 
 const workspace = useWorkspace()
 const toast = useToast()
+const route = useRoute()
 const { preference: themePreference, setPreference: setThemePreference } = useTheme()
 const activeSection = ref<'profile' | 'preferences' | 'data' | 'about'>('profile')
 const deleteConfirm = ref(false)
+const deleteResumeTarget = ref<ResumeRecord | null>(null)
+const importInput = ref<HTMLInputElement | null>(null)
 const preferences = reactive({ ...workspace.state.value.settings })
+const aiProvider = reactive({ ...workspace.state.value.settings.aiProvider })
 const themeOptions = [
   { id: 'system', label: 'System', icon: Monitor },
   { id: 'light', label: 'Light', icon: Sun },
@@ -230,7 +310,10 @@ const versionCount = computed(() => workspace.state.value.resumes.reduce((sum, r
 const isThemePreferenceActive = (preference: typeof themeOptions[number]['id']) => themePreference.value === preference
 onMounted(() => {
   workspace.hydrate()
+  if (route.query.section === 'data') activeSection.value = 'data'
+  if (route.query.section === 'preferences') activeSection.value = 'preferences'
   Object.assign(preferences, workspace.state.value.settings)
+  Object.assign(aiProvider, workspace.state.value.settings.aiProvider)
 })
 const savePreferences = () => {
   workspace.updateSettings(preferences)
@@ -239,6 +322,58 @@ const savePreferences = () => {
 const saveThemePreference = (nextPreference: typeof themeOptions[number]['id']) => {
   setThemePreference(nextPreference)
   toast.show('Appearance preference saved')
+}
+const saveAiProvider = () => {
+  workspace.updateSettings({ aiProvider: { ...aiProvider } })
+  toast.show('AI provider settings saved')
+}
+const testAiProvider = () => {
+  const lastStatus = aiProvider.provider === 'local-preview' || aiProvider.baseUrl ? 'ok' : 'failed'
+  Object.assign(aiProvider, {
+    lastStatus,
+    lastTestedAt: new Date().toISOString(),
+  })
+  workspace.updateSettings({ aiProvider: { ...aiProvider } })
+  toast.show(lastStatus === 'ok' ? 'Provider configuration ready' : 'Provider configuration incomplete', {
+    tone: lastStatus === 'ok' ? 'success' : 'warning',
+  })
+}
+const exportData = () => {
+  const payload = workspace.exportWorkspaceJson()
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `career-studio-workspace-${new Date().toISOString().slice(0, 10)}.json`
+  link.click()
+  URL.revokeObjectURL(url)
+  toast.show('Workspace JSON exported')
+}
+const importData = async (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  try {
+    workspace.importWorkspaceJson(await file.text())
+    Object.assign(preferences, workspace.state.value.settings)
+    Object.assign(aiProvider, workspace.state.value.settings.aiProvider)
+    toast.show('Workspace JSON imported', {
+      message: 'Hashes, analyses, and job matches were recomputed with the current deterministic engines.',
+    })
+  } catch (error) {
+    toast.show('Workspace import failed', {
+      message: error instanceof Error ? error.message : 'The file could not be imported.',
+      tone: 'error',
+    })
+  } finally {
+    input.value = ''
+  }
+}
+const deleteOneResume = () => {
+  if (!deleteResumeTarget.value) return
+  workspace.deleteResume(deleteResumeTarget.value.id)
+  deleteResumeTarget.value = null
+  toast.show('Resume deleted', { tone: 'info' })
 }
 const deleteAll = () => {
   workspace.deleteAllData()
@@ -396,6 +531,38 @@ const deleteAll = () => {
   cursor: default;
 }
 
+.provider-settings {
+  display: grid;
+  gap: 12px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.provider-heading strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.provider-heading p,
+.provider-settings small {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.provider-grid {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.8fr) minmax(130px, 1fr) minmax(180px, 1.2fr) auto;
+  align-items: end;
+  gap: 8px;
+}
+
+.provider-url {
+  min-width: 0;
+}
+
 .setting-row strong {
   display: block;
   margin-bottom: 4px;
@@ -531,6 +698,64 @@ const deleteAll = () => {
   line-height: 1.5;
 }
 
+.data-actions,
+.resume-data-list {
+  margin-top: 25px;
+  padding-top: 25px;
+  border-top: 1px solid var(--line);
+}
+
+.data-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.data-actions h3,
+.resume-data-list h3 {
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+
+.data-actions p,
+.resume-data-list p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.resume-data-list {
+  display: grid;
+  gap: 8px;
+}
+
+.resume-data-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.resume-data-list strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.sr-only {
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  clip: rect(0, 0, 0, 0);
+}
+
 .danger-zone {
   display: flex;
   align-items: center;
@@ -610,6 +835,14 @@ const deleteAll = () => {
   .danger-zone {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .data-actions,
+  .resume-data-list article,
+  .provider-grid {
+    align-items: stretch;
+    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 }
 </style>

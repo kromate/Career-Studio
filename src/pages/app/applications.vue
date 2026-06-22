@@ -50,6 +50,10 @@
               <span>Match</span>
               <strong>{{ jobFor(application.jobId)?.match?.score }}/100</strong>
             </div>
+            <div v-if="versionLabel(application)" class="application-version">
+              <span>Resume version</span>
+              <strong>{{ versionLabel(application) }}</strong>
+            </div>
             <label>
               <span>Next action</span>
               <input
@@ -118,16 +122,23 @@ const toast = useToast()
 const openMenu = ref('')
 const columns: Array<{ status: ApplicationStatus; label: string; color: string }> = [
   { status: 'saved', label: 'Saved', color: '#777188' },
+  { status: 'drafting', label: 'Drafting', color: '#b7791f' },
   { status: 'applied', label: 'Applied', color: '#601ded' },
   { status: 'interview', label: 'Interview', color: '#2161c2' },
   { status: 'offer', label: 'Offer', color: '#158564' },
   { status: 'rejected', label: 'Closed', color: '#c1394b' },
+  { status: 'withdrawn', label: 'Withdrawn', color: '#777188' },
 ]
 
 const applicationsFor = (status: ApplicationStatus) => (
   workspace.state.value.applications.filter(application => application.status === status)
 )
 const jobFor = (jobId: string) => workspace.getJob(jobId)
+const versionLabel = (application: { resumeId?: string; resumeVersionId?: string }) => {
+  const resume = application.resumeId ? workspace.getResume(application.resumeId) : undefined
+  const version = resume?.versions.find(item => item.id === application.resumeVersionId)
+  return version ? `${resume?.name} · ${version.label}` : ''
+}
 const toggleMenu = (id: string) => {
   openMenu.value = openMenu.value === id ? '' : id
 }
@@ -187,7 +198,7 @@ const formatActionDate = (date: string) => new Intl.DateTimeFormat('en', {
 
 .pipeline {
   display: grid;
-  grid-template-columns: repeat(5, minmax(235px, 1fr));
+  grid-template-columns: repeat(7, minmax(235px, 1fr));
   gap: 12px;
   overflow-x: auto;
   padding-bottom: 15px;
@@ -334,6 +345,29 @@ const formatActionDate = (date: string) => new Intl.DateTimeFormat('en', {
   border-radius: 8px;
   font-size: 10px;
   background: var(--green-soft);
+}
+
+.application-version {
+  display: grid;
+  gap: 4px;
+  margin: 10px 0 13px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--purple-soft);
+}
+
+.application-version span {
+  color: var(--purple);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.application-version strong {
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .application-match span {

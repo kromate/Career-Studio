@@ -2,8 +2,9 @@ import type { ResumeSectionType, ScoreDimension } from '@/types'
 
 export const PARSER_VERSION = 'resume-parser-v1.1.0'
 export const SCORING_VERSION = 'resume-quality-v1.3.0'
-export const MATCH_SCORING_VERSION = 'job-match-v1.0.0'
+export const MATCH_SCORING_VERSION = 'job-match-v1.1.0'
 export const TAXONOMY_VERSION = 'skills-v1.0.0'
+export const CANONICAL_SCHEMA_VERSION = 'career-studio-resume-v1.0.0'
 
 export const DIMENSION_LABELS: Record<ScoreDimension, string> = {
   parseability: 'ATS readability',
@@ -19,25 +20,25 @@ export const SECTION_HEADINGS: Array<{
   type: ResumeSectionType
   patterns: string[]
 }> = [
-  { type: 'summary', patterns: ['summary', 'profile', 'professional summary', 'career summary', 'about me', 'objective'] },
-  { type: 'experience', patterns: ['experience', 'work experience', 'professional experience', 'employment', 'employment history', 'career history'] },
-  {
-    type: 'skills',
-    patterns: [
-      'skills',
-      'skills & tools',
-      'technical skills',
-      'technical skills & tools',
-      'core competencies',
-      'competencies',
-      'expertise',
-      'technologies',
-    ],
-  },
-  { type: 'education', patterns: ['education', 'academic background', 'qualifications'] },
-  { type: 'certifications', patterns: ['certifications', 'certificates', 'licenses', 'professional development'] },
-  { type: 'projects', patterns: ['projects', 'selected projects', 'key projects', 'portfolio'] },
-]
+    { type: 'summary', patterns: ['summary', 'profile', 'professional summary', 'career summary', 'about me', 'objective'] },
+    { type: 'experience', patterns: ['experience', 'work experience', 'professional experience', 'employment', 'employment history', 'career history'] },
+    {
+      type: 'skills',
+      patterns: [
+        'skills',
+        'skills & tools',
+        'technical skills',
+        'technical skills & tools',
+        'core competencies',
+        'competencies',
+        'expertise',
+        'technologies',
+      ],
+    },
+    { type: 'education', patterns: ['education', 'academic background', 'qualifications'] },
+    { type: 'certifications', patterns: ['certifications', 'certificates', 'licenses', 'professional development'] },
+    { type: 'projects', patterns: ['projects', 'selected projects', 'key projects', 'portfolio'] },
+  ]
 
 export const ACTION_VERBS = [
   'achieved', 'accelerated', 'analyzed', 'attracted', 'automated', 'built',

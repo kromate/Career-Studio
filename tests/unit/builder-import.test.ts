@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { builderDocumentToText, parsedResumeToBuilderDocument } from '@/lib/resume/builder'
 import { parseResumeText } from '@/lib/resume/parser'
+import { RESUME_TEMPLATE_OPTIONS, resumeTemplatePreset, resumeTemplateStyleId } from '@/lib/resume/templates'
 import { sampleResume } from '../fixtures/sample-resume'
 
 describe('resume builder imports', () => {
@@ -33,5 +34,17 @@ describe('resume builder imports', () => {
         })
         expect(document.skills[0]?.skills).toContain('TypeScript')
         expect(builderDocumentToText(document)).toContain('EXPERIENCE')
+    })
+
+    it('exposes the roadmap template registry with supported rendering styles', () => {
+        expect(RESUME_TEMPLATE_OPTIONS.map(template => template.id)).toEqual([
+            'ats-clean',
+            'modern-single',
+            'compact-two-column',
+            'executive',
+        ])
+        expect(resumeTemplateStyleId('ats-clean')).toBe('classic')
+        expect(resumeTemplateStyleId('compact-two-column')).toBe('blueprint')
+        expect(resumeTemplatePreset('executive').fontFamily).toBe('Georgia')
     })
 })

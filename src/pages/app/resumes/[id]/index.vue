@@ -23,8 +23,8 @@
               <ChevronDown :size="14" />
             </button>
             <div v-if="exportOpen" class="export-menu">
-              <button type="button" @click="exportPdf"><FileText :size="15" /> Download PDF</button>
-              <button type="button" @click="exportDocx"><FileType2 :size="15" /> Download DOCX</button>
+              <button type="button" @click="requestExport('pdf')"><FileText :size="15" /> Download PDF</button>
+              <button type="button" @click="requestExport('docx')"><FileType2 :size="15" /> Download DOCX</button>
             </div>
           </div>
           <NuxtLink :to="`/app/resumes/${resume.id}/rewrite`" class="btn btn-primary">
@@ -224,6 +224,10 @@
           <p>{{ version.parsed.stats.words }} words · {{ version.parsed.stats.bullets }} bullets · {{ version.analysis.parseConfidence }} confidence</p>
           <div class="version-summary-actions">
             <NuxtLink :to="`/app/resumes/${resume.id}/rewrite`" class="btn btn-primary">Edit as new version</NuxtLink>
+            <button class="btn btn-secondary" type="button" @click="shareCurrentVersion">
+              <Share2 :size="15" />
+              Share version
+            </button>
             <button class="btn btn-danger" type="button" @click="deleteConfirm = true">
               <Trash2 :size="15" />
               Delete resume
@@ -242,6 +246,15 @@
         @close="deleteConfirm = false"
         @confirm="confirmDelete"
       />
+      <ExportSafetyModal
+        v-if="resume && version"
+        :open="exportSafetyOpen"
+        :resume="resume"
+        :version="version"
+        :format="exportFormat"
+        @close="exportSafetyOpen = false"
+        @confirm="confirmExport"
+      />
     </template>
 
     <DetailPageSkeleton v-else />
@@ -250,7 +263,7 @@
 
 <script setup lang="ts">
 import type { Component } from 'vue'
-import type { FindingSeverity, ResumeVersion, ScoreCheck, ScoreDimension } from '@/types'
+import type { FindingSeverity, ResumeExportFormat, ResumeVersion, ScoreCheck, ScoreDimension } from '@/types'
 import {
   ArrowLeft,
   CheckCircle2,
@@ -269,6 +282,7 @@ import {
   ListFilter,
   Plus,
   ScanSearch,
+  Share2,
   ShieldCheck,
   Sparkles,
   Target,
@@ -288,6 +302,8 @@ const selectedRuleId = ref(typeof route.query.finding === 'string' ? route.query
 const activeFilter = ref<'all' | ScoreDimension>('all')
 const filterOpen = ref(false)
 const exportOpen = ref(false)
+const exportSafetyOpen = ref(false)
+const exportFormat = ref<ResumeExportFormat>('pdf')
 const deleteConfirm = ref(false)
 const deleteLoading = ref(false)
 const resume = computed(() => workspace.getResume(route.params.id as string))
@@ -371,17 +387,32 @@ const versionIcon = (source: ResumeVersion['source']): Component => {
   if (source === 'edit') return FileInput
   return FileText
 }
-const exportPdf = async () => {
-  if (!resume.value || !version.value) return
+const requestExport = (format: ResumeExportFormat) => {
+  exportFormat.value = format
   exportOpen.value = false
-  await exportResumePdf(resume.value.builderDocument || version.value.parsed, resume.value.name)
-  toast.show('PDF exported')
+  exportSafetyOpen.value = true
 }
-const exportDocx = async () => {
+const confirmExport = async () => {
   if (!resume.value || !version.value) return
-  exportOpen.value = false
-  await exportResumeDocx(version.value.parsed, resume.value.name)
-  toast.show('DOCX exported')
+  exportSafetyOpen.value = false
+  if (exportFormat.value === 'pdf') {
+    await exportResumePdf(resume.value.builderDocument || version.value.parsed, resume.value.name)
+  } else if (exportFormat.value === 'docx') {
+    await exportResumeDocx(version.value.parsed, resume.value.name)
+  }
+  workspace.recordResumeExport(resume.value.id, version.value.id, exportFormat.value)
+  toast.show(`${exportFormat.value.toUpperCase()} exported`, {
+    message: 'Export metadata was attached to this resume version.',
+  })
+}
+const shareCurrentVersion = () => {
+  if (!resume.value || !version.value) return
+  const share = workspace.createPublicResumeShare(resume.value.id, version.value.id, true)
+  if (!share) return
+  toast.show('Public share created', {
+    message: `/share/resumes/${share.id}`,
+  })
+  navigateTo(`/share/resumes/${share.id}`, { open: { target: '_blank' } })
 }
 const confirmDelete = async () => {
   if (!resume.value) return

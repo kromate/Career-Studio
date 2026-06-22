@@ -1,6 +1,14 @@
 <template>
   <div v-if="!activeSection" class="section-list">
-    <article v-for="section in sectionRows" :key="section.id" class="section-row-wrap">
+    <article
+      v-for="section in sectionRows"
+      :key="section.id"
+      class="section-row-wrap"
+      draggable="true"
+      @dragstart="draggedSectionId = section.id"
+      @dragover.prevent
+      @drop="dropSection(section.id)"
+    >
       <div
         class="section-row"
         role="button"
@@ -8,6 +16,8 @@
         @click="openSection(section.key)"
         @keydown.enter.prevent="openSection(section.key)"
         @keydown.space.prevent="openSection(section.key)"
+        @keydown.alt.up.prevent="moveSection(section.id, -1)"
+        @keydown.alt.down.prevent="moveSection(section.id, 1)"
       >
         <GripVertical :size="15" />
         <component :is="section.icon" :size="15" />
@@ -28,6 +38,8 @@
       </div>
       <div v-if="menuOpenFor === section.id" class="section-menu">
         <button type="button" @click="startRename(section.id, section.key)">Rename section</button>
+        <button type="button" @click="moveSection(section.id, -1)">Move up</button>
+        <button type="button" @click="moveSection(section.id, 1)">Move down</button>
         <button type="button" @click="hideSection(section.id, section.key)">Remove section</button>
       </div>
     </article>
@@ -327,6 +339,7 @@ const activeEducationId = ref('')
 const activeProjectId = ref('')
 const activeSimpleEntryId = ref('')
 const menuOpenFor = ref('')
+const draggedSectionId = ref('')
 const addingSection = ref(false)
 const newSectionName = ref('')
 const addingSkillCategory = ref(false)
@@ -586,6 +599,47 @@ const hideSection = (id: string, key: string) => {
   }
   saveDocument({ ...document.value, sectionSettings: document.value.sectionSettings.map(section => section.key === key ? { ...section, visible: false } : section) })
   menuOpenFor.value = ''
+}
+const reorderValues = <Item extends { id?: string; key?: string; order?: number }>(items: Item[], activeId: string, targetId: string): Item[] => {
+  const next = [...items]
+  const from = next.findIndex(item => (item.id || item.key) === activeId)
+  const to = next.findIndex(item => (item.id || item.key) === targetId)
+  if (from < 0 || to < 0 || from === to) return items
+  const [moved] = next.splice(from, 1)
+  if (!moved) return items
+  next.splice(to, 0, moved)
+  return next.map((item, index) => 'order' in item ? { ...item, order: index } : item)
+}
+const moveSection = (id: string, direction: -1 | 1) => {
+  const customIndex = document.value.customSections.findIndex(section => section.id === id)
+  if (customIndex >= 0) {
+    const target = document.value.customSections[customIndex + direction]
+    if (!target) return
+    saveDocument({ ...document.value, customSections: reorderValues(document.value.customSections, id, target.id) })
+    menuOpenFor.value = ''
+    return
+  }
+  const ordered = [...document.value.sectionSettings].sort((a, b) => a.order - b.order)
+  const index = ordered.findIndex(section => section.key === id)
+  const target = ordered[index + direction]
+  if (!target) return
+  saveDocument({ ...document.value, sectionSettings: reorderValues(ordered, id, target.key) })
+  menuOpenFor.value = ''
+}
+const dropSection = (targetId: string) => {
+  const activeId = draggedSectionId.value
+  draggedSectionId.value = ''
+  if (!activeId || activeId === targetId) return
+  const activeCustom = document.value.customSections.some(section => section.id === activeId)
+  const targetCustom = document.value.customSections.some(section => section.id === targetId)
+  if (activeCustom && targetCustom) {
+    saveDocument({ ...document.value, customSections: reorderValues(document.value.customSections, activeId, targetId) })
+    return
+  }
+  if (!activeCustom && !targetCustom) {
+    const ordered = [...document.value.sectionSettings].sort((a, b) => a.order - b.order)
+    saveDocument({ ...document.value, sectionSettings: reorderValues(ordered, activeId, targetId) })
+  }
 }
 const confirmAddSection = () => {
   if (!newSectionName.value.trim()) return

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { createResumeDocxBlob, createResumePdfBlob } from '@/lib/export/resume'
+import { CANONICAL_SCHEMA_VERSION } from '@/lib/resume/constants'
 import { matchResumeToJob } from '@/lib/resume/matching'
 import { parseResumeText, reconstructPdfText } from '@/lib/resume/parser'
 import { applySuggestion, generateRewriteSuggestions } from '@/lib/resume/rewrite'
@@ -15,6 +16,16 @@ describe('deterministic resume analysis', () => {
     for (let index = 0; index < 100; index += 1) {
       expect(scoreResume(parseResumeText(sampleResume), { createdAt })).toEqual(baseline)
     }
+  })
+
+  it('emits a versioned canonical resume shape and stable content hash', () => {
+    const first = parseResumeText(sampleResume)
+    const second = parseResumeText(sampleResume.replace(/\r?\n/g, '\r\n'))
+
+    expect(first.canonicalSchemaVersion).toBe(CANONICAL_SCHEMA_VERSION)
+    expect(second.canonicalSchemaVersion).toBe(CANONICAL_SCHEMA_VERSION)
+    expect(second.normalizedText).toBe(first.normalizedText)
+    expect(second.contentHash).toBe(first.contentHash)
   })
 
   it('keeps the score explainable and bounded', () => {
@@ -175,6 +186,41 @@ describe('job matching', () => {
     expect(first.score).toBeGreaterThan(50)
     expect(first.dimensions.reduce((sum, item) => sum + item.maxScore, 0)).toBe(100)
     expect(first.requirements.some(requirement => requirement.type === 'required')).toBe(true)
+    expect(first.coverage.required.total).toBeGreaterThan(0)
+    expect(first.requirements.some(requirement => requirement.evidenceLocations.length)).toBe(true)
+  })
+
+  it('returns coverage buckets, evidence locations, credentials, and missing actions', () => {
+    const parsed = parseResumeText(sampleResume.replace('Firebase, SQL, Docker', 'SQL'))
+    const result = matchResumeToJob(
+      parsed,
+      `${sampleJobDescription}\nCandidates must know Kubernetes. AWS certification is required.`,
+      '2026-06-11T12:00:00.000Z',
+    )
+    const typescript = result.requirements.find(requirement => requirement.normalized === 'typescript')
+    const kubernetes = result.requirements.find(requirement => requirement.normalized === 'kubernetes')
+    const certification = result.requirements.find(requirement => requirement.normalized === 'certification')
+
+    expect(typescript?.matched).toBe(true)
+    expect(typescript?.evidenceLocations[0]?.lineId).toMatch(/^line-/)
+    expect(kubernetes?.matched).toBe(false)
+    expect(certification?.type).toBe('credential')
+    expect(result.coverage.required.missing).toBeGreaterThan(0)
+    expect(result.coverage.credential.total).toBeGreaterThan(0)
+    expect(result.missing.some(item => item.label === 'Kubernetes' && item.suggestedAction.includes('truthful'))).toBe(true)
+  })
+
+  it('awards a repeated requirement once and flags suspicious repetition', () => {
+    const resume = `${sampleResume}\nSKILLS\nTypeScript TypeScript TypeScript TypeScript TypeScript TypeScript TypeScript`
+    const result = matchResumeToJob(
+      parseResumeText(resume),
+      'TypeScript is required. TypeScript is required. TypeScript is required.',
+      '2026-06-11T12:00:00.000Z',
+    )
+
+    expect(result.requirements.filter(requirement => requirement.normalized === 'typescript')).toHaveLength(1)
+    expect(result.coverage.required).toMatchObject({ total: 1, matched: 1, missing: 0 })
+    expect(result.warnings.some(warning => warning.includes('awarded once'))).toBe(true)
   })
 
   it('matches whole skill terms instead of substrings', () => {
@@ -212,8 +258,12 @@ describe('evidence-preserving rewrites', () => {
     const evidencePrompt = suggestions.find(suggestion => suggestion.requiresFactConfirmation)
 
     expect(direct?.proposedText).toContain('Managed')
+    expect(direct?.targetPath).toMatch(/^lines\./)
+    expect(direct?.originalText).toBe(direct?.sourceText)
+    expect(direct?.riskFlags).toEqual([])
     expect(direct?.requiresFactConfirmation).toBe(false)
     expect(evidencePrompt?.proposedText).toBe(evidencePrompt?.sourceText)
+    expect(evidencePrompt?.riskFlags).toContain('new_metric')
   })
 
   it('applies only suggestions that do not require new facts', () => {

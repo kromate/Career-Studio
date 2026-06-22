@@ -1,8 +1,12 @@
 export type ParseConfidence = 'high' | 'medium' | 'low'
 export type FindingSeverity = 'high' | 'medium' | 'low'
-export type ApplicationStatus = 'saved' | 'applied' | 'interview' | 'offer' | 'rejected'
+export type ApplicationStatus = 'saved' | 'drafting' | 'applied' | 'interview' | 'offer' | 'rejected' | 'withdrawn'
 export type ResumeExperienceLevel = 'entry' | 'mid' | 'senior'
 export type ResumeBuilderSource = 'new' | 'import'
+export type ResumeVersionKind = 'master' | 'revision' | 'tailored' | 'exported'
+export type ResumeExportFormat = 'pdf' | 'docx' | 'json' | 'txt'
+export type CoverLetterTone = 'direct' | 'warm' | 'formal' | 'concise'
+export type CoverLetterLength = 'short-email' | 'standard-letter' | 'recruiter-note'
 export type ResumeBuilderSectionKey =
   | 'profile'
   | 'work'
@@ -143,7 +147,17 @@ export interface ResumeCustomSection {
   entries: ResumeSimpleEntry[]
 }
 
-export type ResumeTemplateId = 'classic' | 'compact' | 'blueprint' | 'coral' | 'green' | 'mono'
+export type ResumeTemplateId =
+  | 'ats-clean'
+  | 'modern-single'
+  | 'compact-two-column'
+  | 'executive'
+  | 'classic'
+  | 'compact'
+  | 'blueprint'
+  | 'coral'
+  | 'green'
+  | 'mono'
 
 export interface ResumeDesignSettings {
   template: ResumeTemplateId
@@ -226,6 +240,7 @@ export interface ResumeSection {
 }
 
 export interface ParsedResume {
+  canonicalSchemaVersion: string
   normalizedText: string
   contentHash: string
   lines: ResumeLine[]
@@ -299,21 +314,86 @@ export interface ResumeAnalysis {
   parseWarnings: string[]
 }
 
+export interface ResumeVersionLineage {
+  sourceResumeId?: string
+  sourceVersionId?: string
+  sourceContentHash?: string
+  targetJobId?: string
+  acceptedSuggestionIds: string[]
+}
+
+export interface ResumeExportMetadata {
+  id: string
+  format: ResumeExportFormat
+  exportedAt: string
+  resumeId: string
+  versionId: string
+  canonicalContentHash: string
+  jobId?: string
+  jobMatchScore?: number
+  unresolvedFindingCount: number
+  parseWarningCount: number
+}
+
+export interface CoverLetterEvidenceSource {
+  type: 'resume-line' | 'job-requirement' | 'job-description' | 'user-note'
+  id: string
+  quote: string
+}
+
+export interface CoverLetterParagraph {
+  id: string
+  text: string
+  evidenceSources: CoverLetterEvidenceSource[]
+  unsupported: boolean
+}
+
+export interface CoverLetterExportMetadata {
+  id: string
+  format: 'pdf' | 'txt'
+  exportedAt: string
+  draftId: string
+  resumeVersionId: string
+  jobId: string
+  unsupportedParagraphCount: number
+}
+
+export interface CoverLetterDraft {
+  id: string
+  title: string
+  jobId: string
+  resumeId: string
+  resumeVersionId: string
+  tone: CoverLetterTone
+  length: CoverLetterLength
+  createdAt: string
+  updatedAt: string
+  paragraphs: CoverLetterParagraph[]
+  userNotes?: string
+  exportMetadata?: CoverLetterExportMetadata[]
+  status: 'draft' | 'ready' | 'exported'
+}
+
 export interface ResumeVersion {
   id: string
   label: string
   createdAt: string
   source: 'upload' | 'edit' | 'rewrite' | 'tailored' | 'builder'
+  kind?: ResumeVersionKind
   text: string
   parsed: ParsedResume
   analysis: ResumeAnalysis
+  historicalAnalyses?: ResumeAnalysis[]
   targetJobId?: string
+  lineage?: ResumeVersionLineage
+  exportMetadata?: ResumeExportMetadata[]
   intentionalRuleIds?: string[]
 }
 
 export interface ResumeRecord {
   id: string
   name: string
+  isMaster?: boolean
   originalFileName: string
   fileType: string
   targetJobTitle?: string
@@ -326,13 +406,54 @@ export interface ResumeRecord {
   versions: ResumeVersion[]
 }
 
+export interface ResumeEvidenceLocation {
+  lineId: string
+  section: ResumeSectionType
+  quote: string
+  match: string
+}
+
+export type JobRequirementType = 'required' | 'preferred' | 'responsibility' | 'credential'
+
 export interface JobRequirement {
   id: string
   label: string
   normalized: string
-  type: 'required' | 'preferred' | 'responsibility'
+  type: JobRequirementType
+  priority: 'critical' | 'important' | 'nice-to-have'
   matched: boolean
   evidence?: string
+  evidenceLocations: ResumeEvidenceLocation[]
+  missingEvidence: boolean
+  sourceSentences: string[]
+  aliases: string[]
+}
+
+export interface JobCoverageBucket {
+  total: number
+  matched: number
+  missing: number
+}
+
+export interface MissingJobRequirement {
+  requirementId: string
+  label: string
+  normalized: string
+  type: JobRequirementType
+  priority: JobRequirement['priority']
+  suggestedAction: string
+}
+
+export interface JobCoverageResult {
+  createdAt: string
+  scoringVersion: string
+  taxonomyVersion: string
+  resumeContentHash: string
+  jobDescriptionHash: string
+  requirements: JobRequirement[]
+  coverage: Record<JobRequirementType, JobCoverageBucket>
+  missing: MissingJobRequirement[]
+  warnings: string[]
 }
 
 export interface JobMatchDimension {
@@ -342,14 +463,8 @@ export interface JobMatchDimension {
   maxScore: number
 }
 
-export interface JobMatchResult {
+export interface JobMatchResult extends JobCoverageResult {
   score: number
-  createdAt: string
-  scoringVersion: string
-  taxonomyVersion: string
-  resumeContentHash: string
-  jobDescriptionHash: string
-  requirements: JobRequirement[]
   dimensions: JobMatchDimension[]
   recommendations: string[]
 }
@@ -382,6 +497,11 @@ export interface ApplicationRecord {
   status: ApplicationStatus
   createdAt: string
   updatedAt: string
+  resumeId?: string
+  resumeVersionId?: string
+  submittedResumeVersionId?: string
+  coverLetterDraftIds?: string[]
+  submittedCoverLetterDraftId?: string
   appliedAt?: string
   nextAction?: string
   nextActionAt?: string
@@ -390,14 +510,67 @@ export interface ApplicationRecord {
 
 export interface RewriteSuggestion {
   id: string
+  targetPath?: string
   lineId: string
   sourceText: string
+  originalText?: string
   proposedText: string
+  rationale?: string
   reason: string
   addressedRuleIds: string[]
   expectedPointRecovery: number
   requiresFactConfirmation: boolean
+  riskFlags?: Array<'new_metric' | 'new_date' | 'new_title' | 'new_company' | 'new_degree' | 'new_certification' | 'new_technology'>
   status: 'pending' | 'accepted' | 'rejected'
+}
+
+export interface EnrichmentQuestion {
+  id: string
+  prompt: string
+  targetPath: string
+  sourceText?: string
+  sourceLineId?: string
+  sourceSection?: ResumeSectionType
+  missingRequirementId?: string
+  label: string
+  riskFlags: NonNullable<RewriteSuggestion['riskFlags']>
+}
+
+export interface EnrichmentSuggestion {
+  id: string
+  questionId: string
+  targetPath: string
+  originalText: string
+  proposedText: string
+  rationale: string
+  evidenceSources: Array<{
+    type: 'resume-line' | 'user-answer' | 'job-requirement'
+    id: string
+    quote: string
+  }>
+  riskFlags: NonNullable<RewriteSuggestion['riskFlags']>
+  status: 'pending' | 'accepted' | 'rejected'
+}
+
+export interface AiProviderSettings {
+  provider: 'local-preview' | 'openai-compatible' | 'ollama'
+  model: string
+  baseUrl: string
+  enabled: boolean
+  lastTestedAt?: string
+  lastStatus?: 'untested' | 'ok' | 'failed'
+}
+
+export interface PublicResumeShare {
+  id: string
+  resumeId: string
+  versionId: string
+  resumeName: string
+  versionLabel: string
+  createdAt: string
+  parsed: ParsedResume
+  includeContact: boolean
+  visibility: 'local-public'
 }
 
 export interface AppSettings {
@@ -405,15 +578,19 @@ export interface AppSettings {
   weeklyReview: boolean
   retainUploads: boolean
   scoringDetails: boolean
+  aiProvider: AiProviderSettings
 }
 
 export interface WorkspaceState {
   schemaVersion: number
   ownerId: string | null
+  masterResumeId: string | null
   user: UserProfile | null
   resumes: ResumeRecord[]
   jobs: SavedJob[]
   applications: ApplicationRecord[]
+  coverLetters: CoverLetterDraft[]
+  publicShares: PublicResumeShare[]
   settings: AppSettings
   hydrated: boolean
 }

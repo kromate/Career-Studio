@@ -7,6 +7,7 @@
       <span>{{ label }}</span>
     </div>
     <div class="topbar-actions">
+      <AppCommandPalette />
       <DropdownMenuRoot>
         <DropdownMenuTrigger as-child>
           <button class="profile-button" type="button" aria-label="Open account menu">

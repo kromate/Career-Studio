@@ -1,0 +1,17 @@
+services:
+  career-studio:
+    build: .
+    ports:
+      - "3030:3030"
+    environment:
+      NODE_ENV: production
+      PORT: 3030
+      HOST: 0.0.0.0
+      VITE_APP_MODE: self-hosted
+      VITE_GOALMATIC_APP_URL: https://goalmatic.io
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3030/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s

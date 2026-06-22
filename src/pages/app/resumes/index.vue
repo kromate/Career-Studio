@@ -345,6 +345,7 @@ const download = async (resume: ResumeRecord) => {
   const version = activeVersion(resume)
   if (!version) return
   await exportResumePdf(resume.builderDocument || version.parsed, resume.name)
+  workspace.recordResumeExport(resume.id, version.id, 'pdf')
   toast.show('PDF exported')
 }
 const confirmDelete = () => {

@@ -8,6 +8,8 @@ import type {
   ResumeSkillGroup,
   ResumeTemplateId,
 } from '@/types'
+import type { ResumeTemplateStyleId } from '@/lib/resume/templates'
+import { resumeTemplateStyleId } from '@/lib/resume/templates'
 
 type JsPdfInstance = InstanceType<typeof import('jspdf').jsPDF>
 
@@ -24,7 +26,7 @@ interface PdfTheme {
   contentWidth: number
   pageHeight: number
   compact: boolean
-  template: ResumeTemplateId
+  template: ResumeTemplateStyleId
 }
 
 interface PdfEntry {
@@ -106,11 +108,11 @@ function sectionTitle(document: EditableResumeDocument, key: ResumeBuilderSectio
 }
 
 function isUploadedTemplate(template: ResumeTemplateId): boolean {
-  return ['blueprint', 'coral', 'green', 'mono'].includes(template)
+  return ['blueprint', 'coral', 'green', 'mono'].includes(resumeTemplateStyleId(template))
 }
 
 function isOrderedOneColumnTemplate(template: ResumeTemplateId): boolean {
-  return ['coral', 'green', 'mono'].includes(template)
+  return ['coral', 'green', 'mono'].includes(resumeTemplateStyleId(template))
 }
 
 function pdfFont(fontFamily: string): string {
@@ -633,6 +635,7 @@ function renderUploadedTemplatePdf(pdf: JsPdfInstance, document: EditableResumeD
 export async function createBuilderResumePdfBlob(document: EditableResumeDocument): Promise<Blob> {
   const { jsPDF } = await import('jspdf')
   const pdf = new jsPDF({ unit: 'pt', format: document.design.pageSize })
+  const templateStyle = resumeTemplateStyleId(document.design.template)
   const pageWidth = pdf.internal.pageSize.getWidth()
   const pageHeight = pdf.internal.pageSize.getHeight()
   const theme: PdfTheme = {
@@ -647,8 +650,8 @@ export async function createBuilderResumePdfBlob(document: EditableResumeDocumen
     pageWidth,
     contentWidth: pageWidth - document.design.marginX * 2,
     pageHeight,
-    compact: document.design.template === 'compact',
-    template: document.design.template,
+    compact: templateStyle === 'compact',
+    template: templateStyle,
   }
 
   if (isUploadedTemplate(document.design.template)) {

@@ -37,7 +37,7 @@
           </p>
         </div>
         <div class="target-gaps">
-          <span v-for="requirement in targetMissing" :key="requirement.id">
+          <span v-for="requirement in targetMissing" :key="requirement.requirementId">
             {{ requirement.label }}
           </span>
           <span v-if="!targetMissing.length" class="all-covered">Core requirements covered</span>
@@ -234,7 +234,7 @@ const sourceVersion = computed(() => resume.value ? workspace.getActiveVersion(r
 const targetJobId = computed(() => typeof route.query.target === 'string' ? route.query.target : '')
 const targetJob = computed(() => targetJobId.value ? workspace.getJob(targetJobId.value) : undefined)
 const targetMissing = computed(() => (
-  targetJob.value?.match?.requirements.filter(requirement => !requirement.matched).slice(0, 6) || []
+  targetJob.value?.match?.missing.slice(0, 6) || []
 ))
 const backLink = computed(() => (
   targetJob.value ? `/app/jobs/${targetJob.value.id}` : `/app/resumes/${route.params.id as string}`
@@ -315,6 +315,12 @@ const saveVersion = async () => {
     savedTargetJobId ? `Tailored resume v${versionNumber}` : `Improved resume v${versionNumber}`,
     savedTargetJobId ? 'tailored' : 'rewrite',
     savedTargetJobId,
+    {
+      sourceVersionId: sourceVersion.value.id,
+      acceptedSuggestionIds: suggestions.value
+        .filter(suggestion => suggestion.status === 'accepted' && !suggestion.requiresFactConfirmation)
+        .map(suggestion => suggestion.id),
+    },
   )
   toast.show('New resume version saved', {
     message: `Quality score: ${priorScore ?? '—'} → ${nextScore ?? '—'}`,
