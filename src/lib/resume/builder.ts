@@ -16,6 +16,7 @@ import type {
     ResumeSkillGroup,
 } from '@/types'
 import { parseResumeText } from './parser'
+import { resumeTemplatePreset } from './templates'
 
 const EMAIL_PATTERN = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i
 const PHONE_PATTERN = /(?:\+?\d[\d\s().-]{7,}\d)/
@@ -45,14 +46,7 @@ export function createBuilderId(prefix: string): string {
 export function defaultResumeDesignSettings(): ResumeDesignSettings {
     return {
         template: 'classic',
-        pageSize: 'letter',
-        marginY: 36,
-        marginX: 36,
-        fontFamily: 'Roboto',
-        fontSize: 10,
-        lineHeight: 1.35,
-        accentColor: '#601ded',
-        dateFormat: 'MM/YYYY',
+        ...resumeTemplatePreset('classic'),
     }
 }
 

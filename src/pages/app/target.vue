@@ -17,57 +17,18 @@
           </div>
         </div>
 
-        <form @submit.prevent="analyzeAndSave">
-          <div class="grid-2">
-            <label class="field">
-              <span class="field-label">Job title</span>
-              <input v-model.trim="form.title" class="input" placeholder="Senior Product Designer" required>
-            </label>
-            <label class="field">
-              <span class="field-label">Company</span>
-              <input v-model.trim="form.company" class="input" placeholder="Company name" required>
-            </label>
-          </div>
-          <div class="grid-2">
-            <label class="field">
-              <span class="field-label">Location</span>
-              <input v-model.trim="form.location" class="input" placeholder="Remote, London, Lagos…">
-            </label>
-            <label class="field">
-              <span class="field-label url-label">
-                Job URL <small>optional</small>
-                <ComingSoonBadge>Auto-import coming soon</ComingSoonBadge>
-              </span>
-              <input v-model.trim="form.url" class="input" type="url" placeholder="https://company.com/jobs/…">
-              <small class="field-help">The URL is saved with the job. Paste the complete description below for analysis.</small>
-            </label>
-          </div>
+        <form @submit.prevent="extractAnalyzeAndSave">
           <label class="field">
-            <span class="field-label">Resume to compare</span>
-            <select v-model="form.resumeId" class="select" required>
-              <option value="" disabled>Select a resume</option>
-              <option v-for="resume in workspace.state.value.resumes" :key="resume.id" :value="resume.id">
-                {{ resume.name }} · {{ workspace.getActiveVersion(resume)?.analysis.score ?? '—' }}/100
-              </option>
-            </select>
+            <span class="field-label">Job posting URL</span>
+            <input v-model.trim="form.url" class="input" type="url" placeholder="https://company.com/jobs/…" required>
+            <small class="field-help">Use the public posting URL for the role you want to compare.</small>
           </label>
-          <label class="field">
-            <span class="field-label">Complete job description</span>
-            <textarea
-              v-model="form.description"
-              class="textarea job-description"
-              placeholder="Paste responsibilities, required skills, preferred skills, and qualifications…"
-              required
-            />
-            <small class="field-help">
-              {{ wordCount }} words ·
-              {{ wordCount >= 50 ? 'Ready to calculate a useful match.' : 'Add at least 50 words for a useful result.' }}
-            </small>
-          </label>
-          <button class="btn btn-primary btn-lg submit-button" type="submit" :disabled="!canAnalyze || saving">
-            <AppSpinner v-if="saving" :size="17" light />
+          <p v-if="!selectedVersion" class="error-note">Upload a resume before comparing a job.</p>
+          <p v-if="extractError" class="error-note">{{ extractError }}</p>
+          <button class="btn btn-primary btn-lg submit-button" type="submit" :disabled="!canAnalyze || extracting">
+            <AppSpinner v-if="extracting" :size="17" light />
             <ScanSearch v-else :size="17" />
-            {{ saving ? 'Calculating match…' : 'Calculate and save match' }}
+            {{ extracting ? 'Extracting job…' : 'Extract and save match' }}
           </button>
         </form>
       </section>
@@ -77,7 +38,7 @@
           <div class="match-preview-top">
             <div>
               <span class="section-kicker">Live Job Match Score</span>
-              <h2>{{ form.title || 'Target role' }}</h2>
+              <h2>{{ extractedJob?.title || 'Target role' }}</h2>
             </div>
             <ScoreRing :score="liveMatch.score" :size="100" :stroke="8" />
           </div>
@@ -108,8 +69,9 @@
         <article v-else class="match-placeholder card card-pad">
           <span><Gauge :size="27" /></span>
           <h2>Your job match will appear here</h2>
-          <p>Select a resume and paste at least 50 words from the job description.</p>
+          <p>Enter a public job posting URL to extract the description and compare it with your current resume.</p>
           <ul>
+            <li><Check :size="14" /> Job description extraction</li>
             <li><Check :size="14" /> Required skill coverage</li>
             <li><Check :size="14" /> Responsibility evidence</li>
             <li><Check :size="14" /> Experience and seniority</li>
@@ -130,6 +92,7 @@
 </template>
 
 <script setup lang="ts">
+import type { StructuredJobImport } from '@/types'
 import {
   Check,
   Gauge,
@@ -143,31 +106,27 @@ definePageMeta({ layout: 'app', middleware: 'auth' })
 
 const workspace = useWorkspace()
 const toast = useToast()
-const saving = ref(false)
+const extracting = ref(false)
+const extractError = ref('')
+const extractedJob = ref<StructuredJobImport | null>(null)
 const form = reactive({
-  title: '',
-  company: '',
-  location: '',
   url: '',
-  description: '',
-  resumeId: '',
 })
 
 onMounted(() => {
   workspace.hydrate()
-  form.resumeId = workspace.state.value.resumes[0]?.id || ''
 })
 
-const selectedResume = computed(() => workspace.state.value.resumes.find(resume => resume.id === form.resumeId))
+const selectedResume = computed(() => workspace.state.value.resumes[0])
 const selectedVersion = computed(() => selectedResume.value ? workspace.getActiveVersion(selectedResume.value) : undefined)
-const wordCount = computed(() => form.description.trim() ? form.description.trim().split(/\s+/).length : 0)
+const wordCount = computed(() => extractedJob.value?.description.trim() ? extractedJob.value.description.trim().split(/\s+/).length : 0)
 const liveMatch = computed(() => (
-  selectedVersion.value && wordCount.value >= 50
-    ? matchResumeToJob(selectedVersion.value.parsed, form.description, 'preview')
+  selectedVersion.value && extractedJob.value && wordCount.value >= 50
+    ? matchResumeToJob(selectedVersion.value.parsed, extractedJob.value.description, 'preview')
     : null
 ))
 const canAnalyze = computed(() => Boolean(
-  form.title && form.company && selectedVersion.value && wordCount.value >= 50,
+  form.url && selectedVersion.value,
 ))
 const required = computed(() => liveMatch.value?.requirements.filter(item => item.type === 'required') || [])
 const responsibilities = computed(() => liveMatch.value?.requirements.filter(item => item.type === 'responsibility') || [])
@@ -176,16 +135,46 @@ const responsibilityCount = computed(() => responsibilities.value.length)
 const matchedRequired = computed(() => required.value.filter(item => item.matched).length)
 const matchedResponsibilities = computed(() => responsibilities.value.filter(item => item.matched).length)
 
-const analyzeAndSave = async () => {
-  if (!canAnalyze.value) return
-  saving.value = true
-  await new Promise(resolve => window.setTimeout(resolve, 350))
-  const job = workspace.saveJob({ ...form })
-  workspace.addApplication(job.id)
-  toast.show('Job match saved', {
-    message: `Match score: ${job.match?.score ?? '—'}/100`,
-  })
-  await navigateTo(`/app/jobs/${job.id}`)
+const jobExtractionErrorMessage = (error: unknown) => {
+  const candidate = error as {
+    data?: { message?: string; statusMessage?: string; statusCode?: number }
+    message?: string
+    statusCode?: number
+    statusMessage?: string
+  }
+  const message = candidate.data?.statusMessage || candidate.data?.message || candidate.statusMessage || candidate.message || 'Job extraction failed.'
+  const statusCode = candidate.data?.statusCode || candidate.statusCode
+  if (statusCode === 503 || message.includes('not configured')) {
+    return 'Tabstack job extraction is not configured. Add TABSTACK_API_KEY to .env.dev and restart the dev server.'
+  }
+  return message
+}
+
+const extractAnalyzeAndSave = async () => {
+  if (!canAnalyze.value || extracting.value) return
+  extracting.value = true
+  extractError.value = ''
+  extractedJob.value = null
+
+  try {
+    const response = await $fetch<{ job: StructuredJobImport }>('/api/jobs/extract', {
+      method: 'POST',
+      body: { url: form.url },
+    })
+    extractedJob.value = response.job
+    const job = workspace.saveJob({ ...response.job, resumeId: selectedResume.value?.id })
+    workspace.addApplication(job.id)
+    toast.show('Job match saved', {
+      message: `Match score: ${job.match?.score ?? '—'}/100`,
+    })
+    await navigateTo(`/app/jobs/${job.id}`)
+  } catch (error) {
+    const message = jobExtractionErrorMessage(error)
+    extractError.value = message
+    toast.show('Job import failed', { message, tone: 'error' })
+  } finally {
+    extracting.value = false
+  }
 }
 </script>
 
@@ -237,20 +226,16 @@ const analyzeAndSave = async () => {
   font-weight: 500;
 }
 
-.url-label {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-}
-
-.job-description {
-  min-height: 280px;
-}
-
 .field-help {
   color: var(--muted);
   font-size: 11px;
+}
+
+.error-note {
+  margin: 0;
+  color: var(--red);
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 .submit-button {

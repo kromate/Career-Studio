@@ -25,7 +25,7 @@ The first release focuses on a trustworthy resume workflow:
 4. Review prioritized, line-level improvements.
 5. Accept or reject AI-assisted rewrites without inventing experience.
 6. Export a clean, ATS-readable resume.
-7. Optionally add a job description for a separate Job Match Score.
+7. Optionally add a job posting URL for a separate Job Match Score.
 
 The same resume, parser version, and scoring version must always produce the
 same score. Generative AI may explain or rewrite content, but it does not
@@ -56,7 +56,7 @@ The full local-preview application is implemented in Nuxt 3 and includes:
 - deterministic, versioned Resume Quality and Job Match scoring;
 - evidence-linked findings and safe rewrite suggestions;
 - immutable resume version history and PDF/DOCX export;
-- saved jobs, job-aware tailoring, and an application pipeline;
+- saved jobs imported from public posting URLs, job-aware tailoring, and an application pipeline;
 - local account settings, preferences, and explicit data deletion.
 
 Local preview stores extracted content in browser storage. Production
@@ -77,6 +77,10 @@ credentials in local preview mode. Copy `.env.example` to `.env.dev` when you
 need shared Goalmatic Firebase identity or the email OTP endpoint. Goalmatic
 contributors should map the public Firebase web values from
 `gm/frontend/.env.dev`; never copy server credentials into this app.
+
+Set `TABSTACK_API_KEY` in `.env.dev` to import job descriptions from public
+posting URLs. Without it, resume workflows still run normally but URL-based job
+comparison is unavailable.
 
 ```bash
 yarn test

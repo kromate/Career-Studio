@@ -49,9 +49,10 @@
 </template>
 
 <script setup lang="ts">
-import type { EditableResumeDocument, ResumeDesignSettings, ScoreDimension } from '@/types'
+import type { EditableResumeDocument, ResumeDesignSettings, ResumeTemplateId, ScoreDimension } from '@/types'
 import '@/assets/css/resume-builder.css'
 import { exportResumePdf } from '@/lib/export/resume'
+import { resumeTemplatePreset } from '@/lib/resume/templates'
 import { getPrioritizedFindings } from '@/lib/resume/scoring'
 
 definePageMeta({ layout: 'app-builder', middleware: 'auth' })
@@ -88,6 +89,14 @@ const saveDocument = (nextDocument: EditableResumeDocument) => {
 }
 const updateDesign = (key: keyof ResumeDesignSettings, value: string | number) => {
   if (!document.value) return
+  if (key === 'template') {
+    const template = value as ResumeTemplateId
+    saveDocument({
+      ...document.value,
+      design: { ...document.value.design, ...resumeTemplatePreset(template), template },
+    })
+    return
+  }
   saveDocument({
     ...document.value,
     design: { ...document.value.design, [key]: value } as ResumeDesignSettings,

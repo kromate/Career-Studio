@@ -15,6 +15,7 @@ working local preview uses:
 - optional Gemini Lite assisted structuring for imported resume text;
 - a canonical parsed-resume model;
 - versioned deterministic scoring and matching modules;
+- optional Tabstack JSON extraction for public job posting URLs;
 - evidence-preserving rewrite suggestions;
 - browser storage for contributor-friendly persistence;
 - client-side PDF and DOCX export;
@@ -101,6 +102,20 @@ Upload
 The canonical representation contains sections, roles, dates, bullets, skills,
 education, certifications, contact fields, page/layout facts, and extraction
 warnings. Scoring consumes this representation rather than raw model output.
+
+## Job Processing
+
+```text
+Public job posting URL
+  -> server-side Tabstack JSON extraction with a job description schema
+  -> normalized title, company, location, URL, and job description
+  -> deterministic resume-to-job matching
+  -> saved job and application pipeline record
+```
+
+Tabstack extraction is optional in local preview mode and requires a server-only
+`TABSTACK_API_KEY`. The browser never receives the key, and numeric match scores
+continue to come only from the deterministic matching engine.
 
 ## AI Safety
 

@@ -30,7 +30,8 @@
     "integrations": [
       "goalmatic_auth",
       "goalmatic_tables",
-      "google_gemini"
+      "google_gemini",
+      "tabstack_extract"
     ]
   }
 }

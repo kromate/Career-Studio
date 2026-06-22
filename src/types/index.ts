@@ -143,8 +143,10 @@ export interface ResumeCustomSection {
   entries: ResumeSimpleEntry[]
 }
 
+export type ResumeTemplateId = 'classic' | 'compact' | 'blueprint' | 'coral' | 'green' | 'mono'
+
 export interface ResumeDesignSettings {
-  template: 'classic' | 'compact'
+  template: ResumeTemplateId
   pageSize: 'letter' | 'a4'
   marginY: number
   marginX: number
@@ -364,6 +366,14 @@ export interface SavedJob {
   match?: JobMatchResult
   resumeId?: string
   resumeVersionId?: string
+}
+
+export interface StructuredJobImport {
+  title: string
+  company: string
+  location: string
+  url: string
+  description: string
 }
 
 export interface ApplicationRecord {

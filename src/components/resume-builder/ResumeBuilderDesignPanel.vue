@@ -6,8 +6,9 @@
         <label class="field">
           <span class="field-label">Template</span>
           <select class="select" :value="document.design.template" @change="updateDesign('template', inputValue($event))">
-            <option value="classic">Classic</option>
-            <option value="compact">Compact</option>
+            <option v-for="template in templateOptions" :key="template.id" :value="template.id">
+              {{ template.label }}
+            </option>
           </select>
         </label>
         <label class="field">
@@ -37,6 +38,7 @@
             <option>Arial</option>
             <option>Georgia</option>
             <option>Helvetica</option>
+            <option>Courier</option>
           </select>
         </label>
         <label class="field">
@@ -76,6 +78,7 @@
 
 <script setup lang="ts">
 import type { EditableResumeDocument, ResumeDesignSettings } from '@/types'
+import { RESUME_TEMPLATE_OPTIONS } from '@/lib/resume/templates'
 
 const props = defineProps<{
   document: EditableResumeDocument
@@ -85,6 +88,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update-design': [key: keyof ResumeDesignSettings, value: string | number]
 }>()
+
+const templateOptions = RESUME_TEMPLATE_OPTIONS
 
 const inputValue = (event: Event) => (event.target as HTMLInputElement | HTMLSelectElement).value
 const numberValue = (event: Event) => Number(inputValue(event))

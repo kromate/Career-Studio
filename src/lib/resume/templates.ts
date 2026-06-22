@@ -1,0 +1,85 @@
+import type { ResumeDesignSettings, ResumeTemplateId } from '@/types'
+
+export interface ResumeTemplateOption {
+    id: ResumeTemplateId
+    label: string
+    source?: string
+}
+
+type ResumeTemplatePreset = Omit<ResumeDesignSettings, 'template'>
+
+export const RESUME_TEMPLATE_OPTIONS: ResumeTemplateOption[] = [
+    { id: 'classic', label: 'Classic' },
+    { id: 'compact', label: 'Compact' },
+    { id: 'blueprint', label: 'Blue Split', source: 'resume one' },
+    { id: 'coral', label: 'Coral Editorial', source: 'resume two' },
+    { id: 'green', label: 'Modern Green', source: 'Resume 3' },
+    { id: 'mono', label: 'Mono Accent', source: 'Resume 4' },
+]
+
+export const RESUME_TEMPLATE_PRESETS: Record<ResumeTemplateId, ResumeTemplatePreset> = {
+    classic: {
+        pageSize: 'letter',
+        marginY: 36,
+        marginX: 36,
+        fontFamily: 'Roboto',
+        fontSize: 10,
+        lineHeight: 1.35,
+        accentColor: '#601ded',
+        dateFormat: 'MM/YYYY',
+    },
+    compact: {
+        pageSize: 'letter',
+        marginY: 30,
+        marginX: 34,
+        fontFamily: 'Roboto',
+        fontSize: 9,
+        lineHeight: 1.24,
+        accentColor: '#601ded',
+        dateFormat: 'MM/YYYY',
+    },
+    blueprint: {
+        pageSize: 'letter',
+        marginY: 54,
+        marginX: 56,
+        fontFamily: 'Georgia',
+        fontSize: 10.5,
+        lineHeight: 1.35,
+        accentColor: '#1476d4',
+        dateFormat: 'MM/YYYY',
+    },
+    coral: {
+        pageSize: 'letter',
+        marginY: 58,
+        marginX: 70,
+        fontFamily: 'Georgia',
+        fontSize: 10.5,
+        lineHeight: 1.45,
+        accentColor: '#ff5c61',
+        dateFormat: 'MM/YYYY',
+    },
+    green: {
+        pageSize: 'letter',
+        marginY: 52,
+        marginX: 72,
+        fontFamily: 'Helvetica',
+        fontSize: 10.5,
+        lineHeight: 1.38,
+        accentColor: '#00a650',
+        dateFormat: 'MM/YYYY',
+    },
+    mono: {
+        pageSize: 'letter',
+        marginY: 52,
+        marginX: 72,
+        fontFamily: 'Courier',
+        fontSize: 9.5,
+        lineHeight: 1.42,
+        accentColor: '#f00657',
+        dateFormat: 'MM/YYYY',
+    },
+}
+
+export function resumeTemplatePreset(template: ResumeTemplateId): ResumeTemplatePreset {
+    return RESUME_TEMPLATE_PRESETS[template]
+}
