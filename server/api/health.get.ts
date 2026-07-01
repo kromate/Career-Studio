@@ -12,6 +12,8 @@ export default defineEventHandler(() => {
       tabstackConfigured: Boolean(config.tabstackApiKey),
       geminiImportAssistConfigured: Boolean(config.geminiApiKey),
       firebasePublicConfigPresent: Boolean(config.public.firebaseApiKey && config.public.firebaseProjectId),
+      firebaseDatabaseConfigured: config.public.firebaseDatabaseId === 'career-studio',
+      firebaseStorageConfigured: Boolean(config.public.firebaseStorageBucket),
     },
   }
 })

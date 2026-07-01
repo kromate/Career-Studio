@@ -19,14 +19,16 @@ working local preview uses:
 - evidence-preserving rewrite suggestions;
 - browser storage for contributor-friendly persistence;
 - client-side PDF and DOCX export;
-- optional shared-project Firebase Google authentication.
+- optional shared-project Firebase Google authentication;
+- shared Firebase Firestore, Storage, and Functions client setup using the
+  named `career-studio` Firestore database.
 
 The local adapter is intentionally usable without private Goalmatic source code
 or credentials. It is not the production storage model.
 
-Production rollout must replace browser persistence with account-scoped
-Goalmatic Tables and private object storage, resolve the active Goalmatic
-account after authentication, and execute privileged workflows server-side.
+Production rollout must use account-scoped Goalmatic data paths and private
+object storage, resolve the active Goalmatic account after authentication, and
+execute privileged workflows server-side.
 
 ## App-Owned Responsibilities
 
@@ -47,8 +49,10 @@ account after authentication, and execute privileged workflows server-side.
 
 ## Identity and SSO
 
-The app should use the same Firebase project as Goalmatic. Google sign-in and
-email OTP therefore resolve to the same Firebase UID used by Goalmatic.
+The app should use the same Firebase project as Goalmatic. Google sign-in,
+email OTP, Functions, Storage, and Firestore therefore resolve through the same
+Firebase app config used by Goalmatic. Firestore uses the named `career-studio`
+database, not `(default)`.
 
 Firebase browser persistence is origin-scoped. A user authenticated on
 `goalmatic.io` is not automatically authenticated on another app domain.
@@ -62,6 +66,16 @@ Recommended rollout:
 5. Never put a reusable custom token, ID token, or account secret in a URL.
 
 Every data operation must use a real authenticated user and active account ID.
+
+Career Studio Firebase paths follow the Goalmatic app-bundle shape:
+
+```text
+accounts/{accountId}/bundles/career-studio/workspaces/current
+accounts/{accountId}/bundles/career-studio/{privateStoragePath}
+```
+
+Those paths are resolved against the named `career-studio` Firestore database
+and the shared Goalmatic Storage bucket.
 
 ## Data Model
 

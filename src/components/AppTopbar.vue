@@ -7,12 +7,18 @@
       <span>{{ label }}</span>
     </div>
     <div class="topbar-actions">
-      <AppCommandPalette />
+
       <DropdownMenuRoot>
         <DropdownMenuTrigger as-child>
           <button class="profile-button" type="button" aria-label="Open account menu">
             <span class="avatar">
-              <img v-if="workspace.state.value.user?.avatarUrl" :src="workspace.state.value.user.avatarUrl" alt="">
+              <img
+                v-if="avatarUrl"
+                :src="avatarUrl"
+                alt=""
+                referrerpolicy="no-referrer"
+                @error="avatarFailed = true"
+              >
               <template v-else>{{ initials }}</template>
             </span>
             <span class="profile-copy">
@@ -57,6 +63,7 @@ defineEmits<{ menu: [] }>()
 
 const route = useRoute()
 const workspace = useWorkspace()
+const avatarFailed = ref(false)
 
 const routeLabels: Record<string, string> = {
   '/app': 'Overview',
@@ -82,6 +89,17 @@ const initials = computed(() => (
     .toUpperCase()
     || 'G'
 ))
+
+const avatarUrl = computed(() => (
+  avatarFailed.value ? undefined : workspace.state.value.user?.avatarUrl
+))
+
+watch(
+  () => workspace.state.value.user?.avatarUrl,
+  () => {
+    avatarFailed.value = false
+  },
+)
 
 const handleLogout = async () => {
   try {

@@ -34,6 +34,8 @@ calculate the numeric score.
 ## Goalmatic Foundation
 
 - Goalmatic Firebase Authentication provides the same user identity.
+- Firebase Firestore uses the named `career-studio` database in the same
+	Goalmatic project.
 - Goalmatic account IDs scope every resume, analysis, job, and application.
 - Goalmatic Tables store structured product data and analysis history.
 - Goalmatic workflows run analysis, rewriting, reminders, and automations.
@@ -76,7 +78,8 @@ The app runs at [http://localhost:3030](http://localhost:3030). It works without
 credentials in local preview mode. Copy `.env.example` to `.env.dev` when you
 need shared Goalmatic Firebase identity or the email OTP endpoint. Goalmatic
 contributors should map the public Firebase web values from
-`gm/frontend/.env.dev`; never copy server credentials into this app.
+`gm/frontend/.env.dev`, set `VITE_FIREBASE_DATABASE_ID=career-studio`, and
+never copy server credentials into this app.
 
 Set `TABSTACK_API_KEY` in `.env.dev` to import job descriptions from public
 posting URLs. Without it, resume workflows still run normally but URL-based job

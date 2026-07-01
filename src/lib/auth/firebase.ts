@@ -1,4 +1,5 @@
 import type { UserProfile } from '@/types'
+import { auth, functions, useFirebase } from '@/firebase/init'
 
 interface FirebasePublicConfig {
   firebaseApiKey: string
@@ -60,37 +61,15 @@ export function hasGoogleSignInConfig(config: FirebasePublicConfig): boolean {
   return hasFirebaseConfig(config)
 }
 
-function firebaseAuthDomain(config: FirebasePublicConfig): string {
-  if (config.firebaseProjectId === 'goalmatics' && config.firebaseAuthDomain === 'www.goalmatic.io') {
-    return 'goalmatics.firebaseapp.com'
-  }
-
-  return config.firebaseAuthDomain
-}
-
 async function getFirebaseClient(config: FirebasePublicConfig) {
   if (!hasFirebaseConfig(config)) {
     throw new Error('Firebase is not configured for this environment.')
   }
 
-  const [{ initializeApp, getApp, getApps }, authModule] = await Promise.all([
-    import('firebase/app'),
-    import('firebase/auth'),
-  ])
-  const app = getApps().length
-    ? getApp()
-    : initializeApp({
-      apiKey: config.firebaseApiKey,
-      authDomain: firebaseAuthDomain(config),
-      projectId: config.firebaseProjectId,
-      storageBucket: config.firebaseStorageBucket,
-      messagingSenderId: config.firebaseMessagingSenderId,
-      appId: config.firebaseAppId,
-    })
-  const auth = authModule.getAuth(app)
+  const authModule = await import('firebase/auth')
   await authModule.setPersistence(auth, authModule.browserLocalPersistence)
 
-  return { app, auth, authModule }
+  return { app: useFirebase(), auth, authModule }
 }
 
 async function callGoalmaticAuthFunction(
@@ -98,9 +77,8 @@ async function callGoalmaticAuthFunction(
   functionName: string,
   payload: Record<string, string>,
 ): Promise<EmailOtpResponse> {
-  const { app } = await getFirebaseClient(config)
+  await getFirebaseClient(config)
   const functionsModule = await import('firebase/functions')
-  const functions = functionsModule.getFunctions(app, 'us-central1')
   const callable = functionsModule.httpsCallable<Record<string, string>, EmailOtpResponse>(
     functions,
     functionName,
@@ -238,10 +216,6 @@ export async function verifyGoalmaticSignupOtp(
 }
 
 export async function signOutFirebase(): Promise<void> {
-  const [{ getApps }, authModule] = await Promise.all([
-    import('firebase/app'),
-    import('firebase/auth'),
-  ])
-  if (!getApps().length) return
-  await authModule.signOut(authModule.getAuth(getApps()[0]))
+  const authModule = await import('firebase/auth')
+  await authModule.signOut(auth)
 }
